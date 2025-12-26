@@ -1,0 +1,23 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: tfg-backend
+    ports:
+      - "8080:8080"
+    networks:
+      - tfgnet
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: tfg-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - tfgnet
+
+networks:
+  tfgnet:
