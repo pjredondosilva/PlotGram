@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3307/plotgram}
+    username: ${SPRING_DATASOURCE_USERNAME:plotgram}
+    password: ${SPRING_DATASOURCE_PASSWORD:plotgram}
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    open-in-view: false
+    show-sql: true
+
+tiempoExpiracionTokenJwtMin: 30
+
+tmdb:
+  base-url: ${TMDB_BASE_URL:https://api.themoviedb.org/3}
+  token: ${TMDB_TOKEN}
+  lang: ${TMDB_LANG:es-ES}
