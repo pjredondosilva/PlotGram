@@ -1,6 +1,5 @@
 package es.plotgram.backend.rest.dto;
 import es.plotgram.backend.entidades.Usuario;
-import es.plotgram.backend.entidades.tipousuario;
 import es.plotgram.backend.repositorios.RepositorioUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,4 +43,6 @@ public class Mapeador {
                 d.borrado()
         );
     }
+
+
 }

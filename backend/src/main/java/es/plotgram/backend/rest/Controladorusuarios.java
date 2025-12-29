@@ -1,6 +1,5 @@
 package es.plotgram.backend.rest;
 
-import es.plotgram.backend.entidades.Usuario;
 import es.plotgram.backend.excepciones.UsuarioYaRegistrado;
 import es.plotgram.backend.rest.dto.Dusuario;
 import es.plotgram.backend.rest.dto.Mapeador;

@@ -24,7 +24,7 @@ public class Usuario {
     private String email;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private tipousuario tipo=tipousuario.USER;
+    private Tipousuario tipo= Tipousuario.USER;
     @Column(nullable = false)
     private boolean borrado;
 }

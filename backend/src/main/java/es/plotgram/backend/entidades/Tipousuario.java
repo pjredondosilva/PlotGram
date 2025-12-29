@@ -1,6 +1,6 @@
 package es.plotgram.backend.entidades;
 
-public enum tipousuario {
+public enum Tipousuario {
     USER,
     ADMIN
 }

@@ -54,6 +54,17 @@ EntityManager em;
         return q.getResultList().stream().findFirst();
     }
 
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public boolean existePorNombre(String nombre) {
+        Long count = em.createQuery("""
+            SELECT COUNT(u) FROM Usuario u
+            WHERE u.nombre = :nombre AND u.borrado = false
+            """, Long.class)
+                .setParameter("nombre", nombre)
+                .getSingleResult();
+
+        return count != null && count > 0;
+    }
 
 }
 

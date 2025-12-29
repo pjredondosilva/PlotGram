@@ -20,3 +20,8 @@ tmdb:
   base-url: ${TMDB_BASE_URL:https://api.themoviedb.org/3}
   token: ${TMDB_TOKEN}
   lang: ${TMDB_LANG:es-ES}
+
+plotgram:
+  admin:
+    nombre: admin
+    password: admin123

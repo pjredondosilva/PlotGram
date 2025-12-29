@@ -43,6 +43,7 @@ public class ServicioSeguridad {
                         .requestMatchers(HttpMethod.POST, "/api/autenticacion").permitAll()
                         // Registro de usuarios
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+                        .requestMatchers("/api/ping").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();

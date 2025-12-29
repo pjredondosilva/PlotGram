@@ -1,6 +1,6 @@
 package es.plotgram.backend.seguridad.Credenciales;
 import es.plotgram.backend.entidades.Usuario;
-import es.plotgram.backend.entidades.tipousuario;
+import es.plotgram.backend.entidades.Tipousuario;
 import es.plotgram.backend.servicios.ServicioUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +21,7 @@ public class ServicioCredencialesUsuario implements UserDetailsService {
         var builder = org.springframework.security.core.userdetails.User.withUsername(usuario.getNombre())
                 .password(usuario.getContrasena());
 
-        if (usuario.getTipo() == tipousuario.ADMIN) {
+        if (usuario.getTipo() == Tipousuario.ADMIN) {
             builder.roles("ADMIN", "USUARIO");
         } else {
             builder.roles("USUARIO");
