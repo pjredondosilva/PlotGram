@@ -1,0 +1,106 @@
+.pg-modal__backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+
+.pg-modal__panel{
+    width:min(420px, 92vw);
+    background:#111;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 20px 60px rgba(0,0,0,.6);
+    max-height: 85vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+.pg-modal__title{
+    color: #fff;
+    margin: 0 0 14px 0;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.pg-modal__form{
+    display: grid;
+    gap: 10px;
+}
+
+.pg-modal__input{
+    width: 100%;
+    box-sizing: border-box;
+    height: 34px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,.25);
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    outline: none;
+}
+
+.pg-modal__input:focus{
+    border-color: rgba(255,255,255,.45);
+}
+
+.pg-modal__rules{
+    margin-top: 6px;
+    font-size: 12px;
+    opacity: 0.95;
+    color: #fff;
+    display: grid;
+    gap: 4px;
+}
+
+.pg-modal__rule{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pg-modal__mark{
+    width: 18px;
+    display: inline-flex;
+    justify-content: center;
+}
+
+.pg-modal__rule.is-ok{
+    opacity: 1;
+}
+
+.pg-modal__rule.is-bad{
+    opacity: 0.8;
+}
+
+.pg-modal__error{
+    color: #ff6b6b;
+    margin-top: 6px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.pg-modal__submit{
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 8px;
+    height: 34px;
+    border-radius: 4px;
+    border: none;
+    background: rgba(255,255,255,.28);
+    color: #fff;
+    cursor: pointer;
+}
+
+.pg-modal__submit:disabled{
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+

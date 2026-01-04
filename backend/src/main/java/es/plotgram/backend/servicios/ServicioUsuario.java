@@ -28,8 +28,11 @@ public class ServicioUsuario {
      * @throws UsuarioYaRegistrado si el usuario ya está registrado o intenta usarse el ID del administrador.
      */
     public void nuevoUsuario(@Valid Usuario usuario) {
-        if (repositorioUsuario.buscarPorID(usuario.getId()).isPresent()) {
-            throw new UsuarioYaRegistrado();
+        if (usuario.getNombre() != null && repositorioUsuario.buscarPorNombre(usuario.getNombre()).isPresent()){
+            throw new UsuarioYaRegistrado("nombre");
+        }
+        if (usuario.getEmail() != null && repositorioUsuario.buscarPorEmail(usuario.getEmail()).isPresent()){
+            throw new UsuarioYaRegistrado("email");
         }
         repositorioUsuario.guardar(usuario);
     }

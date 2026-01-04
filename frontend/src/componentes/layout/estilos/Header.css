@@ -1,0 +1,53 @@
+.pg-header{
+    height: 72px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    background:#0b0b0b;
+    border-bottom:2px solid #ff8a00; /* línea naranja como en tu imagen */
+}
+
+.pg-header__left{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.pg-logo{
+    width:44px;
+    height:44px;
+    object-fit:contain;
+}
+
+.pg-brand{
+    color:#fff;
+    font-size:28px;
+    font-weight:700;
+    letter-spacing:.5px;
+}
+
+.pg-header__right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#fff;
+    font-size:18px;
+}
+
+.pg-link{
+    background:transparent;
+    border:none;
+    color:#fff;
+    cursor:pointer;
+    font:inherit;
+    font-weight:600;
+}
+
+.pg-link:hover{
+    text-decoration:underline;
+}
+
+.pg-sep{
+    opacity:.7;
+}

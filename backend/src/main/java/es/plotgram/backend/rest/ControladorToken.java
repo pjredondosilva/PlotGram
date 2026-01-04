@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,10 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/incidencias")
+@RequestMapping("/api")
 public class ControladorToken {
 
     @Autowired
@@ -30,14 +32,17 @@ public class ControladorToken {
     int tiempoExpiracionToken;
 
     @PostMapping("/autenticacion")
-    public ResponseEntity<String> obtenerToken(@RequestBody DAutenticacionUsuario datosLogin) {
+    public ResponseEntity<?> obtenerToken(@RequestBody DAutenticacionUsuario datosLogin) {
         Authentication authentication;
         try {
-            authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(datosLogin.id(), datosLogin.clave())
+            authentication =  authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(datosLogin.nombre(), datosLogin.contrasenia())
             );
         } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of(
+                    "code", "AUTH_INVALID",
+                    "message", "Nombre o contraseña incorrectos."
+            ));
         }
 
         String roles = authentication.getAuthorities().stream()
@@ -45,7 +50,7 @@ public class ControladorToken {
                 .collect(Collectors.joining(","));
 
         String token = UtilJwt.crearToken(
-                String.valueOf(datosLogin.id()),
+                String.valueOf(datosLogin.nombre()),
                 Collections.singletonMap("roles", roles),
                 tiempoExpiracionToken
         );

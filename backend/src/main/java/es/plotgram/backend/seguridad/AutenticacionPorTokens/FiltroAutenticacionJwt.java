@@ -40,8 +40,8 @@ public class FiltroAutenticacionJwt extends OncePerRequestFilter {
                 return;
             }
 
-            String dni = claims.getSubject();
-            UserDetails detallesUsuario = servicioCredencialesUsuario.loadUserByUsername(dni);
+            String nombre = claims.getSubject();
+            UserDetails detallesUsuario = servicioCredencialesUsuario.loadUserByUsername(nombre);
 
             var authenticationToken = new UsernamePasswordAuthenticationToken(
                     detallesUsuario,

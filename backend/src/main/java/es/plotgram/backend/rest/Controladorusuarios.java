@@ -1,6 +1,7 @@
 package es.plotgram.backend.rest;
 
 import es.plotgram.backend.excepciones.UsuarioYaRegistrado;
+import es.plotgram.backend.rest.dto.DUsuarioRegistro;
 import es.plotgram.backend.rest.dto.Dusuario;
 import es.plotgram.backend.rest.dto.Mapeador;
 import es.plotgram.backend.servicios.ServicioUsuario;
@@ -24,13 +25,8 @@ public class Controladorusuarios {
      * 201 si ok, 409 si email ya existe
      */
     @PostMapping("/usuarios")
-    public ResponseEntity<Void> nuevoUsuario(@Valid @RequestBody Dusuario dto) {
-        try {
-            serviciousuario.nuevoUsuario(mapeador.entidadNueva(dto));
-        }
-        catch(UsuarioYaRegistrado e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
+    public ResponseEntity<Void> nuevoUsuario(@Valid @RequestBody DUsuarioRegistro dto) {
+        serviciousuario.nuevoUsuario(mapeador.entidadNueva(dto));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -38,6 +34,8 @@ public class Controladorusuarios {
     /**
      * Obtener usuario por id
      * GET /api/usuarios/{id}
+     *
+     *
      * 200 si existe, 404 si no
      */
     @GetMapping("/usuarios/{id}")

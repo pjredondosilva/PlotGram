@@ -1,4 +1,5 @@
 package es.plotgram.backend.rest.dto;
+import es.plotgram.backend.entidades.Tipousuario;
 import es.plotgram.backend.entidades.Usuario;
 import es.plotgram.backend.repositorios.RepositorioUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +34,14 @@ public class Mapeador {
         );
     }
 
-    public Usuario entidadNueva(Dusuario d) {
-        return new Usuario(
-                d.id(),
-                d.nombre(),
-                codificadorClaves.encode(d.contrasenia()),
-                d.email(),
-                d.tipo(),
-                d.borrado()
-        );
+    public Usuario entidadNueva(DUsuarioRegistro d) {
+        Usuario u = new Usuario();
+        u.setNombre(d.nombre());
+        u.setContrasena(codificadorClaves.encode(d.contrasenia()));
+        u.setEmail(d.email());
+        u.setTipo(Tipousuario.USER);
+        u.setBorrado(false);
+        return u;
     }
 
 

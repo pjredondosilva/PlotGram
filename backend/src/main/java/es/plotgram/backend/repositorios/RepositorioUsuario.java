@@ -47,7 +47,7 @@ EntityManager em;
     public Optional<Usuario> buscarPorNombre(String nombre) {
         var q = em.createQuery("""
         SELECT u FROM Usuario u
-        WHERE u.nombre = :nombre AND u.borrado = false
+        WHERE lower(u.nombre) = lower(:nombre) AND u.borrado = false
     """, Usuario.class);
         q.setParameter("nombre", nombre);
         q.setMaxResults(1);
@@ -55,16 +55,16 @@ EntityManager em;
     }
 
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
-    public boolean existePorNombre(String nombre) {
-        Long count = em.createQuery("""
-            SELECT COUNT(u) FROM Usuario u
-            WHERE u.nombre = :nombre AND u.borrado = false
-            """, Long.class)
-                .setParameter("nombre", nombre)
-                .getSingleResult();
-
-        return count != null && count > 0;
+    public Optional<Usuario> buscarPorEmail(String email) {
+        var q = em.createQuery("""
+        SELECT u FROM Usuario u
+        WHERE u.email = :email AND u.borrado = false
+    """, Usuario.class);
+        q.setParameter("email", email);
+        q.setMaxResults(1);
+        return q.getResultList().stream().findFirst();
     }
+
 
 }
 

@@ -17,16 +17,27 @@ public class ControladorTmdb {
         this.servicioTmdb = servicioTmdb;
     }
 
-    @GetMapping("/peliculas/buscar")
-    public List<DPeliculaListado> buscarPeliculas(@RequestParam String query,
-                                                  @RequestParam(defaultValue = "1") int page) {
+    @GetMapping("/tmdb/peliculas")
+    public List<DPeliculaListado> peliculas(
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        if (query == null || query.isBlank()) {
+            return servicioTmdb.taquillaPeliculas(page);
+        }
         return servicioTmdb.buscarPeliculas(query, page);
     }
 
-    @GetMapping("/series/buscar")
-    public List<DSerieListado> buscarSeries(@RequestParam String query,
-                                            @RequestParam(defaultValue = "1") int page) {
+    @GetMapping("/tmdb/series")
+    public List<DSerieListado> series(
+            @RequestParam(required = false) String query,
+            @RequestParam(defaultValue = "1") int page
+    ) {
+        if (query == null || query.isBlank()) {
+            return servicioTmdb.seriesDelMomento(page);
+        }
         return servicioTmdb.buscarSeries(query, page);
     }
+
 }
 

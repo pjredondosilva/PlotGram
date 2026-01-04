@@ -8,22 +8,27 @@ import java.util.List;
 
 @Service
 public class MapeadorTmdb {
-    public DPeliculaListado Dto(DPeliculaListadoRespuesta m) {
+    public DPeliculaListado DtoPelicula(DPeliculaListadoRespuesta m) {
+        var ids = (m.genreIds() == null) ? List.<Integer>of() : m.genreIds();
         return new DPeliculaListado(
                 m.id(),
                 m.title(),
                 m.releaseDate(),
                 m.posterPath(),
-                m.genreIds() == null ? List.of() : m.genreIds()
+                ids,
+                List.of()
         );
     }
 
-    public DSerieListado Dto(DSerieListadoRespuesta t) {
+    public DSerieListado DtoSerie(DSerieListadoRespuesta t) {
+        var ids = (t.genreIds() == null) ? List.<Integer>of() : t.genreIds();
         return new DSerieListado(
                 t.id(),
                 t.name(),
                 t.firstAirDate(),
-                t.posterPath()
+                t.posterPath(),
+                ids,
+                List.of()
         );
     }
 }

@@ -1,0 +1,45 @@
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+async function handleResponse(res) {
+    const contentType = res.headers.get("content-type") || "";
+    const body = contentType.includes("application/json")
+        ? await res.json().catch(() => null)
+        : await res.text().catch(() => "");
+
+    if (!res.ok) {
+        let msg =
+            typeof body === "string" ? body :
+                body?.message ? body.message :
+                    body?.fieldErrors ? Object.values(body.fieldErrors).join("\n") :
+                        "";
+        if (!msg && res.status === 401) {
+            msg = "Nombre o contraseña incorrectos.";
+        }
+        const err = new Error(msg || `HTTP ${res.status}`);
+        err.status = res.status;
+        err.body = body;
+        throw err;
+    }
+
+    return body;
+}
+
+export async function apiGet(path) {
+    const res = await fetch(`${BASE_URL}${path}`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+    });
+    return handleResponse(res);
+}
+
+export async function apiPost(path, data) {
+    const res = await fetch(`${BASE_URL}${path}`, {
+        method: "POST",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
