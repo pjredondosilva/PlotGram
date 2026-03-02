@@ -1,11 +1,13 @@
-package es.plotgram.backend.tmdb.servicios;
+package es.plotgram.backend.servicios;
 import es.plotgram.backend.rest.dto.tmdb.DPeliculaListado;
 import es.plotgram.backend.rest.dto.tmdb.DSerieListado;
 import es.plotgram.backend.rest.dto.tmdb.MapeadorTmdb;
 import es.plotgram.backend.tmdb.dto.DRespuestaBusquedaPeliculasTmdb;
 import es.plotgram.backend.tmdb.dto.DRespuestaBusquedaSeriesTmdb;
 import es.plotgram.backend.tmdb.dto.DRespuestaGenerosTmdb;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.time.Duration;
@@ -15,8 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import es.plotgram.backend.tmdb.dto.DGeneroTmdb;
-import es.plotgram.backend.tmdb.dto.DPeliculaListadoRespuesta;
-import es.plotgram.backend.tmdb.dto.DSerieListadoRespuesta;
 
 @Service
 public class ServicioTmdb {
@@ -25,14 +25,11 @@ public class ServicioTmdb {
     private final String lang;
     private final MapeadorTmdb mapeador;
 
-    //Cache para los generos
-    private static final Duration TTL_GENEROS = Duration.ofHours(24);
-
     private volatile Map<Integer, String> cacheGenerosPeliculas = Map.of();
-    private volatile Instant cacheGenerosPeliculasAt = Instant.EPOCH;
-
     private volatile Map<Integer, String> cacheGenerosSeries = Map.of();
-    private volatile Instant cacheGenerosSeriesAt = Instant.EPOCH;
+
+    private final Object lockGenerosPeliculas = new Object();
+    private final Object lockGenerosSeries = new Object();
 
     public ServicioTmdb(WebClient tmdbWebClient,
                         @Value("${tmdb.lang:es-ES}") String lang,
@@ -42,12 +39,12 @@ public class ServicioTmdb {
         this.mapeador = mapeador;
     }
 
-    public List<DPeliculaListado> buscarPeliculas(String query, int page) {
+    public List<DPeliculaListado> buscarPeliculas(String consulta, int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/movie")
-                        .queryParam("query", query)
+                        .queryParam("query", consulta)
                         .queryParam("language", lang)
-                        .queryParam("page", page)
+                        .queryParam("page", pagina)
                         .build())
                 .retrieve()
                 .bodyToMono(DRespuestaBusquedaPeliculasTmdb.class)
@@ -62,12 +59,12 @@ public class ServicioTmdb {
                 .toList();
     }
 
-    public List<DSerieListado> buscarSeries(String query, int page) {
+    public List<DSerieListado> buscarSeries(String consulta, int pagina) {
         DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/tv")
-                        .queryParam("query", query)
+                        .queryParam("query", consulta)
                         .queryParam("language", lang)
-                        .queryParam("page", page)
+                        .queryParam("page", pagina)
                         .build())
                 .retrieve()
                 .bodyToMono(DRespuestaBusquedaSeriesTmdb.class)
@@ -83,11 +80,11 @@ public class ServicioTmdb {
 
     }
 
-    public List<DPeliculaListado> taquillaPeliculas(int page) {
+    public List<DPeliculaListado> taquillaPeliculas(int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/movie/now_playing")
                         .queryParam("language", lang)
-                        .queryParam("page", page)
+                        .queryParam("page", pagina)
                         .build())
                 .retrieve()
                 .bodyToMono(DRespuestaBusquedaPeliculasTmdb.class)
@@ -102,11 +99,11 @@ public class ServicioTmdb {
 
     }
 
-    public List<DSerieListado> seriesDelMomento(int page) {
+    public List<DSerieListado> seriesDelMomento(int pagina) {
         DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/trending/tv/week")
                         .queryParam("language", lang)
-                        .queryParam("page", page)
+                        .queryParam("page", pagina)
                         .build())
                 .retrieve()
                 .bodyToMono(DRespuestaBusquedaSeriesTmdb.class)
@@ -158,12 +155,43 @@ public class ServicioTmdb {
         );
     }
 
-    private Map<Integer, String> generosPeliculas() {
-        Instant now = Instant.now();
-        if (!cacheGenerosPeliculas.isEmpty() && now.isBefore(cacheGenerosPeliculasAt.plus(TTL_GENEROS))) {
-            return cacheGenerosPeliculas;
+    @PostConstruct
+    public void precargarGeneros() {
+        refrescarGeneros();
+    }
+
+    @Scheduled(cron = "0 0 4 1 * *", zone = "Europe/Madrid")
+    public void refrescarGeneros() {
+        try {
+            Map<Integer, String> nuevos = ActualizarGenerosPeliculas();
+            if (!nuevos.isEmpty()) {
+                synchronized (lockGenerosPeliculas) {
+                    cacheGenerosPeliculas = Map.copyOf(nuevos);
+                }
+            }
+        } catch (Exception ignored) {
         }
 
+        try {
+            Map<Integer, String> nuevos = ActualizarGenerosSeries();
+            if (!nuevos.isEmpty()) {
+                synchronized (lockGenerosSeries) {
+                    cacheGenerosSeries = Map.copyOf(nuevos);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private Map<Integer, String> generosPeliculas() {
+        return cacheGenerosPeliculas;
+    }
+
+    private Map<Integer, String> generosSeries() {
+        return cacheGenerosSeries;
+    }
+
+    private Map<Integer, String> ActualizarGenerosPeliculas() {
         DRespuestaGenerosTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/genre/movie/list")
                         .queryParam("language", lang)
@@ -172,23 +200,18 @@ public class ServicioTmdb {
                 .bodyToMono(DRespuestaGenerosTmdb.class)
                 .block();
 
-        Map<Integer, String> mapa = (resp == null || resp.genres() == null)
+        return (resp == null || resp.genres() == null)
                 ? Map.of()
                 : resp.genres().stream()
                 .filter(g -> g.id() != null && g.name() != null)
-                .collect(Collectors.toUnmodifiableMap(DGeneroTmdb::id,DGeneroTmdb::name));
-
-        cacheGenerosPeliculas = mapa;
-        cacheGenerosPeliculasAt = now;
-        return mapa;
+                .collect(Collectors.toUnmodifiableMap(
+                        DGeneroTmdb::id,
+                        DGeneroTmdb::name,
+                        (a, b) -> a
+                ));
     }
 
-    private Map<Integer, String> generosSeries() {
-        Instant now = Instant.now();
-        if (!cacheGenerosSeries.isEmpty() && now.isBefore(cacheGenerosSeriesAt.plus(TTL_GENEROS))) {
-            return cacheGenerosSeries;
-        }
-
+    private Map<Integer, String> ActualizarGenerosSeries() {
         DRespuestaGenerosTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/genre/tv/list")
                         .queryParam("language", lang)
@@ -197,16 +220,15 @@ public class ServicioTmdb {
                 .bodyToMono(DRespuestaGenerosTmdb.class)
                 .block();
 
-        Map<Integer, String> mapa = (resp == null || resp.genres() == null)
+        return (resp == null || resp.genres() == null)
                 ? Map.of()
                 : resp.genres().stream()
                 .filter(g -> g.id() != null && g.name() != null)
-                .collect(Collectors.toUnmodifiableMap(DGeneroTmdb::id,DGeneroTmdb::name));
-
-        cacheGenerosSeries = mapa;
-        cacheGenerosSeriesAt = now;
-        return mapa;
+                .collect(Collectors.toUnmodifiableMap(
+                        DGeneroTmdb::id,
+                        DGeneroTmdb::name,
+                        (a, b) -> a
+                ));
     }
-
 
 }

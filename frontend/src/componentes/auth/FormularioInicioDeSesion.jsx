@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { loginUser } from "../../servicios/auth";
+import { loginUser, getMe } from "../../servicios/auth";
 
-export default function LoginForm({ onDone }) {
+export default function LoginForm({ onDone, setUser }) {
     const [nombre, setNombre] = useState("");
-    const [contrasenia, setcontrasenia] = useState("");
+    const [contrasenia, setContrasenia] = useState("");
 
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
@@ -15,9 +15,11 @@ export default function LoginForm({ onDone }) {
 
         try {
             const data = await loginUser({ nombre, contrasenia});
+            const me = await getMe();
+            setUser(me);
             onDone?.();
         } catch (e) {
-            setErr(e.message || "Credenciales incorrectas");
+            setErr(e.message || "Nombre o contraseña incorrectos");
         } finally {
             setLoading(false);
         }
@@ -29,7 +31,7 @@ export default function LoginForm({ onDone }) {
 
             <form onSubmit={submit} style={{ display: "grid", gap: 10 }}>
                 <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre de usuario" />
-                <input type="password" value={contrasenia} onChange={(e) => setcontrasenia(e.target.value)} placeholder="Contraseña" />
+                <input type="password" value={contrasenia} onChange={(e) => setContrasenia(e.target.value)} placeholder="Contraseña" />
 
                 {err && <div style={{ color: "#ff6b6b" }}>{err}</div>}
 

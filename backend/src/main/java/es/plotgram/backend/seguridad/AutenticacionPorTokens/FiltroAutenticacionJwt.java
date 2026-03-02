@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,29 +29,55 @@ public class FiltroAutenticacionJwt extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        String authorizationHeader = request.getHeader(AUTHORIZATION);
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            Claims claims;
-            try {
-                String token = authorizationHeader.substring(7);
-                claims = UtilJwt.extraerContenido(token);
-            } catch (JwtException e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-
-            String nombre = claims.getSubject();
-            UserDetails detallesUsuario = servicioCredencialesUsuario.loadUserByUsername(nombre);
-
-            var authenticationToken = new UsernamePasswordAuthenticationToken(
-                    detallesUsuario,
-                    null,
-                    detallesUsuario.getAuthorities()
-            );
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
+        String token = extraerToken(request);
+        if (token == null || token.isBlank()) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        final Claims claims;
+        try {
+            claims = UtilJwt.extraerContenido(token);
+        } catch (JwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        String nombre = claims.getSubject();
+        if (nombre == null || nombre.isBlank()) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        UserDetails detallesUsuario = servicioCredencialesUsuario.loadUserByUsername(nombre);
+
+        var authenticationToken = new UsernamePasswordAuthenticationToken(
+                detallesUsuario,
+                null,
+                detallesUsuario.getAuthorities()
+        );
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
         filterChain.doFilter(request, response);
+    }
+
+    private String extraerToken(HttpServletRequest request) {
+        String auth = request.getHeader("Authorization");
+        if (auth != null && auth.startsWith("Bearer ")) {
+            return auth.substring(7);
+        }
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) return null;
+
+        for (Cookie c : cookies) {
+            if ("pg_token".equals(c.getName())) return c.getValue();
+        }
+        return null;
     }
 }

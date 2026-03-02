@@ -1,6 +1,5 @@
 package es.plotgram.backend.rest;
 
-import es.plotgram.backend.excepciones.UsuarioYaRegistrado;
 import es.plotgram.backend.rest.dto.DUsuarioRegistro;
 import es.plotgram.backend.rest.dto.Dusuario;
 import es.plotgram.backend.rest.dto.Mapeador;
@@ -10,10 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api")
-public class Controladorusuarios {
+public class ControladorUsuarios {
     @Autowired
     Mapeador mapeador;
     @Autowired
@@ -41,6 +41,14 @@ public class Controladorusuarios {
     @GetMapping("/usuarios/{id}")
     public ResponseEntity<Dusuario> obtenerUsuario(@PathVariable long id) {
         return serviciousuario.buscarUsuario(id)
+                .map(u -> ResponseEntity.ok(mapeador.dto(u)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @GetMapping("/usuarios/me")
+    public ResponseEntity<Dusuario> me(Authentication authentication) {
+        String nombre = authentication.getName();
+        return serviciousuario.buscarUsuario(nombre)
                 .map(u -> ResponseEntity.ok(mapeador.dto(u)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }

@@ -15,6 +15,9 @@ async function handleResponse(res) {
         if (!msg && res.status === 401) {
             msg = "Nombre o contraseña incorrectos.";
         }
+        if (!msg && res.status === 403) {
+            msg = "No autorizado.";
+        }
         const err = new Error(msg || `HTTP ${res.status}`);
         err.status = res.status;
         err.body = body;
@@ -27,6 +30,7 @@ async function handleResponse(res) {
 export async function apiGet(path) {
     const res = await fetch(`${BASE_URL}${path}`, {
         method: "GET",
+        credentials: "include",
         headers: { Accept: "application/json" },
     });
     return handleResponse(res);
@@ -35,11 +39,20 @@ export async function apiGet(path) {
 export async function apiPost(path, data) {
     const res = await fetch(`${BASE_URL}${path}`, {
         method: "POST",
+        credentials: "include",
         headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
+    });
+    return handleResponse(res);
+}
+export async function apiDelete(path) {
+    const res = await fetch(`${BASE_URL}${path}`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: { Accept: "application/json" },
     });
     return handleResponse(res);
 }

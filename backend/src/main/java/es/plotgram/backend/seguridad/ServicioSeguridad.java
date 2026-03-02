@@ -40,7 +40,10 @@ public class ServicioSeguridad {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "http://127.0.0.1:*"
+        ));
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization","Content-Type"));
         config.setAllowCredentials(true);
@@ -54,18 +57,20 @@ public class ServicioSeguridad {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {})
-                .sessionManagement(session -> session.disable())
+                .cors(org.springframework.security.config.Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterAfter(filtroAutenticacionJwt(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()
                         // Login y Autenticación
-                        .requestMatchers(HttpMethod.POST, "/api/autenticacion").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/sesiones").permitAll()
                         // Registro de usuarios
+                        .requestMatchers(HttpMethod.DELETE, "/api/sesiones/actual").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers("/api/ping").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/tmdb/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/peliculas").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/series").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();

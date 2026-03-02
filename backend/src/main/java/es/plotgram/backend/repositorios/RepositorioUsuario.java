@@ -24,16 +24,6 @@ EntityManager em;
     }
 
     /**
-     * Actualiza los datos de un usuario existente en la base de datos.
-     * @param usuario El usuario con los datos actualizados.
-     * @return El usuario actualizado y gestionado por el EntityManager.
-     */
-    @Transactional
-    public Usuario actualizar(Usuario usuario) {
-        return em.merge(usuario);
-    }
-
-    /**
      * Busca un usuario por su ID (que es la clave primaria @Id).
      * @param id El ID del usuario a buscar.
      * @return Un Optional que contiene al usuario si se encuentra, o vacío si no.

@@ -1,12 +1,12 @@
 import { useMemo, useState } from "react";
-import { registerUser } from "../../servicios/auth";
+import { registerUser,loginUser, getMe } from "../../servicios/auth";
 
 const hasUpper = (s) => /[A-Z]/.test(s);
 const hasDigit = (s) => /\d/.test(s);
 const hasSpecial = (s) => /[.,!@#$%^&*()_\-+=\[\]{};:'"\\|<>/?]/.test(s);
 const isValidEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
-export default function RegisterForm({ onDone }) {
+export default function RegisterForm({ onDone, setUser }) {
     const [nombre, setNombre] = useState("");
     const [email, setEmail] = useState("");
     const [contrasenia, setContrasenia] = useState("");
@@ -52,7 +52,10 @@ export default function RegisterForm({ onDone }) {
         }
         setLoading(true);
         try {
-            await registerUser({ nombre, email, contrasenia });
+            await registerUser({ nombre: nombreTrim, email: emailTrim, contrasenia });
+            await loginUser({ nombre: nombreTrim, contrasenia });
+            const me = await getMe();
+            setUser?.(me);
             onDone?.();
         } catch (e) {
             setErr(e.message || "Error registrando usuario");

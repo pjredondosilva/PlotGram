@@ -15,11 +15,16 @@ public class UtilJwt {
 
     public static String crearToken(String usuario, Map<String, ?> claims, int tiempoExpiracionMin) {
         var ahora = LocalDateTime.now().atZone(ZoneId.systemDefault());
+        Date exp = Date.from(ahora.plusMinutes(tiempoExpiracionMin).toInstant());
+        return crearTokenConExp(usuario, claims, exp);
+    }
 
+    public static String crearTokenConExp(String usuario, Map<String, ?> claims, Date expiracion) {
         return Jwts.builder()
                 .claims(claims)
                 .subject(usuario)
-                .expiration(Date.from(ahora.plusMinutes(tiempoExpiracionMin).toInstant()))
+                .issuedAt(new Date())
+                .expiration(expiracion)
                 .signWith(claveFirmadoTokens)
                 .compact();
     }

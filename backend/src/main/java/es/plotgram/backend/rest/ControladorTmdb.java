@@ -2,7 +2,7 @@ package es.plotgram.backend.rest;
 
 import es.plotgram.backend.rest.dto.tmdb.DPeliculaListado;
 import es.plotgram.backend.rest.dto.tmdb.DSerieListado;
-import es.plotgram.backend.tmdb.servicios.ServicioTmdb;
+import es.plotgram.backend.servicios.ServicioTmdb;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,26 +17,26 @@ public class ControladorTmdb {
         this.servicioTmdb = servicioTmdb;
     }
 
-    @GetMapping("/tmdb/peliculas")
-    public List<DPeliculaListado> peliculas(
-            @RequestParam(required = false) String query,
-            @RequestParam(defaultValue = "1") int page
+    @GetMapping("/peliculas")
+    public List<DPeliculaListado> DarPeliculas(
+            @RequestParam(required = false) String consulta,
+            @RequestParam(defaultValue = "1") int pagina
     ) {
-        if (query == null || query.isBlank()) {
-            return servicioTmdb.taquillaPeliculas(page);
+        if (consulta == null || consulta.isBlank()) {
+            return servicioTmdb.taquillaPeliculas(pagina);
         }
-        return servicioTmdb.buscarPeliculas(query, page);
+        return servicioTmdb.buscarPeliculas(consulta, pagina);
     }
 
-    @GetMapping("/tmdb/series")
-    public List<DSerieListado> series(
-            @RequestParam(required = false) String query,
-            @RequestParam(defaultValue = "1") int page
+    @GetMapping("/series")
+    public List<DSerieListado> DarSeries(
+            @RequestParam(required = false) String consulta,
+            @RequestParam(defaultValue = "1") int pagina
     ) {
-        if (query == null || query.isBlank()) {
-            return servicioTmdb.seriesDelMomento(page);
+        if (consulta == null || consulta.isBlank()) {
+            return servicioTmdb.seriesDelMomento(pagina);
         }
-        return servicioTmdb.buscarSeries(query, page);
+        return servicioTmdb.buscarSeries(consulta, pagina);
     }
 
 }
