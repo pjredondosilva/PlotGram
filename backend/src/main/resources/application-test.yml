@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MYSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+
+#  tmdb:
+#    base-url: https://api.themoviedb.org/3
+#    token: eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMzUwYmI3MjE4NDYwZGNiNjM0ZmZmYWM1YjdlMDI5YSIsIm5iZiI6MTc1MjA4MTMyNC42MjksInN1YiI6IjY4NmVhM2FjMWI5YThhYjFlOGE5NjYwOSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.K0r9kC62EHEhKtiPgpT32bsah8K_zbeaxiLAhTYSu9s
+#    lang: es-ES
+

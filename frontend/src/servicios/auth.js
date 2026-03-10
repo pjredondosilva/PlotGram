@@ -14,3 +14,11 @@ export async function logout() {
 export async function getMe() {
     return apiGet("/api/usuarios/me");
 }
+
+export async function getSessionState() {
+    return apiGet("/api/sesiones/estado");
+}
+
+export async function refreshSession() {
+    return apiPost("/api/sesiones/renovacion");
+}

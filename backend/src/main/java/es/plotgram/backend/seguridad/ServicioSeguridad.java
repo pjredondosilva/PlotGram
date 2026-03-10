@@ -59,7 +59,7 @@ public class ServicioSeguridad {
                 .csrf(csrf -> csrf.disable())
                 .cors(org.springframework.security.config.Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterAfter(filtroAutenticacionJwt(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(filtroAutenticacionJwt(), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/error").permitAll()

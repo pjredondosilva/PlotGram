@@ -23,6 +23,9 @@ public class FiltroAutenticacionJwt extends OncePerRequestFilter {
     @Autowired
     ServicioCredencialesUsuario servicioCredencialesUsuario;
 
+    @Autowired
+    UtilJwt utilJwt;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -42,7 +45,7 @@ public class FiltroAutenticacionJwt extends OncePerRequestFilter {
 
         final Claims claims;
         try {
-            claims = UtilJwt.extraerContenido(token);
+            claims = utilJwt.extraerContenido(token);
         } catch (JwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;

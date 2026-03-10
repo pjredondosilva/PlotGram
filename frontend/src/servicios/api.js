@@ -1,6 +1,7 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 async function handleResponse(res) {
+    if (res.status === 204) return null;
     const contentType = res.headers.get("content-type") || "";
     const body = contentType.includes("application/json")
         ? await res.json().catch(() => null)
@@ -42,9 +43,9 @@ export async function apiPost(path, data) {
         credentials: "include",
         headers: {
             Accept: "application/json",
-            "Content-Type": "application/json",
+            ...(data !== undefined ? { "Content-Type": "application/json" } : {}),
         },
-        body: JSON.stringify(data),
+        ...(data !== undefined ? { body: JSON.stringify(data) } : {}),
     });
     return handleResponse(res);
 }

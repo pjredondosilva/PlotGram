@@ -29,7 +29,7 @@ public class AdminBootstrap implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (repo.buscarPorNombre(adminNombre) != null) return;
+        if (repo.buscarPorNombre(adminNombre).isPresent()) return;
 
         Usuario admin = new Usuario();
         admin.setNombre(adminNombre);

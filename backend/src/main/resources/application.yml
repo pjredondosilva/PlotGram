@@ -2,7 +2,8 @@ server:
   port: 8080
 
 spring:
-  application: name=backend
+  application:
+    name:backend
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mariadb://localhost:3307/plotgram}
     username: ${SPRING_DATASOURCE_USERNAME:plotgram}
@@ -15,7 +16,7 @@ spring:
     open-in-view: false
     show-sql: true
 
-tiempoExpiracionTokenJwtMin: 30
+tiempoExpiracionTokenJwtMin: 40
 
 tmdb:
   base-url: ${TMDB_BASE_URL:https://api.themoviedb.org/3}
@@ -30,8 +31,10 @@ plotgram:
 app:
   auth:
     jwt:
-      refreshWindowMin: 5
-      maxSessionHours: 8
+      secret: rFUIutbOUBLaezB7R9AqTLit9fXttySNjCPInZ5euCA=
+      clockSkewSeconds: 30
+      refrescarventana: 10
+      maxhorassesion: 8
     cookie:
       secure=false
       samesite=Lax

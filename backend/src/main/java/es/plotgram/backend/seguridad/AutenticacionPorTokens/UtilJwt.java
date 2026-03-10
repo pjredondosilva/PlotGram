@@ -1,25 +1,44 @@
 package es.plotgram.backend.seguridad.AutenticacionPorTokens;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Map;
-
+@Component
 public class UtilJwt {
 
-    private static final SecretKey claveFirmadoTokens = Jwts.SIG.HS256.key().build();
+    private final SecretKey claveFirmadoTokens;
+    private final JwtParser parser;
 
-    public static String crearToken(String usuario, Map<String, ?> claims, int tiempoExpiracionMin) {
+    public UtilJwt(
+            @Value("${app.auth.jwt.secret}") String secretoBase64,
+            @Value("${app.auth.jwt.clockSkewSeconds}") long clockSkewSeconds
+    ) {
+        byte[] keyBytes = Decoders.BASE64.decode(secretoBase64);
+        this.claveFirmadoTokens = Keys.hmacShaKeyFor(keyBytes);
+        this.parser = Jwts.parser()
+                .verifyWith(claveFirmadoTokens)
+                .clockSkewSeconds(clockSkewSeconds)
+                .build();
+    }
+
+
+    public String crearToken(String usuario, Map<String, ?> claims, int tiempoExpiracionMin) {
         var ahora = LocalDateTime.now().atZone(ZoneId.systemDefault());
         Date exp = Date.from(ahora.plusMinutes(tiempoExpiracionMin).toInstant());
         return crearTokenConExp(usuario, claims, exp);
     }
 
-    public static String crearTokenConExp(String usuario, Map<String, ?> claims, Date expiracion) {
+    public String crearTokenConExp(String usuario, Map<String, ?> claims, Date expiracion) {
         return Jwts.builder()
                 .claims(claims)
                 .subject(usuario)
@@ -29,11 +48,7 @@ public class UtilJwt {
                 .compact();
     }
 
-    public static Claims extraerContenido(String token) {
-        return Jwts.parser()
-                .verifyWith(claveFirmadoTokens)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+    public Claims extraerContenido(String token) {
+        return parser.parseSignedClaims(token).getPayload();
     }
 }

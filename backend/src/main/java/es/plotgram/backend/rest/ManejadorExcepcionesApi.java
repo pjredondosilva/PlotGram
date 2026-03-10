@@ -1,6 +1,7 @@
 package es.plotgram.backend.rest;
 
 import es.plotgram.backend.excepciones.UsuarioYaRegistrado;
+import io.jsonwebtoken.JwtException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,6 +46,12 @@ public class ManejadorExcepcionesApi {
     public ResponseEntity<ApiError> manejarCredencialesInvalidas(BadCredentialsException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiError("AUTH_INVALID", "Nombre o contraseña incorrectos.", null));
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ApiError> manejarJwtInvalido(JwtException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiError("TOKEN_INVALID", "La sesión no es válida o ha caducado.", null));
     }
 
     @ExceptionHandler(WebClientResponseException.class)

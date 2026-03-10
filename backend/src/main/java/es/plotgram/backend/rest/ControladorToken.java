@@ -3,6 +3,7 @@ package es.plotgram.backend.rest;
 import es.plotgram.backend.rest.dto.DAutenticacionUsuario;
 import es.plotgram.backend.seguridad.AutenticacionPorTokens.UtilJwt;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,16 +26,16 @@ import java.util.stream.Collectors;
 @RequestMapping("/api")
 public class ControladorToken {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+    private final UtilJwt utilJwt;
 
     @Value("${tiempoExpiracionTokenJwtMin}")
     int tiempoExpiracionToken;
 
-    @Value("${app.auth.jwt.refreshWindowMin:5}")
+    @Value("${app.auth.jwt.refrescarventana}")
     int refreshWindowMin;
 
-    @Value("${app.auth.jwt.maxSessionHours:8}")
+    @Value("${app.auth.jwt.maxhorassesion}")
     int maxSessionHours;
 
     //poner a true en producción
@@ -43,6 +44,12 @@ public class ControladorToken {
 
     @Value("${app.auth.cookie.samesite:Lax}")
     String cookieSameSite;
+
+
+    public ControladorToken(AuthenticationManager authenticationManager, UtilJwt utilJwt) {
+        this.authenticationManager = authenticationManager;
+        this.utilJwt = utilJwt;
+    }
 
     @PostMapping("/sesiones")
     public ResponseEntity<?> obtenerToken(@Valid @RequestBody DAutenticacionUsuario datosLogin) {
@@ -61,7 +68,7 @@ public class ControladorToken {
         claims.put("roles", roles);
         claims.put("session_start", sessionStart);
 
-        String token = UtilJwt.crearToken(
+        String token = utilJwt.crearToken(
                 String.valueOf(datosLogin.nombre()),
                 claims,
                 tiempoExpiracionToken
@@ -77,6 +84,7 @@ public class ControladorToken {
 
         return ResponseEntity.ok()
                 .header("Set-Cookie", cookie.toString())
+                .header("Cache-Control", "no-store")
                 .body(Map.of("ok", true));
     }
 
@@ -92,24 +100,35 @@ public class ControladorToken {
 
         return ResponseEntity.ok()
                 .header("Set-Cookie", cookie.toString())
+                .header("Cache-Control", "no-store")
                 .body(Map.of("ok", true));
     }
 
-    @PostMapping("/sesiones/refrescar")
-    public ResponseEntity<?> Refrescar(@CookieValue(name = "pg_token", required = false) String token) {
+    @PostMapping("/sesiones/renovacion")
+    public ResponseEntity<?> refrescar(@CookieValue(name = "pg_token", required = false) String token) {
         if (token == null || token.isBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ManejadorExcepcionesApi.ApiError("AUTH_REQUIRED", "No hay sesión activa.", null));
         }
 
-        Claims claims = UtilJwt.extraerContenido(token);
+        final Claims claims;
+        try {
+            claims = utilJwt.extraerContenido(token);
+        } catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ManejadorExcepcionesApi.ApiError("TOKEN_INVALID", "La sesión no es válida o ha caducado.", null));
+        }
 
         Instant now = Instant.now();
         Instant exp = claims.getExpiration().toInstant();
 
         long remainingSeconds = Duration.between(now, exp).getSeconds();
+        if (remainingSeconds <= 0) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ManejadorExcepcionesApi.ApiError("TOKEN_EXPIRED", "La sesión ha caducado. Inicia sesión de nuevo.", null));
+        }
         if (remainingSeconds > refreshWindowMin * 60L) {
-            return ResponseEntity.noContent().build(); // todavía no toca
+            return ResponseEntity.noContent().build();
         }
 
         Long sessionStartMs = claims.get("session_start", Long.class);
@@ -132,7 +151,7 @@ public class ControladorToken {
         newClaims.remove("exp");
         newClaims.remove("iat");
 
-        String newToken = UtilJwt.crearTokenConExp(claims.getSubject(), newClaims, java.util.Date.from(newExp));
+        String newToken = utilJwt.crearTokenConExp(claims.getSubject(), newClaims, java.util.Date.from(newExp));
 
         long maxAgeSeconds = Duration.between(now, newExp).getSeconds();
 
@@ -146,6 +165,45 @@ public class ControladorToken {
 
         return ResponseEntity.ok()
                 .header("Set-Cookie", cookie.toString())
+                .header("Cache-Control", "no-store")
                 .body(Map.of("refreshed", true));
+    }
+
+@GetMapping("/sesiones/estado")
+    public ResponseEntity<?> estado(@CookieValue(name = "pg_token", required = false) String token) {
+        if (token == null || token.isBlank()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ManejadorExcepcionesApi.ApiError("AUTH_REQUIRED", "No hay sesión activa.", null));
+        }
+
+        final Claims claims;
+        try {
+            claims = utilJwt.extraerContenido(token);
+        } catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ManejadorExcepcionesApi.ApiError("TOKEN_INVALID", "La sesión no es válida o ha caducado.", null));
+        }
+
+        Instant now = Instant.now();
+        Instant exp = claims.getExpiration().toInstant();
+        long remainingSeconds = Math.max(0, Duration.between(now, exp).getSeconds());
+
+        Long sessionStartMs = claims.get("session_start", Long.class);
+        if (sessionStartMs == null) sessionStartMs = now.toEpochMilli();
+        Instant sessionStart = Instant.ofEpochMilli(sessionStartMs);
+        Instant hardEnd = sessionStart.plus(Duration.ofHours(maxSessionHours));
+
+        long hardRemainingSeconds = Math.max(0, Duration.between(now, hardEnd).getSeconds());
+
+        return ResponseEntity.ok()
+                .header("Cache-Control", "no-store")
+                .body(Map.of(
+                        "usuario", claims.getSubject(),
+                        "expiresAt", exp.toEpochMilli(),
+                        "remainingSeconds", remainingSeconds,
+                        "refreshWindowSeconds", refreshWindowMin * 60L,
+                        "hardEndAt", hardEnd.toEpochMilli(),
+                        "hardRemainingSeconds", hardRemainingSeconds
+                ));
     }
 }
