@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { loginUser, getMe } from "../../servicios/auth";
 
-export default function LoginForm({ onDone, setUser }) {
-    const [nombre, setNombre] = useState("");
-    const [contrasenia, setContrasenia] = useState("");
-
+export default function FormularioLogin({ onDone, setUser, form, setForm, resetForm }) {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
+
+    const { nombre, contrasenia } = form;
 
     async function submit(e) {
         e.preventDefault();
@@ -14,9 +13,11 @@ export default function LoginForm({ onDone, setUser }) {
         setLoading(true);
 
         try {
-            const data = await loginUser({ nombre, contrasenia});
+            await loginUser({ nombre, contrasenia });
             const me = await getMe();
             setUser(me);
+
+            resetForm?.();
             onDone?.();
         } catch (e) {
             setErr(e.message || "Nombre o contraseña incorrectos");
@@ -30,8 +31,24 @@ export default function LoginForm({ onDone, setUser }) {
             <h2 style={{ color: "white", marginTop: 0 }}>Iniciar sesión</h2>
 
             <form onSubmit={submit} style={{ display: "grid", gap: 10 }}>
-                <input value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre de usuario" />
-                <input type="password" value={contrasenia} onChange={(e) => setContrasenia(e.target.value)} placeholder="Contraseña" />
+                <input
+                    className="pg-modal__input"
+                    value={nombre}
+                    onChange={(e) =>
+                        setForm((prev) => ({ ...prev, nombre: e.target.value }))
+                    }
+                    placeholder="Nombre de usuario"
+                />
+
+                <input
+                    className="pg-modal__input"
+                    type="password"
+                    value={contrasenia}
+                    onChange={(e) =>
+                        setForm((prev) => ({ ...prev, contrasenia: e.target.value }))
+                    }
+                    placeholder="Contraseña"
+                />
 
                 {err && <div style={{ color: "#ff6b6b" }}>{err}</div>}
 

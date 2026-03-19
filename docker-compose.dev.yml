@@ -26,9 +26,9 @@ services:
       SPRING_DATASOURCE_USERNAME: plotgram
       SPRING_DATASOURCE_PASSWORD: plotgram
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      TMDB_TOKEN: ${TMDB_TOKEN}
-      TMDB_BASE_URL: ${TMDB_BASE_URL}
-      TMDB_LANG: ${TMDB_LANG}
+      TMDB_TOKEN: eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMzUwYmI3MjE4NDYwZGNiNjM0ZmZmYWM1YjdlMDI5YSIsIm5iZiI6MTc1MjA4MTMyNC42MjksInN1YiI6IjY4NmVhM2FjMWI5YThhYjFlOGE5NjYwOSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.K0r9kC62EHEhKtiPgpT32bsah8K_zbeaxiLAhTYSu9s
+      TMDB_BASE_URL: https://api.themoviedb.org/3
+      TMDB_LANG: es-ES
     networks:
       - tfgnet
 

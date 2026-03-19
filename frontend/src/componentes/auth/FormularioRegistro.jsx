@@ -1,18 +1,16 @@
 import { useMemo, useState } from "react";
-import { registerUser,loginUser, getMe } from "../../servicios/auth";
+import { registerUser, loginUser, getMe } from "../../servicios/auth";
 
 const hasUpper = (s) => /[A-Z]/.test(s);
 const hasDigit = (s) => /\d/.test(s);
 const hasSpecial = (s) => /[.,!@#$%^&*()_\-+=\[\]{};:'"\\|<>/?]/.test(s);
 const isValidEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
-export default function RegisterForm({ onDone, setUser }) {
-    const [nombre, setNombre] = useState("");
-    const [email, setEmail] = useState("");
-    const [contrasenia, setContrasenia] = useState("");
-
+export default function FormularioRegistro({ onDone, setUser, form, setForm, resetForm }) {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
+
+    const { nombre, email, contrasenia } = form;
 
     const rules = useMemo(() => {
         return {
@@ -33,6 +31,7 @@ export default function RegisterForm({ onDone, setUser }) {
             setErr("Contraseña débil: revisa los requisitos.");
             return;
         }
+
         const nombreTrim = nombre.trim();
         const emailTrim = email.trim();
 
@@ -46,16 +45,19 @@ export default function RegisterForm({ onDone, setUser }) {
             return;
         }
 
-        if (!passwordOk) {
-            setErr("Contraseña débil: revisa los requisitos.");
-            return;
-        }
         setLoading(true);
         try {
-            await registerUser({ nombre: nombreTrim, email: emailTrim, contrasenia });
+            await registerUser({
+                nombre: nombreTrim,
+                email: emailTrim,
+                contrasenia,
+            });
+
             await loginUser({ nombre: nombreTrim, contrasenia });
             const me = await getMe();
             setUser?.(me);
+
+            resetForm?.();
             onDone?.();
         } catch (e) {
             setErr(e.message || "Error registrando usuario");
@@ -72,7 +74,9 @@ export default function RegisterForm({ onDone, setUser }) {
                 <input
                     className="pg-modal__input"
                     value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
+                    onChange={(e) =>
+                        setForm((prev) => ({ ...prev, nombre: e.target.value }))
+                    }
                     placeholder="Nombre de usuario"
                     required
                     minLength={3}
@@ -82,7 +86,9 @@ export default function RegisterForm({ onDone, setUser }) {
                 <input
                     className="pg-modal__input"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) =>
+                        setForm((prev) => ({ ...prev, email: e.target.value }))
+                    }
                     placeholder="Email"
                     type="email"
                     required
@@ -92,7 +98,9 @@ export default function RegisterForm({ onDone, setUser }) {
                     className="pg-modal__input"
                     type="password"
                     value={contrasenia}
-                    onChange={(e) => setContrasenia(e.target.value)}
+                    onChange={(e) =>
+                        setForm((prev) => ({ ...prev, contrasenia: e.target.value }))
+                    }
                     placeholder="Contraseña"
                     required
                     minLength={8}

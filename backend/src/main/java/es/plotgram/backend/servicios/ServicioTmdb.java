@@ -10,14 +10,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import java.time.Duration;
-import java.time.Instant;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import es.plotgram.backend.tmdb.dto.DGeneroTmdb;
 
+/**
+ * Servicio encargado de consultar información de películas y series en TMDB
+ * y de enriquecer los resultados con los nombres de sus géneros.
+ * <p>
+ * Mantiene una caché en memoria con los géneros de películas y series para
+ * evitar consultas repetidas al servicio externo.
+ */
 @Service
 public class ServicioTmdb {
 
@@ -39,6 +45,13 @@ public class ServicioTmdb {
         this.mapeador = mapeador;
     }
 
+    /**
+     * Busca películas en TMDB a partir de un texto de consulta.
+     *
+     * @param consulta texto de búsqueda
+     * @param pagina número de página a consultar
+     * @return listado de películas encontradas
+     */
     public List<DPeliculaListado> buscarPeliculas(String consulta, int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/movie")
@@ -59,6 +72,13 @@ public class ServicioTmdb {
                 .toList();
     }
 
+    /**
+     * Busca series en TMDB a partir de un texto de consulta.
+     *
+     * @param consulta texto de búsqueda
+     * @param pagina número de página a consultar
+     * @return listado de series encontradas
+     */
     public List<DSerieListado> buscarSeries(String consulta, int pagina) {
         DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/tv")
@@ -80,6 +100,12 @@ public class ServicioTmdb {
 
     }
 
+    /**
+     * Obtiene las películas en cartelera.
+     *
+     * @param pagina número de página a consultar
+     * @return listado de películas en cartelera
+     */
     public List<DPeliculaListado> taquillaPeliculas(int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/movie/now_playing")
@@ -99,6 +125,12 @@ public class ServicioTmdb {
 
     }
 
+    /**
+     * Obtiene las series del momento.
+     *
+     * @param pagina número de página a consultar
+     * @return listado de series destacadas de la semana
+     */
     public List<DSerieListado> seriesDelMomento(int pagina) {
         DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/trending/tv/week")
@@ -118,7 +150,14 @@ public class ServicioTmdb {
 
     }
 
-
+    /**
+     * Sustituye los identificadores de género de una película por sus nombres
+     * legibles usando la caché disponible.
+     *
+     * @param dto película con identificadores de género
+     * @param mapa mapa de correspondencia entre id de género y nombre
+     * @return una nueva película con la lista de nombres de género completada
+     */
     private DPeliculaListado conNombresDeGenero(DPeliculaListado dto, Map<Integer, String> mapa) {
         List<String> nombres = (dto.genreIds() == null ? List.<Integer>of() : dto.genreIds())
                 .stream()
@@ -137,6 +176,14 @@ public class ServicioTmdb {
         );
     }
 
+    /**
+     * Sustituye los identificadores de género de una serie por sus nombres
+     * legibles usando la caché disponible.
+     *
+     * @param dto serie con identificadores de género
+     * @param mapa mapa de correspondencia entre id de género y nombre
+     * @return una nueva serie con la lista de nombres de género completada
+     */
     private DSerieListado conNombresDeGenero(DSerieListado dto, Map<Integer, String> mapa) {
         List<String> nombres = (dto.genreIds() == null ? List.<Integer>of() : dto.genreIds())
                 .stream()
@@ -155,15 +202,22 @@ public class ServicioTmdb {
         );
     }
 
+    /**
+     * Precarga la información de géneros al iniciar la aplicación.
+     */
     @PostConstruct
     public void precargarGeneros() {
         refrescarGeneros();
     }
 
+    /**
+     * Actualiza la caché de géneros de películas y series.
+     * Este proceso también se ejecuta de forma programada periódicamente.
+     */
     @Scheduled(cron = "0 0 4 1 * *", zone = "Europe/Madrid")
     public void refrescarGeneros() {
         try {
-            Map<Integer, String> nuevos = ActualizarGenerosPeliculas();
+            Map<Integer, String> nuevos = actualizarGenerosPeliculas();
             if (!nuevos.isEmpty()) {
                 synchronized (lockGenerosPeliculas) {
                     cacheGenerosPeliculas = Map.copyOf(nuevos);
@@ -173,7 +227,7 @@ public class ServicioTmdb {
         }
 
         try {
-            Map<Integer, String> nuevos = ActualizarGenerosSeries();
+            Map<Integer, String> nuevos = actualizarGenerosSeries();
             if (!nuevos.isEmpty()) {
                 synchronized (lockGenerosSeries) {
                     cacheGenerosSeries = Map.copyOf(nuevos);
@@ -183,15 +237,32 @@ public class ServicioTmdb {
         }
     }
 
+    /**
+     * Devuelve la caché actual de géneros de películas.
+     *
+     * @return mapa de identificadores y nombres de géneros de películas
+     */
     private Map<Integer, String> generosPeliculas() {
         return cacheGenerosPeliculas;
     }
 
+    /**
+     * Devuelve la caché actual de géneros de series.
+     *
+     * @return mapa de identificadores y nombres de géneros de series
+     */
     private Map<Integer, String> generosSeries() {
         return cacheGenerosSeries;
     }
 
-    private Map<Integer, String> ActualizarGenerosPeliculas() {
+    /**
+     * Consulta en TMDB el catálogo de géneros de películas y construye
+     * un mapa inmutable con sus identificadores y nombres.
+     *
+     * @return mapa de géneros de películas, o vacío si la consulta falla
+     *         o no devuelve resultados válidos
+     */
+    private Map<Integer, String> actualizarGenerosPeliculas() {
         DRespuestaGenerosTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/genre/movie/list")
                         .queryParam("language", lang)
@@ -211,7 +282,14 @@ public class ServicioTmdb {
                 ));
     }
 
-    private Map<Integer, String> ActualizarGenerosSeries() {
+    /**
+     * Consulta en TMDB el catálogo de géneros de series y construye
+     * un mapa inmutable con sus identificadores y nombres.
+     *
+     * @return mapa de géneros de series, o vacío si la consulta falla
+     *         o no devuelve resultados válidos
+     */
+    private Map<Integer, String> actualizarGenerosSeries() {
         DRespuestaGenerosTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/genre/tv/list")
                         .queryParam("language", lang)

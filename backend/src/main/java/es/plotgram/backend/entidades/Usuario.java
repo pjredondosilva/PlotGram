@@ -1,30 +1,85 @@
 package es.plotgram.backend.entidades;
 
 import jakarta.persistence.*;
-import lombok.*;
-
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
 
 @Entity
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
 public class Usuario {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
     private Long id;
-    @Column(nullable=false, unique=true, length=30)
+
+    @Column(nullable = false, unique = true, length = 30)
     private String nombre;
+
     @Column(nullable = false)
     private String contrasena;
+
     @Email
     @Column(nullable = false, unique = true)
     private String email;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Tipousuario tipo= Tipousuario.USER;
+    private Tipousuario tipo = Tipousuario.USER;
+
     @Column(nullable = false)
     private boolean borrado;
+
+    public Usuario() {
+    }
+
+    public Usuario(Long id, String nombre, String contrasena, String email, Tipousuario tipo, boolean borrado) {
+        this.id = id;
+        this.nombre = nombre;
+        this.contrasena = contrasena;
+        this.email = email;
+        this.tipo = tipo;
+        this.borrado = borrado;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getContrasena() {
+        return contrasena;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public Tipousuario getTipo() {
+        return tipo;
+    }
+
+    public boolean isBorrado() {
+        return borrado;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setTipo(Tipousuario tipo) {
+        this.tipo = tipo;
+    }
+
+    public void setBorrado(boolean borrado) {
+        this.borrado = borrado;
+    }
 }

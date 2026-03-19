@@ -9,6 +9,9 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 
+/**
+ * Servicio de negocio para el alta y la consulta de usuarios.
+ */
 @Service
 @Validated
 public class ServicioUsuario {
@@ -20,12 +23,13 @@ public class ServicioUsuario {
     public ServicioUsuario(RepositorioUsuario repositorioUsuario) {
         this.repositorioUsuario = repositorioUsuario;
     }
+
     /**
-     * Registra un nuevo usuario en el sistema, verificando que no esté ya registrado.
-     * No se permite registrar un usuario con el mismo ID que el administrador.
-     * Si el ID ya existe en el sistema, se lanza una excepción {@link UsuarioYaRegistrado}.
-     * @param usuario Usuario a registrar (no nulo y válido).
-     * @throws UsuarioYaRegistrado si el usuario ya está registrado o intenta usarse el ID del administrador.
+     * Registra un nuevo usuario comprobando que no exista ya otro con el mismo
+     * nombre o correo electrónico.
+     *
+     * @param usuario usuario a registrar
+     * @throws UsuarioYaRegistrado si el nombre o el correo ya están en uso
      */
     public void nuevoUsuario(@Valid Usuario usuario) {
         if (usuario.getNombre() != null && repositorioUsuario.buscarPorNombre(usuario.getNombre()).isPresent()){
@@ -38,18 +42,20 @@ public class ServicioUsuario {
     }
 
     /**
-     * Devolver el usuario asociado al DNI dado
-     * @param id el DNI del usuario
-     * @return un optional con el usuario asociado al DNI
+     * Busca un usuario por su identificador.
+     *
+     * @param id identificador del usuario
+     * @return un {@link Optional} con el usuario encontrado, o vacío si no existe
      */
     public Optional<Usuario> buscarUsuario(long id) {
         return repositorioUsuario.buscarPorID(id);
     }
 
     /**
-     * Devolver el usuario asociado al nombre dado
-     * @param nombre el nickname del usuario
-     * @return un optional con el usuario asociado al nombre
+     * Busca un usuario por su nombre.
+     *
+     * @param nombre nombre del usuario
+     * @return un {@link Optional} con el usuario encontrado, o vacío si no existe
      */
     public Optional<Usuario> buscarUsuario(String nombre) {
         return repositorioUsuario.buscarPorNombre(nombre);

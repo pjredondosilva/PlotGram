@@ -22,6 +22,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Controlador REST encargado de la gestión de sesión mediante tokens JWT.
+ * Permite iniciar sesión, cerrarla, renovar el token y consultar su estado.
+ */
 @RestController
 @RequestMapping("/api")
 public class ControladorToken {
@@ -51,6 +55,12 @@ public class ControladorToken {
         this.utilJwt = utilJwt;
     }
 
+    /**
+     * Autentica al usuario y genera un token JWT que se envía en una cookie HTTP-only.
+     *
+     * @param datosLogin credenciales de acceso del usuario
+     * @return respuesta con la cookie de sesión creada
+     */
     @PostMapping("/sesiones")
     public ResponseEntity<?> obtenerToken(@Valid @RequestBody DAutenticacionUsuario datosLogin) {
         Authentication authentication;
@@ -88,6 +98,11 @@ public class ControladorToken {
                 .body(Map.of("ok", true));
     }
 
+    /**
+     * Cierra la sesión actual invalidando la cookie que contiene el token.
+     *
+     * @return respuesta de confirmación de cierre de sesión
+     */
     @DeleteMapping("/sesiones/actual")
     public ResponseEntity<?> logout() {
         ResponseCookie cookie = ResponseCookie.from("pg_token", "")
@@ -104,6 +119,14 @@ public class ControladorToken {
                 .body(Map.of("ok", true));
     }
 
+    /**
+     * Renueva el token de la sesión actual si se encuentra dentro de la
+     * ventana de renovación permitida y no se ha alcanzado la duración
+     * máxima de la sesión.
+     *
+     * @param token token JWT almacenado en la cookie de sesión
+     * @return respuesta con el nuevo token o el estado correspondiente
+     */
     @PostMapping("/sesiones/renovacion")
     public ResponseEntity<?> refrescar(@CookieValue(name = "pg_token", required = false) String token) {
         if (token == null || token.isBlank()) {
@@ -169,7 +192,13 @@ public class ControladorToken {
                 .body(Map.of("refreshed", true));
     }
 
-@GetMapping("/sesiones/estado")
+    /**
+     * Devuelve información sobre el estado de la sesión actual.
+     *
+     * @param token token JWT almacenado en la cookie de sesión
+     * @return datos de expiración y vigencia de la sesión
+     */
+    @GetMapping("/sesiones/estado")
     public ResponseEntity<?> estado(@CookieValue(name = "pg_token", required = false) String token) {
         if (token == null || token.isBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

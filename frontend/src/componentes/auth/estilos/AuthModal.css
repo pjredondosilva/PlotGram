@@ -45,6 +45,10 @@
     outline: none;
 }
 
+.pg-modal__input::placeholder{
+    color: rgba(227, 220, 220, 0.78);
+}
+
 .pg-modal__input:focus{
     border-color: rgba(255,255,255,.45);
 }

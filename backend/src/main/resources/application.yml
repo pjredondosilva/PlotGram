@@ -19,14 +19,14 @@ spring:
 tiempoExpiracionTokenJwtMin: 40
 
 tmdb:
-  base-url: ${TMDB_BASE_URL:https://api.themoviedb.org/3}
-  token: ${TMDB_TOKEN}
-  lang: ${TMDB_LANG:es-ES}
-
+  base-url: https://api.themoviedb.org/3
+  token:   eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMzUwYmI3MjE4NDYwZGNiNjM0ZmZmYWM1YjdlMDI5YSIsIm5iZiI6MTc1MjA4MTMyNC42MjksInN1YiI6IjY4NmVhM2FjMWI5YThhYjFlOGE5NjYwOSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.K0r9kC62EHEhKtiPgpT32bsah8K_zbeaxiLAhTYSu9s
+  lang: es-ES
 plotgram:
   admin:
     nombre: admin
     password: admin123
+    email: admin@email.com
 
 app:
   auth:

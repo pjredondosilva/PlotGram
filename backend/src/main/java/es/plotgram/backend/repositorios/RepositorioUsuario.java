@@ -9,6 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+/**
+ * Repositorio de acceso a datos para la entidad {@link Usuario}.
+ * Proporciona operaciones básicas de persistencia y consulta de usuarios.
+ */
 @Repository
 public class RepositorioUsuario {
 @PersistenceContext
@@ -16,7 +20,7 @@ EntityManager em;
 
     /**
      * Guarda un usuario nuevo en la base de datos.
-     * @param usuario El usuario a persistir (debe ser nuevo).
+     * @param usuario El usuario a persistir.
      */
     @Transactional
     public void guardar(Usuario usuario) {
@@ -24,15 +28,23 @@ EntityManager em;
     }
 
     /**
-     * Busca un usuario por su ID (que es la clave primaria @Id).
-     * @param id El ID del usuario a buscar.
-     * @return Un Optional que contiene al usuario si se encuentra, o vacío si no.
+     * Busca un usuario por su identificador.
+     *
+     * @param id identificador del usuario
+     * @return un {@link Optional} con el usuario encontrado, o vacío si no existe
      */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Optional<Usuario> buscarPorID(long id) {
         return Optional.ofNullable(em.find(Usuario.class, id));
     }
 
+    /**
+     * Busca un usuario activo por su nombre.
+     * La comparación no distingue entre mayúsculas y minúsculas.
+     *
+     * @param nombre nombre del usuario a buscar
+     * @return un {@link Optional} con el usuario encontrado, o vacío si no existe
+     */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Optional<Usuario> buscarPorNombre(String nombre) {
         var q = em.createQuery("""
@@ -44,6 +56,12 @@ EntityManager em;
         return q.getResultList().stream().findFirst();
     }
 
+    /**
+     * Busca un usuario activo por su correo electrónico.
+     *
+     * @param email correo electrónico del usuario a buscar
+     * @return un {@link Optional} con el usuario encontrado, o vacío si no existe
+     */
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Optional<Usuario> buscarPorEmail(String email) {
         var q = em.createQuery("""

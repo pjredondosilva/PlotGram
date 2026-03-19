@@ -2,13 +2,27 @@ import { Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Header from "../componentes/layout/Header";
 import AuthModal from "../componentes/auth/AuthModal";
-import LoginForm from "../componentes/auth/FormularioInicioDeSesion.jsx";
-import RegisterForm from "../componentes/auth/FormularioRegistro.jsx";
+import FormularioLogin from "../componentes/auth/FormularioInicioDeSesion.jsx";
+import FormularioRegistro from "../componentes/auth/FormularioRegistro.jsx";
 import { getMe, logout } from "../servicios/auth";
+
+const LOGIN_FORM_INICIAL = {
+    nombre: "",
+    contrasenia: "",
+};
+
+const REGISTER_FORM_INICIAL = {
+    nombre: "",
+    email: "",
+    contrasenia: "",
+};
 
 export default function MainLayout() {
     const [user, setUser] = useState(null);
     const [modal, setModal] = useState(null); // "login" | "register" | null
+
+    const [loginForm, setLoginForm] = useState(LOGIN_FORM_INICIAL);
+    const [registerForm, setRegisterForm] = useState(REGISTER_FORM_INICIAL);
 
     useEffect(() => {
         getMe()
@@ -39,16 +53,22 @@ export default function MainLayout() {
 
             <AuthModal open={modal !== null} onClose={() => setModal(null)}>
                 {modal === "login" && (
-                    <LoginForm
+                    <FormularioLogin
+                        form={loginForm}
+                        setForm={setLoginForm}
                         onDone={() => setModal(null)}
                         setUser={setUser}
+                        resetForm={() => setLoginForm(LOGIN_FORM_INICIAL)}
                     />
                 )}
 
                 {modal === "register" && (
-                    <RegisterForm
+                    <FormularioRegistro
+                        form={registerForm}
+                        setForm={setRegisterForm}
                         onDone={() => setModal(null)}
                         setUser={setUser}
+                        resetForm={() => setRegisterForm(REGISTER_FORM_INICIAL)}
                     />
                 )}
             </AuthModal>

@@ -21,7 +21,7 @@ public class ServicioUsuarioTest {
     @Test
     @DisplayName("NuevoUsuario OK: guarda el usuario si no existe ni nombre ni email")
     void testNuevoUsuarioValido() {
-        var usuario = new Usuario(0L,"Manolo", "1234", "manolo@gmail.com", Tipousuario.USER,false);
+        var usuario = new Usuario(null,"Manolo", "1234", "manolo@gmail.com", Tipousuario.USER,false);
         servicio.nuevoUsuario(usuario);
         assertThat(servicio.buscarUsuario("Manolo")).isPresent();
     }
@@ -29,8 +29,8 @@ public class ServicioUsuarioTest {
     @Test
     @DisplayName("NuevoUsuario KO: no permite registrar un usuario si el nombre ya existe")
     void testNuevoUsuarioNombreRepetido() {
-        var usuario1 = new Usuario(0L,"Pedro", "1234", "pedro@gmail.com", Tipousuario.USER,false);
-        var usuario2 =new Usuario(0L,"Pedro", "1234", "otro@gmail.com", Tipousuario.USER,false);
+        var usuario1 = new Usuario(null,"Pedro", "1234", "pedro@gmail.com", Tipousuario.USER,false);
+        var usuario2 =new Usuario(null,"Pedro", "1234", "otro@gmail.com", Tipousuario.USER,false);
         servicio.nuevoUsuario(usuario1);
         assertThatThrownBy(() -> servicio.nuevoUsuario(usuario2))
                 .isInstanceOf(UsuarioYaRegistrado.class)
@@ -40,8 +40,8 @@ public class ServicioUsuarioTest {
     @Test
     @DisplayName("NuevoUsuario KO: no permite registrar un usuario si el nombre ya existe")
     void testNuevoUsuarioEmailRepetido() {
-        var usuario1 = new Usuario(0L,"Pepe", "1234", "pepe@gmail.com", Tipousuario.USER,false);
-        var usuario2 =new Usuario(0L,"Antonio", "1234", "antonio@gmail.com", Tipousuario.USER,false);
+        var usuario1 = new Usuario(null,"Pepe", "1234", "pepe@gmail.com", Tipousuario.USER,false);
+        var usuario2 =new Usuario(null,"Antonio", "1234", "pepe@gmail.com", Tipousuario.USER,false);
         servicio.nuevoUsuario(usuario1);
         assertThatThrownBy(() -> servicio.nuevoUsuario(usuario2))
                 .isInstanceOf(UsuarioYaRegistrado.class)
