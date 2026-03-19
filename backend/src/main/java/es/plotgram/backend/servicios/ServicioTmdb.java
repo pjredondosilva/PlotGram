@@ -1,5 +1,6 @@
 package es.plotgram.backend.servicios;
 import es.plotgram.backend.rest.dto.tmdb.DPeliculaListado;
+import es.plotgram.backend.rest.dto.tmdb.DRespuestaPaginadaTmdb;
 import es.plotgram.backend.rest.dto.tmdb.DSerieListado;
 import es.plotgram.backend.rest.dto.tmdb.MapeadorTmdb;
 import es.plotgram.backend.tmdb.dto.DRespuestaBusquedaPeliculasTmdb;
@@ -52,7 +53,7 @@ public class ServicioTmdb {
      * @param pagina número de página a consultar
      * @return listado de películas encontradas
      */
-    public List<DPeliculaListado> buscarPeliculas(String consulta, int pagina) {
+    public DRespuestaPaginadaTmdb<DPeliculaListado> buscarPeliculas(String consulta, int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/movie")
                         .queryParam("query", consulta)
@@ -63,13 +64,22 @@ public class ServicioTmdb {
                 .bodyToMono(DRespuestaBusquedaPeliculasTmdb.class)
                 .block();
 
-        if (resp == null || resp.results() == null) return List.of();
+        if (resp == null || resp.results() == null) {
+            return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
+        }
 
         Map<Integer, String> mapa = generosPeliculas();
-        return resp.results().stream()
+        List<DPeliculaListado> resultados = resp.results().stream()
                 .map(mapeador::DtoPelicula)
                 .map(dto -> conNombresDeGenero(dto, mapa))
                 .toList();
+
+        return new DRespuestaPaginadaTmdb<>(
+                resp.page() != null ? resp.page() : 1,
+                resp.totalPages() != null ? resp.totalPages() : 1,
+                resp.totalResults() != null ? resp.totalResults() : 0,
+                resultados
+        );
     }
 
     /**
@@ -79,7 +89,7 @@ public class ServicioTmdb {
      * @param pagina número de página a consultar
      * @return listado de series encontradas
      */
-    public List<DSerieListado> buscarSeries(String consulta, int pagina) {
+    public DRespuestaPaginadaTmdb<DSerieListado> buscarSeries(String consulta, int pagina) {
         DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/tv")
                         .queryParam("query", consulta)
@@ -90,15 +100,24 @@ public class ServicioTmdb {
                 .bodyToMono(DRespuestaBusquedaSeriesTmdb.class)
                 .block();
 
-        if (resp == null || resp.results() == null) return List.of();
+        if (resp == null || resp.results() == null) {
+            return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
+        }
 
         Map<Integer, String> mapa = generosSeries();
-        return resp.results().stream()
+        List<DSerieListado> resultados = resp.results().stream()
                 .map(mapeador::DtoSerie)
                 .map(dto -> conNombresDeGenero(dto, mapa))
                 .toList();
 
+        return new DRespuestaPaginadaTmdb<>(
+                resp.page() != null ? resp.page() : 1,
+                resp.totalPages() != null ? resp.totalPages() : 1,
+                resp.totalResults() != null ? resp.totalResults() : 0,
+                resultados
+        );
     }
+
 
     /**
      * Obtiene las películas en cartelera.
@@ -106,7 +125,7 @@ public class ServicioTmdb {
      * @param pagina número de página a consultar
      * @return listado de películas en cartelera
      */
-    public List<DPeliculaListado> taquillaPeliculas(int pagina) {
+    public DRespuestaPaginadaTmdb<DPeliculaListado> taquillaPeliculas(int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/movie/now_playing")
                         .queryParam("language", lang)
@@ -116,14 +135,24 @@ public class ServicioTmdb {
                 .bodyToMono(DRespuestaBusquedaPeliculasTmdb.class)
                 .block();
 
-        if (resp == null || resp.results() == null) return List.of();
+        if (resp == null || resp.results() == null) {
+            return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
+        }
+
         Map<Integer, String> mapa = generosPeliculas();
-        return resp.results().stream()
+        List<DPeliculaListado> resultados = resp.results().stream()
                 .map(mapeador::DtoPelicula)
                 .map(dto -> conNombresDeGenero(dto, mapa))
                 .toList();
 
+        return new DRespuestaPaginadaTmdb<>(
+                resp.page() != null ? resp.page() : 1,
+                resp.totalPages() != null ? resp.totalPages() : 1,
+                resp.totalResults() != null ? resp.totalResults() : 0,
+                resultados
+        );
     }
+
 
     /**
      * Obtiene las series del momento.
@@ -131,7 +160,7 @@ public class ServicioTmdb {
      * @param pagina número de página a consultar
      * @return listado de series destacadas de la semana
      */
-    public List<DSerieListado> seriesDelMomento(int pagina) {
+    public DRespuestaPaginadaTmdb<DSerieListado> seriesDelMomento(int pagina) {
         DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/trending/tv/week")
                         .queryParam("language", lang)
@@ -141,13 +170,22 @@ public class ServicioTmdb {
                 .bodyToMono(DRespuestaBusquedaSeriesTmdb.class)
                 .block();
 
-        if (resp == null || resp.results() == null) return List.of();
+        if (resp == null || resp.results() == null) {
+            return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
+        }
+
         Map<Integer, String> mapa = generosSeries();
-        return resp.results().stream()
+        List<DSerieListado> resultados = resp.results().stream()
                 .map(mapeador::DtoSerie)
                 .map(dto -> conNombresDeGenero(dto, mapa))
                 .toList();
 
+        return new DRespuestaPaginadaTmdb<>(
+                resp.page() != null ? resp.page() : 1,
+                resp.totalPages() != null ? resp.totalPages() : 1,
+                resp.totalResults() != null ? resp.totalResults() : 0,
+                resultados
+        );
     }
 
     /**

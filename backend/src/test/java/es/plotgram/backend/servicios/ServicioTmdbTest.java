@@ -1,6 +1,7 @@
 package es.plotgram.backend.servicios;
 
 import es.plotgram.backend.rest.dto.tmdb.DPeliculaListado;
+import es.plotgram.backend.rest.dto.tmdb.DRespuestaPaginadaTmdb;
 import es.plotgram.backend.rest.dto.tmdb.DSerieListado;
 import es.plotgram.backend.rest.dto.tmdb.MapeadorTmdb;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +23,8 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -48,7 +50,7 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("buscarPeliculas OK: devuelve películas y resuelve nombres de géneros")
+    @DisplayName("buscarPeliculas OK: devuelve respuesta paginada y resuelve nombres de géneros")
     void testBuscarPeliculasOk() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
@@ -66,6 +68,9 @@ class ServicioTmdbTest {
                     """,
                 "/search/movie", """
                     {
+                      "page": 1,
+                      "total_pages": 3,
+                      "total_results": 50,
                       "results": [
                         {
                           "id": 1,
@@ -90,9 +95,12 @@ class ServicioTmdbTest {
                 ));
 
         servicio.refrescarGeneros();
-        List<DPeliculaListado> resultado = servicio.buscarPeliculas("alien", 1);
+        DRespuestaPaginadaTmdb<DPeliculaListado> resultado = servicio.buscarPeliculas("alien", 1);
 
-        assertThat(resultado).containsExactly(
+        assertThat(resultado.page()).isEqualTo(1);
+        assertThat(resultado.totalPages()).isEqualTo(3);
+        assertThat(resultado.totalResults()).isEqualTo(50);
+        assertThat(resultado.results()).containsExactly(
                 new DPeliculaListado(
                         1,
                         "Alien",
@@ -118,7 +126,7 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("buscarPeliculas KO: si TMDB no devuelve resultados, retorna lista vacía")
+    @DisplayName("buscarPeliculas KO: si TMDB no devuelve resultados, retorna respuesta paginada vacía")
     void testBuscarPeliculasSinResultados() {
         mockRutas(Map.of(
                 "/search/movie", """
@@ -127,14 +135,17 @@ class ServicioTmdbTest {
                     """
         ));
 
-        List<DPeliculaListado> resultado = servicio.buscarPeliculas("nada", 1);
+        DRespuestaPaginadaTmdb<DPeliculaListado> resultado = servicio.buscarPeliculas("nada", 1);
 
-        assertThat(resultado).isEmpty();
+        assertThat(resultado.page()).isEqualTo(1);
+        assertThat(resultado.totalPages()).isEqualTo(1);
+        assertThat(resultado.totalResults()).isEqualTo(0);
+        assertThat(resultado.results()).isEmpty();
         verifyNoInteractions(mapeador);
     }
 
     @Test
-    @DisplayName("buscarSeries OK: devuelve series y resuelve nombres de géneros")
+    @DisplayName("buscarSeries OK: devuelve respuesta paginada y resuelve nombres de géneros")
     void testBuscarSeriesOk() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
@@ -152,6 +163,9 @@ class ServicioTmdbTest {
                     """,
                 "/search/tv", """
                     {
+                      "page": 1,
+                      "total_pages": 4,
+                      "total_results": 70,
                       "results": [
                         {
                           "id": 2,
@@ -176,9 +190,12 @@ class ServicioTmdbTest {
                 ));
 
         servicio.refrescarGeneros();
-        List<DSerieListado> resultado = servicio.buscarSeries("dark", 1);
+        DRespuestaPaginadaTmdb<DSerieListado> resultado = servicio.buscarSeries("dark", 1);
 
-        assertThat(resultado).containsExactly(
+        assertThat(resultado.page()).isEqualTo(1);
+        assertThat(resultado.totalPages()).isEqualTo(4);
+        assertThat(resultado.totalResults()).isEqualTo(70);
+        assertThat(resultado.results()).containsExactly(
                 new DSerieListado(
                         2,
                         "Dark",
@@ -191,7 +208,7 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("taquillaPeliculas OK: devuelve películas en cartelera con nombres de géneros")
+    @DisplayName("taquillaPeliculas OK: devuelve respuesta paginada con nombres de géneros")
     void testTaquillaPeliculasOk() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
@@ -208,6 +225,9 @@ class ServicioTmdbTest {
                     """,
                 "/movie/now_playing", """
                     {
+                      "page": 1,
+                      "total_pages": 6,
+                      "total_results": 120,
                       "results": [
                         {
                           "id": 10,
@@ -232,9 +252,12 @@ class ServicioTmdbTest {
                 ));
 
         servicio.refrescarGeneros();
-        List<DPeliculaListado> resultado = servicio.taquillaPeliculas(1);
+        DRespuestaPaginadaTmdb<DPeliculaListado> resultado = servicio.taquillaPeliculas(1);
 
-        assertThat(resultado).containsExactly(
+        assertThat(resultado.page()).isEqualTo(1);
+        assertThat(resultado.totalPages()).isEqualTo(6);
+        assertThat(resultado.totalResults()).isEqualTo(120);
+        assertThat(resultado.results()).containsExactly(
                 new DPeliculaListado(
                         10,
                         "Dune",
@@ -247,7 +270,7 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("seriesDelMomento OK: devuelve series trending con nombres de géneros")
+    @DisplayName("seriesDelMomento OK: devuelve respuesta paginada con nombres de géneros")
     void testSeriesDelMomentoOk() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
@@ -264,6 +287,9 @@ class ServicioTmdbTest {
                     """,
                 "/trending/tv/week", """
                     {
+                      "page": 1,
+                      "total_pages": 7,
+                      "total_results": 140,
                       "results": [
                         {
                           "id": 20,
@@ -288,9 +314,12 @@ class ServicioTmdbTest {
                 ));
 
         servicio.refrescarGeneros();
-        List<DSerieListado> resultado = servicio.seriesDelMomento(1);
+        DRespuestaPaginadaTmdb<DSerieListado> resultado = servicio.seriesDelMomento(1);
 
-        assertThat(resultado).containsExactly(
+        assertThat(resultado.page()).isEqualTo(1);
+        assertThat(resultado.totalPages()).isEqualTo(7);
+        assertThat(resultado.totalResults()).isEqualTo(140);
+        assertThat(resultado.results()).containsExactly(
                 new DSerieListado(
                         20,
                         "The Last of Us",

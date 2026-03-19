@@ -1,6 +1,7 @@
 package es.plotgram.backend.rest;
 
 import es.plotgram.backend.rest.dto.tmdb.DPeliculaListado;
+import es.plotgram.backend.rest.dto.tmdb.DRespuestaPaginadaTmdb;
 import es.plotgram.backend.rest.dto.tmdb.DSerieListado;
 import es.plotgram.backend.servicios.ServicioTmdb;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +32,7 @@ public class ControladorTmdb {
      * @return listado de películas obtenido desde TMDB
      */
     @GetMapping("/peliculas")
-    public List<DPeliculaListado> DarPeliculas(
+    public DRespuestaPaginadaTmdb<DPeliculaListado> DarPeliculas(
             @RequestParam(required = false) String consulta,
             @RequestParam(defaultValue = "1") int pagina
     ) {
@@ -51,7 +52,7 @@ public class ControladorTmdb {
      * @return listado de series obtenido desde TMDB
      */
     @GetMapping("/series")
-    public List<DSerieListado> DarSeries(
+    public DRespuestaPaginadaTmdb<DSerieListado> DarSeries(
             @RequestParam(required = false) String consulta,
             @RequestParam(defaultValue = "1") int pagina
     ) {
