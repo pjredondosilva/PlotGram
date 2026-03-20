@@ -1,4 +1,5 @@
 import "./estilos/CardProyecto.css";
+import { Link } from "react-router-dom";
 import { posterUrl } from "../../utils/img";
 
 export default function MediaCard({ item, type }) {
@@ -6,8 +7,17 @@ export default function MediaCard({ item, type }) {
     const date = type === "movie" ? item.releaseDate : item.firstAirDate;
     const img = posterUrl(item.posterPath);
     const generos = item.genres?? [];
+    const ruta = type === "movie"
+        ? `/peliculas/${item.id}`
+        : `/series/${item.id}`;
+
 
     return (
+        <Link
+            to={ruta}
+            className="card-link"
+            aria-label={`Ver ficha de ${title}`}
+        >
         <div className="card">
             <div className="poster">
                 {img ? <img src={img} alt={title} /> : <div className="noimg">Sin imagen</div>}
@@ -25,5 +35,6 @@ export default function MediaCard({ item, type }) {
                 )}
             </div>
         </div>
+        </Link>
     );
 }

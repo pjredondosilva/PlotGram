@@ -1,8 +1,6 @@
 package es.plotgram.backend.rest;
 
-import es.plotgram.backend.rest.dto.tmdb.DPeliculaListado;
-import es.plotgram.backend.rest.dto.tmdb.DRespuestaPaginadaTmdb;
-import es.plotgram.backend.rest.dto.tmdb.DSerieListado;
+import es.plotgram.backend.rest.dto.tmdb.*;
 import es.plotgram.backend.servicios.ServicioTmdb;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,5 +60,31 @@ public class ControladorTmdb {
         return servicioTmdb.buscarSeries(consulta, pagina);
     }
 
+    @GetMapping("/peliculas/{id}")
+    public DPeliculaDetalle DarPeliculaPorId(@PathVariable long id) {
+        return servicioTmdb.detallePelicula(id);
+    }
+
+    @GetMapping("/series/{id}")
+    public DSerieDetalle DarSeriePorId(@PathVariable long id) {
+        return servicioTmdb.detalleSerie(id);
+    }
+
+    @GetMapping("/series/{id}/temporadas/{temporada}")
+    public DTemporadaDetalle DarTemporadaPorId(
+            @PathVariable long id,
+            @PathVariable int temporada
+    ) {
+        return servicioTmdb.detalleTemporada(id, temporada);
+    }
+
+    @GetMapping("/series/{id}/temporadas/{temporada}/episodios/{episodio}")
+    public DEpisodioDetalle DarEpisodioPorId(
+            @PathVariable long id,
+            @PathVariable int temporada,
+            @PathVariable int episodio
+    ) {
+        return servicioTmdb.detalleEpisodio(id, temporada, episodio);
+    }
 }
 

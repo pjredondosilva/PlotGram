@@ -62,3 +62,15 @@
     border: 1px solid rgba(255,255,255,0.15);
     background: rgba(255,255,255,0.06);
 }
+
+.card-link{
+    display:block;
+    text-decoration:none;
+    color:inherit;
+}
+
+.card-link:focus-visible{
+    outline: 2px solid rgba(255,255,255,0.65);
+    outline-offset: 6px;
+    border-radius: 14px;
+}

@@ -1,11 +1,6 @@
 package es.plotgram.backend.servicios;
-import es.plotgram.backend.rest.dto.tmdb.DPeliculaListado;
-import es.plotgram.backend.rest.dto.tmdb.DRespuestaPaginadaTmdb;
-import es.plotgram.backend.rest.dto.tmdb.DSerieListado;
-import es.plotgram.backend.rest.dto.tmdb.MapeadorTmdb;
-import es.plotgram.backend.tmdb.dto.DRespuestaBusquedaPeliculasTmdb;
-import es.plotgram.backend.tmdb.dto.DRespuestaBusquedaSeriesTmdb;
-import es.plotgram.backend.tmdb.dto.DRespuestaGenerosTmdb;
+import es.plotgram.backend.rest.dto.tmdb.*;
+import es.plotgram.backend.tmdb.dto.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import es.plotgram.backend.tmdb.dto.DGeneroTmdb;
 
 /**
  * Servicio encargado de consultar información de películas y series en TMDB
@@ -347,4 +341,75 @@ public class ServicioTmdb {
                 ));
     }
 
+
+    public DPeliculaDetalle detallePelicula(long peliculaId) {
+        var respuesta = tmdb.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/movie/{id}")
+                        .queryParam("language", "es-ES")
+                        .queryParam("append_to_response", "credits,videos,recommendations,watch/providers,release_dates")
+                        .build(peliculaId))
+                .retrieve()
+                .bodyToMono(DPeliculaDetalleRespuesta.class)
+                .block();
+
+        if (respuesta == null) {
+            throw new IllegalStateException("TMDB no devolvió datos para la película " + peliculaId);
+        }
+
+        return mapeador.DtoPeliculaDetalle(respuesta);
+    }
+
+    public DSerieDetalle detalleSerie(long serieId) {
+        var respuesta = tmdb.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/tv/{id}")
+                        .queryParam("language", "es-ES")
+                        .queryParam("append_to_response", "credits")
+                        .build(serieId))
+                .retrieve()
+                .bodyToMono(DSerieDetalleRespuesta.class)
+                .block();
+
+        if (respuesta == null) {
+            throw new IllegalStateException("TMDB no devolvió datos para la serie " + serieId);
+        }
+
+        return mapeador.DtoSerieDetalle(respuesta);
+    }
+
+    public DTemporadaDetalle detalleTemporada(long serieId, int numeroTemporada) {
+        var respuesta = tmdb.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/tv/{id}/season/{seasonNumber}")
+                        .queryParam("language", "es-ES")
+                        .build(serieId, numeroTemporada))
+                .retrieve()
+                .bodyToMono(DTemporadaDetalleRespuesta.class)
+                .block();
+
+        if (respuesta == null) {
+            throw new IllegalStateException("TMDB no devolvió datos para la temporada " + numeroTemporada);
+        }
+
+        return mapeador.DtoTemporadaDetalle(respuesta);
+    }
+
+    public DEpisodioDetalle detalleEpisodio(long serieId, int numeroTemporada, int numeroEpisodio) {
+        var respuesta = tmdb.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/tv/{id}/season/{seasonNumber}/episode/{episodeNumber}")
+                        .queryParam("language", "es-ES")
+                        .queryParam("append_to_response", "credits")
+                        .build(serieId, numeroTemporada, numeroEpisodio))
+                .retrieve()
+                .bodyToMono(DEpisodioDetalleRespuesta.class)
+                .block();
+
+        if (respuesta == null) {
+            throw new IllegalStateException("TMDB no devolvió datos para el episodio " + numeroEpisodio);
+        }
+
+        return mapeador.DtoEpisodioDetalle(respuesta);
+    }
 }

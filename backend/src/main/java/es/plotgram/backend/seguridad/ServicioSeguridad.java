@@ -69,8 +69,8 @@ public class ServicioSeguridad {
                         .requestMatchers(HttpMethod.DELETE, "/api/sesiones/actual").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
                         .requestMatchers("/api/ping").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/peliculas").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/series").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/peliculas/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/series/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .build();
