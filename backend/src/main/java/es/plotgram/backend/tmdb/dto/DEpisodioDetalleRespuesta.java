@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import java.util.List;
+
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record DEpisodioDetalleRespuesta(
         long id,
@@ -20,6 +22,8 @@ public record DEpisodioDetalleRespuesta(
         Integer runtime,
         @JsonProperty("vote_average")
         Double voteAverage,
-        DCreditosTmdbRespuesta credits
+        DCreditosTmdbRespuesta credits,
+        @JsonProperty("guest_stars")
+        List<DRepartoTmdbRespuesta> guestStars
 ) {
 }

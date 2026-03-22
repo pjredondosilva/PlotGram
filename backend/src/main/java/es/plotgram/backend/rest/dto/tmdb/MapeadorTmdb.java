@@ -77,7 +77,12 @@ public class MapeadorTmdb {
                 s.voteAverage(),
                 mapGeneros(s.genres()),
                 seasons,
-                mapReparto(s.credits())
+                mapReparto(s.credits()),
+                mapCreadorSerie(s.createdBy()),
+                mapPaisOrigenSerie(s.originCountry()),
+                mapEstadoSerie(s.status()),
+                mapProviders(s.watchProviders()),
+                mapRecomendacionesSeries(s.recommendations())
         );
     }
 
@@ -100,12 +105,16 @@ public class MapeadorTmdb {
                 .map(this::DtoEpisodioListado)
                 .toList();
 
+        Integer totalEpisodios = t.episodeCount() != null
+                ? t.episodeCount()
+                : episodios.size();
+
         return new DTemporadaDetalle(
                 t.id(),
                 t.name(),
                 t.overview(),
                 t.seasonNumber(),
-                t.episodeCount(),
+                totalEpisodios,
                 t.airDate(),
                 t.posterPath(),
                 episodios
@@ -136,7 +145,7 @@ public class MapeadorTmdb {
                 e.stillPath(),
                 e.runtime(),
                 e.voteAverage(),
-                mapReparto(e.credits())
+                mapRepartoEpisodio(e)
         );
     }
 
@@ -164,21 +173,35 @@ public class MapeadorTmdb {
         return new DActorTmdb(
                 a.id(),
                 a.name(),
-                a.character(),
+                traducirPersonaje(a.character()),
                 a.profilePath()
         );
     }
+
+    private String traducirPersonaje(String character) {
+        if (character == null || character.isBlank()) {
+            return character;
+        }
+
+        String texto = character;
+
+        texto = texto.replaceAll("(?i)\\(voice\\)", "(voz)");
+        texto = texto.replaceAll("(?i)voice", "voz");
+
+        return texto;
+    }
+
     private DTrailer mapTrailer(DVideosTmdbRespuesta videos) {
         if (videos == null || videos.results() == null || videos.results().isEmpty()) {
             return null;
         }
 
         return videos.results().stream()
+                .filter(v -> v.key() != null && !v.key().isBlank())
+                .filter(v -> "YouTube".equalsIgnoreCase(v.site()))
                 .filter(v -> v.type() != null && v.type().equalsIgnoreCase("Trailer"))
                 .sorted(
-                        Comparator
-                                .comparing((DVideoTmdbRespuesta v) -> !"YouTube".equalsIgnoreCase(v.site()))
-                                .thenComparing(v -> Boolean.FALSE.equals(v.official()))
+                        Comparator.comparing((DVideoTmdbRespuesta v) -> Boolean.FALSE.equals(v.official()))
                 )
                 .map(this::DtoTrailer)
                 .findFirst()
@@ -327,5 +350,94 @@ public class MapeadorTmdb {
         }
 
         return nombreOriginal;
+    }
+
+    private String mapCreadorSerie(List<DCreadorSerieTmdbRespuesta> createdBy) {
+        if (createdBy == null || createdBy.isEmpty()) {
+            return "No disponible";
+        }
+
+        return createdBy.stream()
+                .map(DCreadorSerieTmdbRespuesta::name)
+                .filter(nombre -> nombre != null && !nombre.isBlank())
+                .distinct()
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("No disponible");
+    }
+
+    private String mapPaisOrigenSerie(List<String> originCountry) {
+        if (originCountry == null || originCountry.isEmpty()) {
+            return "No disponible";
+        }
+
+        return originCountry.stream()
+                .map(this::traducirPaisPorIso)
+                .filter(nombre -> nombre != null && !nombre.isBlank())
+                .findFirst()
+                .orElse("No disponible");
+    }
+
+    private List<DSerieRelacionada> mapRecomendacionesSeries(DRecomendacionesSeriesTmdbRespuesta recommendations) {
+        if (recommendations == null || recommendations.results() == null) {
+            return List.of();
+        }
+
+        return recommendations.results().stream()
+                .limit(12)
+                .map(this::DtoSerieRelacionada)
+                .toList();
+    }
+
+    private DSerieRelacionada DtoSerieRelacionada(DSerieListadoRespuesta s) {
+        return new DSerieRelacionada(
+                s.id(),
+                s.name(),
+                s.firstAirDate(),
+                s.posterPath()
+        );
+    }
+    private String mapEstadoSerie(String status) {
+        if (status == null || status.isBlank()) {
+            return "No disponible";
+        }
+
+        return switch (status.trim().toLowerCase(Locale.ROOT)) {
+            case "returning series", "in production", "planned" -> "En emisión";
+            case "ended" -> "Finalizada";
+            case "canceled", "cancelled" -> "Cancelada";
+            default -> status;
+        };
+    }
+
+    private List<DActorTmdb> mapRepartoEpisodio(DEpisodioDetalleRespuesta episodio) {
+        if (episodio == null) {
+            return List.of();
+        }
+
+        List<DRepartoTmdbRespuesta> invitados = episodio.guestStars() == null
+                ? List.of()
+                : episodio.guestStars();
+
+        List<DRepartoTmdbRespuesta> castRegular =
+                episodio.credits() == null || episodio.credits().cast() == null
+                        ? List.of()
+                        : episodio.credits().cast();
+
+        return java.util.stream.Stream.concat(invitados.stream(), castRegular.stream())
+                .collect(java.util.stream.Collectors.toMap(
+                        DRepartoTmdbRespuesta::id,
+                        actor -> actor,
+                        (a, b) -> a,
+                        java.util.LinkedHashMap::new
+                ))
+                .values()
+                .stream()
+                .limit(12)
+                .map(this::DtoActor)
+                .toList();
+    }
+
+    public DTrailer extraerTrailer(DVideosTmdbRespuesta videos) {
+        return mapTrailer(videos);
     }
 }

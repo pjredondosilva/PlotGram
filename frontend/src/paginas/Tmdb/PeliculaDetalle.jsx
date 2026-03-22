@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { DarDetallesPeliculas } from "../../servicios/ServicioTmdb.js";
 import { logoUrl, profileUrl } from "../../utils/tmdbImages.js";
 import { posterUrl } from "../../utils/img.js";
+import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";
 import "./estilos/detalleTmdb.css";
 
 function formatearFecha(fecha) {
@@ -62,6 +63,7 @@ export default function PeliculaDetalle() {
     const rent = pelicula?.providers?.rent ?? [];
     const buy = pelicula?.providers?.buy ?? [];
     const totalProviders = stream.length + rent.length + buy.length;
+    const recomendacionesFormateadas = pelicula?.recommendations ?? [];
 
     const ingresosSuperanPresupuesto =
         pelicula?.budget > 0 &&
@@ -169,6 +171,18 @@ export default function PeliculaDetalle() {
                             {totalProviders > 0 && (
                                 <a className="tmdb-boton-secundario" href="#donde-ver">
                                     Dónde verla
+                                </a>
+                            )}
+
+                            {pelicula.cast?.length > 0 && (
+                                <a className="tmdb-boton-secundario" href="#reparto">
+                                    Ver reparto
+                                </a>
+                            )}
+
+                            {recomendacionesFormateadas.length > 0 && (
+                                <a className="tmdb-boton-secundario" href="#relacionadas">
+                                    Relacionadas
                                 </a>
                             )}
                         </div>
@@ -313,37 +327,14 @@ export default function PeliculaDetalle() {
                 )}
             </section>
 
-            <section className="tmdb-bloque">
+            <section id="relacionadas" className="tmdb-bloque">
                 <div className="tmdb-seccion-cabecera">
                     <h2>Recomendaciones</h2>
                     <p>Películas relacionadas que pueden interesarte</p>
                 </div>
 
-                {pelicula.recommendations?.length ? (
-                    <div className="tmdb-grid tmdb-grid-recomendaciones">
-                        {pelicula.recommendations.map((rec, index) => (
-                            <Link
-                                key={rec.id ?? `rec-${index}`}
-                                className="tmdb-card"
-                                to={`/peliculas/${rec.id}`}
-                            >
-                                {rec.posterPath ? (
-                                    <img
-                                        className="tmdb-card-poster"
-                                        src={posterUrl(rec.posterPath)}
-                                        alt={rec.title}
-                                    />
-                                ) : (
-                                    <div className="tmdb-card-poster-placeholder">Sin imagen</div>
-                                )}
-
-                                <div className="tmdb-card-body">
-                                    <h3>{rec.title}</h3>
-                                    <p>{formatearFecha(rec.releaseDate)}</p>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                {recomendacionesFormateadas.length ? (
+                    <MediaGrid items={recomendacionesFormateadas} type="movie"/>
                 ) : (
                     <div className="tmdb-vacio tmdb-vacio-interno">No hay recomendaciones disponibles.</div>
                 )}

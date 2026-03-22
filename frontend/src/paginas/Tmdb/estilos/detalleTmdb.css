@@ -470,6 +470,60 @@
     background: rgba(255, 255, 255, 0.04);
 }
 
+.tmdb-card-body p {
+    margin: 0 0 6px;
+}
+
+.tmdb-card-body p:last-child {
+    margin-bottom: 0;
+}
+.tmdb-grid-temporadas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 260px);
+    gap: 18px;
+    justify-content: start;
+}
+
+.tmdb-card-temporada {
+    width: 260px;
+}
+
+.tmdb-card-poster-temporada,
+.tmdb-card-poster-temporada-placeholder {
+    width: 100%;
+    height: 320px;
+    object-fit: cover;
+    display: block;
+}
+
+.tmdb-card-temporada .tmdb-card-body {
+    min-height: 120px;
+}
+
+.tmdb-grid-episodios {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.tmdb-card-episodio {
+    height: 100%;
+}
+
+.tmdb-card-poster-episodio,
+.tmdb-card-poster-episodio-placeholder {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    display: block;
+}
+
+.tmdb-card-episodio .tmdb-card-body p {
+    margin: 0;
+}
+
+.tmdb-hero-still {
+    display: flex;
+    min-width: 0;
+}
 @media (max-width: 1080px) {
     .tmdb-destacados {
         grid-template-columns: 1fr;

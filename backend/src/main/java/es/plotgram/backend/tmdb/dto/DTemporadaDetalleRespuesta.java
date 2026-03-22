@@ -19,6 +19,7 @@ public record DTemporadaDetalleRespuesta(
         String airDate,
         @JsonProperty("poster_path")
         String posterPath,
+        DVideosTmdbRespuesta videos,
         List<DEpisodioListadoRespuesta> episodes
 ) {
 }

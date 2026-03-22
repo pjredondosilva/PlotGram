@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
 import "./estilos/home.css";
 import BotonPeliculaSerie from "../../componentes/tmdb/BotonPeliculaSerie.jsx";
 import BarraDeBusqueda from "../../componentes/tmdb/BarraDeBusqueda";
 import ListaProyecto from "../../componentes/tmdb/ListaProyecto.jsx";
 import { getMovies, getSeries } from "../../servicios/ServicioTmdb.js";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 export default function Home() {
-    const [type, setType] = useState("movie");
+    const [searchParams, setSearchParams] = useSearchParams();
+    const tipoUrl = searchParams.get("tipo");
+    const [type, setType] = useState(tipoUrl === "series" ? "tv" : "movie");
     const [query, setQuery] = useState("");
     const [page, setPage] = useState(1);
 
@@ -15,6 +18,13 @@ export default function Home() {
 
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState("");
+
+    useEffect(() => {
+        const tipo = searchParams.get("tipo");
+        setType(tipo === "series" ? "tv" : "movie");
+        setPage(1);
+    }, [searchParams]);
+
 
     useEffect(() => {
         const q = query.trim();
@@ -68,6 +78,7 @@ export default function Home() {
                     onChange={(t) => {
                         setType(t);
                         setPage(1);
+                        setSearchParams(t === "tv" ? { tipo: "series" } : { tipo: "peliculas" });
                     }}
                 />
 

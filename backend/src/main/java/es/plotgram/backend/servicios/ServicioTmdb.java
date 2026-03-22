@@ -365,7 +365,7 @@ public class ServicioTmdb {
                 .uri(uriBuilder -> uriBuilder
                         .path("/tv/{id}")
                         .queryParam("language", "es-ES")
-                        .queryParam("append_to_response", "credits")
+                        .queryParam("append_to_response", "credits,recommendations,watch/providers")
                         .build(serieId))
                 .retrieve()
                 .bodyToMono(DSerieDetalleRespuesta.class)

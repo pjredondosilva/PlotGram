@@ -14,6 +14,11 @@ public record DSerieDetalle(
         Double voteAverage,
         List<String> genres,
         List<DTemporadaResumen> seasons,
-        List<DActorTmdb> cast
+        List<DActorTmdb> cast,
+        String creator,
+        String paisOrigen,
+        String status,
+        DProveedoresPelicula providers,
+        List<DSerieRelacionada> recommendations
 ) {
 }

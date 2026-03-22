@@ -1,4 +1,20 @@
+.card-link{
+    display:block;
+    height: 100%;
+    text-decoration:none;
+    color:inherit;
+}
+
+.card-link:focus-visible{
+    outline: 2px solid rgba(255,255,255,0.65);
+    outline-offset: 6px;
+    border-radius: 14px;
+}
+
 .card{
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 16px;
@@ -14,6 +30,7 @@
 .poster{
     aspect-ratio: 2/3;
     background: rgba(0,0,0,0.25);
+    flex: 0 0 auto;
 }
 
 .poster img{
@@ -32,45 +49,9 @@
     font-size: 14px;
 }
 
-.info{
-    padding: 12px;
-}
 
-.title{
-    font-weight: 700;
-    color: rgba(255,255,255,0.92);
-    margin-bottom: 8px;
-    line-height: 1.2;
-}
-
-.date{
-    color: rgba(255,255,255,0.55);
-    font-size: 14px;
-}
-
-.genres{
-    margin-top: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.genre{
-    font-size: 12px;
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.15);
-    background: rgba(255,255,255,0.06);
-}
-
-.card-link{
-    display:block;
-    text-decoration:none;
-    color:inherit;
-}
-
-.card-link:focus-visible{
-    outline: 2px solid rgba(255,255,255,0.65);
-    outline-offset: 6px;
-    border-radius: 14px;
-}
+.info{ padding: 10px 12px 10px; }
+.title{ font-weight: 700; color: rgba(255,255,255,0.92); margin-bottom: 3px; line-height: 1.15; }
+.date{ color: rgba(255,255,255,0.55); font-size: 14px; margin-bottom: 2px; }
+.genres{ margin-top: 5px; display: flex; flex-wrap: wrap; gap: 5px; }
+.genre{ font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.06); }

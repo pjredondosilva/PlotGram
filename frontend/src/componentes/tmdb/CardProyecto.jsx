@@ -2,9 +2,22 @@ import "./estilos/CardProyecto.css";
 import { Link } from "react-router-dom";
 import { posterUrl } from "../../utils/img";
 
+function formatearFecha(fecha) {
+    if (!fecha) return "-";
+
+    const d = new Date(`${fecha}T00:00:00`);
+    if (Number.isNaN(d.getTime())) return fecha;
+
+    return d.toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    });
+}
 export default function MediaCard({ item, type }) {
     const title = type === "movie" ? item.title : item.name;
-    const date = type === "movie" ? item.releaseDate : item.firstAirDate;
+    const fechaOriginal = type === "movie" ? item.releaseDate : item.firstAirDate;
+    const date = formatearFecha(fechaOriginal);
     const img = posterUrl(item.posterPath);
     const generos = item.genres?? [];
     const ruta = type === "movie"
