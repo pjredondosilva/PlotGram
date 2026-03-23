@@ -3,6 +3,9 @@ package es.plotgram.backend.entidades;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 public class Usuario {
 
@@ -26,6 +29,9 @@ public class Usuario {
 
     @Column(nullable = false)
     private boolean borrado;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Lista> listas = new ArrayList<>();
 
     public Usuario() {
     }
@@ -63,6 +69,10 @@ public class Usuario {
         return borrado;
     }
 
+    public List<Lista> getListas() {
+        return listas;
+    }
+
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
@@ -81,5 +91,19 @@ public class Usuario {
 
     public void setBorrado(boolean borrado) {
         this.borrado = borrado;
+    }
+
+    public void setListas(List<Lista> listas) {
+        this.listas = listas;
+    }
+
+    public void aniadirLista(Lista lista) {
+        listas.add(lista);
+        lista.setUsuario(this);
+    }
+
+    public void borrarLista(Lista lista) {
+        listas.remove(lista);
+        lista.setUsuario(null);
     }
 }

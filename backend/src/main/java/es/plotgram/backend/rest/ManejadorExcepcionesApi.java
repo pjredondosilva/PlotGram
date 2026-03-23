@@ -1,6 +1,6 @@
 package es.plotgram.backend.rest;
 
-import es.plotgram.backend.excepciones.UsuarioYaRegistrado;
+import es.plotgram.backend.excepciones.*;
 import io.jsonwebtoken.JwtException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -70,5 +70,29 @@ public class ManejadorExcepcionesApi {
     public ResponseEntity<ApiError> manejarGenerica(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiError("ERROR_INTERNO", "Se ha producido un error inesperado.", null));
+    }
+
+    @ExceptionHandler(ListaNoEncontrada.class)
+    public ResponseEntity<ApiError> manejarListaNoEncontrada(ListaNoEncontrada ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiError("LISTA_NO_ENCONTRADA", ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(ContenidoYaEnLista.class)
+    public ResponseEntity<ApiError> manejarContenidoYaEnLista(ContenidoYaEnLista ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ApiError("CONTENIDO_YA_EN_LISTA", ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(ElementoNoEncontradoEnLista.class)
+    public ResponseEntity<ApiError> manejarElementoNoEncontradoEnLista(ElementoNoEncontradoEnLista ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiError("ELEMENTO_NO_ENCONTRADO_EN_LISTA", ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(UsuarioNoEncontrado.class)
+    public ResponseEntity<ApiError> manejarUsuarioNoEncontrado(UsuarioNoEncontrado ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiError("USUARIO_NO_ENCONTRADO", ex.getMessage(), null));
     }
 }
