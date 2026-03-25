@@ -6,10 +6,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Controlador REST para la consulta de películas y series a través de TMDB.
- * Permite obtener listados generales o resultados filtrados por texto.
- */
 @RestController
 @RequestMapping("/api")
 public class ControladorTmdb {
@@ -20,44 +16,36 @@ public class ControladorTmdb {
         this.servicioTmdb = servicioTmdb;
     }
 
-    /**
-     * Devuelve un listado de películas.
-     * Si no se indica una consulta, devuelve las películas en cartelera;
-     * en caso contrario, realiza una búsqueda por texto.
-     *
-     * @param consulta texto de búsqueda opcional
-     * @param pagina número de página a consultar
-     * @return listado de películas obtenido desde TMDB
-     */
     @GetMapping("/peliculas")
     public DRespuestaPaginadaTmdb<DPeliculaListado> DarPeliculas(
             @RequestParam(required = false) String consulta,
-            @RequestParam(defaultValue = "1") int pagina
+            @RequestParam(defaultValue = "1") int pagina,
+            @RequestParam(required = false) String fechaDesde,
+            @RequestParam(required = false) String fechaHasta,
+            @RequestParam(required = false) List<String> generos
     ) {
-        if (consulta == null || consulta.isBlank()) {
-            return servicioTmdb.taquillaPeliculas(pagina);
-        }
-        return servicioTmdb.buscarPeliculas(consulta, pagina);
+        return servicioTmdb.listarPeliculas(consulta, pagina, fechaDesde, fechaHasta, generos);
     }
 
-    /**
-     * Devuelve un listado de series.
-     * Si no se indica una consulta, devuelve las series del momento;
-     * en caso contrario, realiza una búsqueda por texto.
-     *
-     * @param consulta texto de búsqueda opcional
-     * @param pagina número de página a consultar
-     * @return listado de series obtenido desde TMDB
-     */
     @GetMapping("/series")
     public DRespuestaPaginadaTmdb<DSerieListado> DarSeries(
             @RequestParam(required = false) String consulta,
-            @RequestParam(defaultValue = "1") int pagina
+            @RequestParam(defaultValue = "1") int pagina,
+            @RequestParam(required = false) String fechaDesde,
+            @RequestParam(required = false) String fechaHasta,
+            @RequestParam(required = false) List<String> generos
     ) {
-        if (consulta == null || consulta.isBlank()) {
-            return servicioTmdb.seriesDelMomento(pagina);
-        }
-        return servicioTmdb.buscarSeries(consulta, pagina);
+        return servicioTmdb.listarSeries(consulta, pagina, fechaDesde, fechaHasta, generos);
+    }
+
+    @GetMapping("/peliculas/generos")
+    public List<String> DarGenerosPeliculas() {
+        return servicioTmdb.nombresGenerosPeliculas();
+    }
+
+    @GetMapping("/series/generos")
+    public List<String> DarGenerosSeries() {
+        return servicioTmdb.nombresGenerosSeries();
     }
 
     @GetMapping("/peliculas/{id}")
@@ -87,4 +75,3 @@ public class ControladorTmdb {
         return servicioTmdb.detalleEpisodio(id, temporada, episodio);
     }
 }
-

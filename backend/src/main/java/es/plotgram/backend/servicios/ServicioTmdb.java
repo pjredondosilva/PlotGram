@@ -1,4 +1,5 @@
 package es.plotgram.backend.servicios;
+
 import es.plotgram.backend.rest.dto.tmdb.*;
 import es.plotgram.backend.tmdb.dto.*;
 import jakarta.annotation.PostConstruct;
@@ -8,23 +9,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * Servicio encargado de consultar información de películas y series en TMDB
- * y de enriquecer los resultados con los nombres de sus géneros.
- * <p>
- * Mantiene una caché en memoria con los géneros de películas y series para
- * evitar consultas repetidas al servicio externo.
- */
 @Service
 public class ServicioTmdb {
 
     private final WebClient tmdb;
     private final String lang;
     private final MapeadorTmdb mapeador;
+    private static final String LANG_GENEROS = "es-ES";
 
     private volatile Map<Integer, String> cacheGenerosPeliculas = Map.of();
     private volatile Map<Integer, String> cacheGenerosSeries = Map.of();
@@ -40,13 +36,44 @@ public class ServicioTmdb {
         this.mapeador = mapeador;
     }
 
-    /**
-     * Busca películas en TMDB a partir de un texto de consulta.
-     *
-     * @param consulta texto de búsqueda
-     * @param pagina número de página a consultar
-     * @return listado de películas encontradas
-     */
+    public DRespuestaPaginadaTmdb<DPeliculaListado> listarPeliculas(String consulta,
+                                                                    int pagina,
+                                                                    String fechaDesde,
+                                                                    String fechaHasta,
+                                                                    List<String> generos) {
+        boolean hayConsulta = consulta != null && !consulta.isBlank();
+        boolean hayFiltros = hayFiltros(fechaDesde, fechaHasta, generos);
+
+        if (hayConsulta) {
+            return buscarPeliculas(consulta, pagina);
+        }
+
+        if (hayFiltros) {
+            return descubrirPeliculasFiltradas(pagina, fechaDesde, fechaHasta, generos);
+        }
+
+        return taquillaPeliculas(pagina);
+    }
+
+    public DRespuestaPaginadaTmdb<DSerieListado> listarSeries(String consulta,
+                                                              int pagina,
+                                                              String fechaDesde,
+                                                              String fechaHasta,
+                                                              List<String> generos) {
+        boolean hayConsulta = consulta != null && !consulta.isBlank();
+        boolean hayFiltros = hayFiltros(fechaDesde, fechaHasta, generos);
+
+        if (hayConsulta) {
+            return buscarSeries(consulta, pagina);
+        }
+
+        if (hayFiltros) {
+            return descubrirSeriesFiltradas(pagina, fechaDesde, fechaHasta, generos);
+        }
+
+        return seriesDelMomento(pagina);
+    }
+
     public DRespuestaPaginadaTmdb<DPeliculaListado> buscarPeliculas(String consulta, int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/movie")
@@ -58,31 +85,9 @@ public class ServicioTmdb {
                 .bodyToMono(DRespuestaBusquedaPeliculasTmdb.class)
                 .block();
 
-        if (resp == null || resp.results() == null) {
-            return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
-        }
-
-        Map<Integer, String> mapa = generosPeliculas();
-        List<DPeliculaListado> resultados = resp.results().stream()
-                .map(mapeador::DtoPelicula)
-                .map(dto -> conNombresDeGenero(dto, mapa))
-                .toList();
-
-        return new DRespuestaPaginadaTmdb<>(
-                resp.page() != null ? resp.page() : 1,
-                resp.totalPages() != null ? resp.totalPages() : 1,
-                resp.totalResults() != null ? resp.totalResults() : 0,
-                resultados
-        );
+        return mapearPeliculas(resp, generosPeliculas());
     }
 
-    /**
-     * Busca series en TMDB a partir de un texto de consulta.
-     *
-     * @param consulta texto de búsqueda
-     * @param pagina número de página a consultar
-     * @return listado de series encontradas
-     */
     public DRespuestaPaginadaTmdb<DSerieListado> buscarSeries(String consulta, int pagina) {
         DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/tv")
@@ -94,31 +99,9 @@ public class ServicioTmdb {
                 .bodyToMono(DRespuestaBusquedaSeriesTmdb.class)
                 .block();
 
-        if (resp == null || resp.results() == null) {
-            return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
-        }
-
-        Map<Integer, String> mapa = generosSeries();
-        List<DSerieListado> resultados = resp.results().stream()
-                .map(mapeador::DtoSerie)
-                .map(dto -> conNombresDeGenero(dto, mapa))
-                .toList();
-
-        return new DRespuestaPaginadaTmdb<>(
-                resp.page() != null ? resp.page() : 1,
-                resp.totalPages() != null ? resp.totalPages() : 1,
-                resp.totalResults() != null ? resp.totalResults() : 0,
-                resultados
-        );
+        return mapearSeries(resp, generosSeries());
     }
 
-
-    /**
-     * Obtiene las películas en cartelera.
-     *
-     * @param pagina número de página a consultar
-     * @return listado de películas en cartelera
-     */
     public DRespuestaPaginadaTmdb<DPeliculaListado> taquillaPeliculas(int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/movie/now_playing")
@@ -129,11 +112,161 @@ public class ServicioTmdb {
                 .bodyToMono(DRespuestaBusquedaPeliculasTmdb.class)
                 .block();
 
+        return mapearPeliculas(resp, generosPeliculas());
+    }
+
+    public DRespuestaPaginadaTmdb<DSerieListado> seriesDelMomento(int pagina) {
+        DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
+                .uri(uri -> uri.path("/trending/tv/week")
+                        .queryParam("language", lang)
+                        .queryParam("page", pagina)
+                        .build())
+                .retrieve()
+                .bodyToMono(DRespuestaBusquedaSeriesTmdb.class)
+                .block();
+
+        return mapearSeries(resp, generosSeries());
+    }
+
+    public DRespuestaPaginadaTmdb<DPeliculaListado> descubrirPeliculasFiltradas(int pagina,
+                                                                                String fechaDesde,
+                                                                                String fechaHasta,
+                                                                                List<String> generos) {
+        Map<Integer, String> mapa = generosPeliculas();
+        List<Integer> idsGenero = resolverIdsGenero(generos, mapa);
+
+        if (hayGenerosSeleccionados(generos) && idsGenero.isEmpty()) {
+            return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
+        }
+
+        DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
+                .uri(uri -> {
+                    var builder = uri.path("/discover/movie")
+                            .queryParam("language", lang)
+                            .queryParam("page", pagina)
+                            .queryParam("sort_by", "primary_release_date.desc");
+
+                    if (fechaValida(fechaDesde)) {
+                        builder.queryParam("primary_release_date.gte", fechaDesde);
+                    }
+                    if (fechaValida(fechaHasta)) {
+                        builder.queryParam("primary_release_date.lte", fechaHasta);
+                    }
+                    if (!idsGenero.isEmpty()) {
+                        builder.queryParam("with_genres", idsGenero.stream()
+                                .map(String::valueOf)
+                                .collect(Collectors.joining(",")));
+                    }
+
+                    return builder.build();
+                })
+                .retrieve()
+                .bodyToMono(DRespuestaBusquedaPeliculasTmdb.class)
+                .block();
+
+        return mapearPeliculas(resp, mapa);
+    }
+
+    public DRespuestaPaginadaTmdb<DSerieListado> descubrirSeriesFiltradas(int pagina,
+                                                                          String fechaDesde,
+                                                                          String fechaHasta,
+                                                                          List<String> generos) {
+        Map<Integer, String> mapa = generosSeries();
+        List<Integer> idsGenero = resolverIdsGenero(generos, mapa);
+
+        if (hayGenerosSeleccionados(generos) && idsGenero.isEmpty()) {
+            return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
+        }
+
+        DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
+                .uri(uri -> {
+                    var builder = uri.path("/discover/tv")
+                            .queryParam("language", lang)
+                            .queryParam("page", pagina)
+                            .queryParam("sort_by", "first_air_date.desc");
+
+                    if (fechaValida(fechaDesde)) {
+                        builder.queryParam("first_air_date.gte", fechaDesde);
+                    }
+                    if (fechaValida(fechaHasta)) {
+                        builder.queryParam("first_air_date.lte", fechaHasta);
+                    }
+                    if (!idsGenero.isEmpty()) {
+                        builder.queryParam("with_genres", idsGenero.stream()
+                                .map(String::valueOf)
+                                .collect(Collectors.joining(",")));
+                    }
+
+                    return builder.build();
+                })
+                .retrieve()
+                .bodyToMono(DRespuestaBusquedaSeriesTmdb.class)
+                .block();
+
+        return mapearSeries(resp, mapa);
+    }
+
+    public List<String> nombresGenerosPeliculas() {
+        return cacheGenerosPeliculas.values().stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
+    }
+
+    public List<String> nombresGenerosSeries() {
+        return cacheGenerosSeries.values().stream()
+                .filter(Objects::nonNull)
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .toList();
+    }
+
+    private boolean hayFiltros(String fechaDesde, String fechaHasta, List<String> generos) {
+        return fechaValida(fechaDesde) || fechaValida(fechaHasta) || hayGenerosSeleccionados(generos);
+    }
+
+    private boolean fechaValida(String fecha) {
+        return fecha != null && !fecha.isBlank();
+    }
+
+    private boolean hayGenerosSeleccionados(List<String> generos) {
+        return generos != null && generos.stream().anyMatch(g -> g != null && !g.isBlank());
+    }
+
+    private List<Integer> resolverIdsGenero(List<String> nombres, Map<Integer, String> mapa) {
+        if (nombres == null || nombres.isEmpty()) {
+            return List.of();
+        }
+
+        Map<String, Integer> porNombre = mapa.entrySet().stream()
+                .filter(e -> e.getValue() != null)
+                .collect(Collectors.toMap(
+                        e -> normalizarGenero(e.getValue()),
+                        Map.Entry::getKey,
+                        (a, b) -> a
+                ));
+
+        return nombres.stream()
+                .filter(Objects::nonNull)
+                .map(this::normalizarGenero)
+                .filter(nombre -> !nombre.isBlank())
+                .map(porNombre::get)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+    }
+
+    private String normalizarGenero(String valor) {
+        return valor == null ? "" : valor.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private DRespuestaPaginadaTmdb<DPeliculaListado> mapearPeliculas(DRespuestaBusquedaPeliculasTmdb resp,
+                                                                     Map<Integer, String> mapa) {
         if (resp == null || resp.results() == null) {
             return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
         }
 
-        Map<Integer, String> mapa = generosPeliculas();
         List<DPeliculaListado> resultados = resp.results().stream()
                 .map(mapeador::DtoPelicula)
                 .map(dto -> conNombresDeGenero(dto, mapa))
@@ -147,28 +280,12 @@ public class ServicioTmdb {
         );
     }
 
-
-    /**
-     * Obtiene las series del momento.
-     *
-     * @param pagina número de página a consultar
-     * @return listado de series destacadas de la semana
-     */
-    public DRespuestaPaginadaTmdb<DSerieListado> seriesDelMomento(int pagina) {
-        DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
-                .uri(uri -> uri.path("/trending/tv/week")
-                        .queryParam("language", lang)
-                        .queryParam("page", pagina)
-                        .build())
-                .retrieve()
-                .bodyToMono(DRespuestaBusquedaSeriesTmdb.class)
-                .block();
-
+    private DRespuestaPaginadaTmdb<DSerieListado> mapearSeries(DRespuestaBusquedaSeriesTmdb resp,
+                                                               Map<Integer, String> mapa) {
         if (resp == null || resp.results() == null) {
             return new DRespuestaPaginadaTmdb<>(1, 1, 0, List.of());
         }
 
-        Map<Integer, String> mapa = generosSeries();
         List<DSerieListado> resultados = resp.results().stream()
                 .map(mapeador::DtoSerie)
                 .map(dto -> conNombresDeGenero(dto, mapa))
@@ -182,14 +299,6 @@ public class ServicioTmdb {
         );
     }
 
-    /**
-     * Sustituye los identificadores de género de una película por sus nombres
-     * legibles usando la caché disponible.
-     *
-     * @param dto película con identificadores de género
-     * @param mapa mapa de correspondencia entre id de género y nombre
-     * @return una nueva película con la lista de nombres de género completada
-     */
     private DPeliculaListado conNombresDeGenero(DPeliculaListado dto, Map<Integer, String> mapa) {
         List<String> nombres = (dto.genreIds() == null ? List.<Integer>of() : dto.genreIds())
                 .stream()
@@ -208,14 +317,6 @@ public class ServicioTmdb {
         );
     }
 
-    /**
-     * Sustituye los identificadores de género de una serie por sus nombres
-     * legibles usando la caché disponible.
-     *
-     * @param dto serie con identificadores de género
-     * @param mapa mapa de correspondencia entre id de género y nombre
-     * @return una nueva serie con la lista de nombres de género completada
-     */
     private DSerieListado conNombresDeGenero(DSerieListado dto, Map<Integer, String> mapa) {
         List<String> nombres = (dto.genreIds() == null ? List.<Integer>of() : dto.genreIds())
                 .stream()
@@ -234,18 +335,11 @@ public class ServicioTmdb {
         );
     }
 
-    /**
-     * Precarga la información de géneros al iniciar la aplicación.
-     */
     @PostConstruct
     public void precargarGeneros() {
         refrescarGeneros();
     }
 
-    /**
-     * Actualiza la caché de géneros de películas y series.
-     * Este proceso también se ejecuta de forma programada periódicamente.
-     */
     @Scheduled(cron = "0 0 4 1 * *", zone = "Europe/Madrid")
     public void refrescarGeneros() {
         try {
@@ -269,35 +363,18 @@ public class ServicioTmdb {
         }
     }
 
-    /**
-     * Devuelve la caché actual de géneros de películas.
-     *
-     * @return mapa de identificadores y nombres de géneros de películas
-     */
     private Map<Integer, String> generosPeliculas() {
         return cacheGenerosPeliculas;
     }
 
-    /**
-     * Devuelve la caché actual de géneros de series.
-     *
-     * @return mapa de identificadores y nombres de géneros de series
-     */
     private Map<Integer, String> generosSeries() {
         return cacheGenerosSeries;
     }
 
-    /**
-     * Consulta en TMDB el catálogo de géneros de películas y construye
-     * un mapa inmutable con sus identificadores y nombres.
-     *
-     * @return mapa de géneros de películas, o vacío si la consulta falla
-     *         o no devuelve resultados válidos
-     */
     private Map<Integer, String> actualizarGenerosPeliculas() {
         DRespuestaGenerosTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/genre/movie/list")
-                        .queryParam("language", lang)
+                        .queryParam("language", LANG_GENEROS)
                         .build())
                 .retrieve()
                 .bodyToMono(DRespuestaGenerosTmdb.class)
@@ -314,17 +391,10 @@ public class ServicioTmdb {
                 ));
     }
 
-    /**
-     * Consulta en TMDB el catálogo de géneros de series y construye
-     * un mapa inmutable con sus identificadores y nombres.
-     *
-     * @return mapa de géneros de series, o vacío si la consulta falla
-     *         o no devuelve resultados válidos
-     */
     private Map<Integer, String> actualizarGenerosSeries() {
         DRespuestaGenerosTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/genre/tv/list")
-                        .queryParam("language", lang)
+                        .queryParam("language", LANG_GENEROS)
                         .build())
                 .retrieve()
                 .bodyToMono(DRespuestaGenerosTmdb.class)
@@ -340,7 +410,6 @@ public class ServicioTmdb {
                         (a, b) -> a
                 ));
     }
-
 
     public DPeliculaDetalle detallePelicula(long peliculaId) {
         var respuesta = tmdb.get()

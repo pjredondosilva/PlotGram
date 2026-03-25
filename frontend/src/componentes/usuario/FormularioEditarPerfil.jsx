@@ -285,7 +285,7 @@ export default function FormularioEditarPerfil({
                                     onChange={(e) =>
                                         setFormulario((prev) => ({ ...prev, nuevaContrasena: e.target.value }))
                                     }
-                                    placeholder="Déjalo vacío si no quieres cambiarla"
+                                    placeholder="Dejar en blanco si no se desea cambiar"
                                 />
                             </label>
 
