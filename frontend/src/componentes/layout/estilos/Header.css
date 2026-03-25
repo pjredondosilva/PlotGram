@@ -30,7 +30,7 @@
 .pg-header__right{
     display:flex;
     align-items:center;
-    gap:10px;
+    gap:14px;
     color:#fff;
     font-size:18px;
 }
@@ -56,23 +56,50 @@
     position:relative;
 }
 
-.pg-user__btn{
-    background:transparent;
-    border:none;
+.pg-user__identidad{
+    display:flex;
+    align-items:center;
+    gap:14px;
+}
+
+.pg-user__nombre{
     color:#fff;
-    cursor:pointer;
-    font:inherit;
     font-weight:700;
-    padding:6px 8px;
+    font-size:0.95rem;
+    line-height:1;
 }
 
-.pg-user__btn:hover{
-    text-decoration:underline;
+.pg-user__avatar-btn{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    padding:0;
+    border:1px solid rgba(255,255,255,.14);
+    background:rgba(255,255,255,.06);
+    cursor:pointer;
+    overflow:hidden;
+    display:grid;
+    place-items:center;
+    flex:0 0 42px;
 }
 
-.pg-user__caret{
-    opacity:.8;
-    margin-left:6px;
+.pg-user__avatar-img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    border-radius:50%;
+}
+
+.pg-user__avatar-fallback{
+    width:100%;
+    height:100%;
+    display:grid;
+    place-items:center;
+    font-weight:800;
+    color:#fff;
+    background:linear-gradient(135deg, #ff8a00, #ffb347);
+    border-radius:50%;
 }
 
 .pg-user__menu{

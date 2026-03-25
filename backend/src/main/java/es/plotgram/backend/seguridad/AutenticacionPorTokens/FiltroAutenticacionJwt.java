@@ -12,11 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 public class FiltroAutenticacionJwt extends OncePerRequestFilter {
 
@@ -47,17 +46,26 @@ public class FiltroAutenticacionJwt extends OncePerRequestFilter {
         try {
             claims = utilJwt.extraerContenido(token);
         } catch (JwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            limpiarAutenticacionInvalida(response);
+            filterChain.doFilter(request, response);
             return;
         }
 
         String nombre = claims.getSubject();
         if (nombre == null || nombre.isBlank()) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            limpiarAutenticacionInvalida(response);
+            filterChain.doFilter(request, response);
             return;
         }
 
-        UserDetails detallesUsuario = servicioCredencialesUsuario.loadUserByUsername(nombre);
+        final UserDetails detallesUsuario;
+        try {
+            detallesUsuario = servicioCredencialesUsuario.loadUserByUsername(nombre);
+        } catch (UsernameNotFoundException e) {
+            limpiarAutenticacionInvalida(response);
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         var authenticationToken = new UsernamePasswordAuthenticationToken(
                 detallesUsuario,
@@ -82,5 +90,15 @@ public class FiltroAutenticacionJwt extends OncePerRequestFilter {
             if ("pg_token".equals(c.getName())) return c.getValue();
         }
         return null;
+    }
+
+    private void limpiarAutenticacionInvalida(HttpServletResponse response) {
+        SecurityContextHolder.clearContext();
+
+        Cookie cookie = new Cookie("pg_token", "");
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
     }
 }

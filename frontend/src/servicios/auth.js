@@ -1,4 +1,4 @@
-import {apiDelete, apiGet, apiPost} from "./api.js";
+import {apiDelete, apiGet, apiPost, apiPut} from "./api.js";
 
 export function registerUser({ nombre, email, contrasenia }) {
     return apiPost("/api/usuarios", { nombre, email, contrasenia });
@@ -21,4 +21,12 @@ export async function getSessionState() {
 
 export async function refreshSession() {
     return apiPost("/api/sesiones/renovacion");
+}
+
+export async function verificarContrasenaActual(contrasenaActual) {
+    return apiPost("/api/usuarios/me/verificacioncontrasena", { contrasenaActual });
+}
+
+export async function actualizarMiPerfil(dto) {
+    return apiPut("/api/usuarios/me/actualizacionperfil", dto);
 }

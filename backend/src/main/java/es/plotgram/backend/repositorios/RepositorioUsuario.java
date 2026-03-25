@@ -23,8 +23,12 @@ EntityManager em;
      * @param usuario El usuario a persistir.
      */
     @Transactional
-    public void guardar(Usuario usuario) {
-        em.persist(usuario);
+    public Usuario guardar(Usuario usuario) {
+        if (usuario.getId() == null) {
+            em.persist(usuario);
+            return usuario;
+        }
+        return em.merge(usuario);
     }
 
     /**

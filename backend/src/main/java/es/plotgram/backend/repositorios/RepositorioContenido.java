@@ -2,24 +2,40 @@ package es.plotgram.backend.repositorios;
 
 import es.plotgram.backend.entidades.Contenido;
 import es.plotgram.backend.entidades.TipoContenido;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-public interface RepositorioContenido extends JpaRepository<Contenido, Long> {
+@Repository
+public class RepositorioContenido {
 
-    @Query("""
-           select c
-           from Contenido c
-           where c.tmdbId = :tmdbId
-             and c.tipo = :tipo
-           """)
-    Optional<Contenido> buscarPorTmdbIdYTipo(@Param("tmdbId") Long tmdbId,
-                                             @Param("tipo") TipoContenido tipo);
+    @PersistenceContext
+    EntityManager em;
 
-    default Contenido guardar(Contenido contenido) {
-        return save(contenido);
+    @Transactional
+    public Contenido guardar(Contenido contenido) {
+        if (contenido.getId() == null) {
+            em.persist(contenido);
+            return contenido;
+        }
+        return em.merge(contenido);
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public Optional<Contenido> buscarPorTmdbIdYTipo(Long tmdbId, TipoContenido tipo) {
+        var q = em.createQuery("""
+                SELECT c
+                FROM Contenido c
+                WHERE c.tmdbId = :tmdbId
+                  AND c.tipo = :tipo
+                """, Contenido.class);
+        q.setParameter("tmdbId", tmdbId);
+        q.setParameter("tipo", tipo);
+        q.setMaxResults(1);
+        return q.getResultList().stream().findFirst();
     }
 }

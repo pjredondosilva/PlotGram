@@ -49,6 +49,20 @@ export async function apiPost(path, data) {
     });
     return handleResponse(res);
 }
+
+export async function apiPut(path, data) {
+    const res = await fetch(`${BASE_URL}${path}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+            Accept: "application/json",
+            ...(data !== undefined ? { "Content-Type": "application/json" } : {}),
+        },
+        ...(data !== undefined ? { body: JSON.stringify(data) } : {}),
+    });
+    return handleResponse(res);
+}
+
 export async function apiDelete(path) {
     const res = await fetch(`${BASE_URL}${path}`, {
         method: "DELETE",

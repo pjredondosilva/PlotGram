@@ -3,6 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import { DarDetallesSeries } from "../../servicios/ServicioTmdb.js";
 import { logoUrl, profileUrl } from "../../utils/tmdbImages.js";
 import { posterUrl } from "../../utils/img.js";
+import { useAuth } from "../../servicios/authContext.jsx";
+import { crearContenidoListaSerie } from "../../utils/contenidoLista.js";
+import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
 import "./estilos/detalleTmdb.css";
 import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";
 
@@ -21,9 +24,13 @@ function formatearFecha(fecha) {
 
 export default function SerieDetalle() {
     const { id } = useParams();
+    const { user } = useAuth();
+
     const [serie, setSerie] = useState(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState("");
+    const [modalListaAbierto, setModalListaAbierto] = useState(false);
+    const [mensajeLista, setMensajeLista] = useState("");
 
     useEffect(() => {
         let cancelled = false;
@@ -49,6 +56,11 @@ export default function SerieDetalle() {
     }, [id]);
 
     const poster = useMemo(() => posterUrl(serie?.posterPath), [serie]);
+    const contenidoLista = useMemo(
+        () => crearContenidoListaSerie(serie, poster),
+        [serie, poster]
+    );
+
     const temporadasDisponibles = serie?.seasons ?? [];
     const reparto = serie?.cast ?? [];
     const recomendacionesFormateadas = serie?.recommendations ?? [];
@@ -135,6 +147,7 @@ export default function SerieDetalle() {
                         </div>
 
                         <div className="tmdb-resumen-acciones">
+
                             {temporadasDisponibles.length > 0 && (
                                 <a className="tmdb-boton-primario" href="#temporadas">
                                     Ver temporadas
@@ -158,7 +171,21 @@ export default function SerieDetalle() {
                                     Relacionadas
                                 </a>
                             )}
+
+                            {user && contenidoLista && (
+                                <button
+                                    type="button"
+                                    className="tmdb-boton-secundario"
+                                    onClick={() => setModalListaAbierto(true)}
+                                >
+                                    Añadir a una lista
+                                </button>
+                            )}
                         </div>
+
+                        {mensajeLista && (
+                            <p className="tmdb-estado-lista">{mensajeLista}</p>
+                        )}
                     </div>
                 </div>
             </header>
@@ -333,6 +360,15 @@ export default function SerieDetalle() {
                     <div className="tmdb-vacio tmdb-vacio-interno">No hay recomendaciones disponibles.</div>
                 )}
             </section>
+
+            <ModalAniadirALista
+                open={modalListaAbierto}
+                onClose={() => setModalListaAbierto(false)}
+                contenido={contenidoLista}
+                onAnadido={(lista) => {
+                    setMensajeLista(`Añadido a "${lista?.nombre ?? "la lista"}".`);
+                }}
+            />
         </section>
     );
 }

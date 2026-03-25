@@ -7,6 +7,8 @@ public record Dusuario(
         String nombre,
         String contrasenia,
         String email,
+        String fotoPerfil,
+        String descripcion,
         Tipousuario tipo,
         boolean borrado
 ) {

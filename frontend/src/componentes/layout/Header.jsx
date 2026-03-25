@@ -1,11 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./estilos/Header.css";
+
+function inicialUsuario(nombre) {
+    return (nombre || "?").trim().charAt(0).toUpperCase();
+}
 
 export default function Header({ user, onLogin, onRegister, onLogout }) {
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);
+
+    const inicial = useMemo(() => inicialUsuario(user?.nombre), [user]);
 
     useEffect(() => {
         function onDocClick(e) {
@@ -16,11 +22,13 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
         return () => document.removeEventListener("mousedown", onDocClick);
     }, []);
 
+    useEffect(() => {
+        setMenuOpen(false);
+    }, [user]);
+
     return (
         <header className="pg-header">
             <div className="pg-header__left">
-                {/* Si tienes logo */}
-                {/* <img className="pg-logo" src="/logo.png" alt="Plotgram" /> */}
                 <div className="pg-brand" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
                     Plotgram
                 </div>
@@ -35,25 +43,48 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
                     </>
                 ) : (
                     <>
-                        <button className="pg-link" onClick={() => navigate("/")}>Home</button>
-
                         <div className="pg-user" ref={menuRef}>
-                            <button
-                                className="pg-user__btn"
-                                type="button"
-                                onClick={() => setMenuOpen(v => !v)}
-                            >
-                                {user.nombre} <span className="pg-user__caret">▾</span>
-                            </button>
+                            <div className="pg-user__identidad">
+                                <span className="pg-user__nombre">{user.nombre}</span>
+
+                                <button
+                                    className="pg-user__avatar-btn"
+                                    type="button"
+                                    onClick={() => setMenuOpen((v) => !v)}
+                                    aria-label="Abrir menú de usuario"
+                                >
+                                    {user.fotoPerfil ? (
+                                        <img
+                                            className="pg-user__avatar-img"
+                                            src={user.fotoPerfil}
+                                            alt={user.nombre}
+                                        />
+                                    ) : (
+                                        <span className="pg-user__avatar-fallback">{inicial}</span>
+                                    )}
+                                </button>
+                            </div>
 
                             {menuOpen && (
                                 <div className="pg-user__menu">
-                                    <button className="pg-user__item" type="button">Opción 1</button>
-                                    <button className="pg-user__item" type="button">Opción 2</button>
+                                    <button
+                                        className="pg-user__item"
+                                        type="button"
+                                        onClick={() => {
+                                            setMenuOpen(false);
+                                            navigate("/mi-feed");
+                                        }}
+                                    >
+                                        Mi feed
+                                    </button>
 
                                     <div className="pg-user__sep" />
 
-                                    <button className="pg-user__item pg-user__item--danger" type="button" onClick={onLogout}>
+                                    <button
+                                        className="pg-user__item pg-user__item--danger"
+                                        type="button"
+                                        onClick={onLogout}
+                                    >
                                         Cerrar sesión
                                     </button>
                                 </div>
@@ -64,5 +95,4 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
             </div>
         </header>
     );
-
 }

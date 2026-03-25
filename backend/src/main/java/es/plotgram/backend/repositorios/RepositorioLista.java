@@ -1,37 +1,59 @@
 package es.plotgram.backend.repositorios;
 
 import es.plotgram.backend.entidades.Lista;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface RepositorioLista extends JpaRepository<Lista, Long> {
+@Repository
+public class RepositorioLista {
 
-    @Query("""
-           select l
-           from Lista l
-           where l.usuario.id = :usuarioId
-           order by l.id desc
-           """)
-    List<Lista> buscarPorUsuarioId(@Param("usuarioId") Long usuarioId);
+    @PersistenceContext
+    EntityManager em;
 
-    @Query("""
-           select l
-           from Lista l
-           where l.id = :idLista
-             and l.usuario.id = :usuarioId
-           """)
-    Optional<Lista> buscarPorIdYUsuarioId(@Param("idLista") Long idLista,
-                                          @Param("usuarioId") Long usuarioId);
-
-    default Lista guardar(Lista lista) {
-        return save(lista);
+    @Transactional
+    public Lista guardar(Lista lista) {
+        if (lista.getId() == null) {
+            em.persist(lista);
+            return lista;
+        }
+        return em.merge(lista);
     }
 
-    default void borrar(Lista lista) {
-        delete(lista);
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public List<Lista> buscarPorUsuarioId(Long usuarioId) {
+        var q = em.createQuery("""
+                SELECT l
+                FROM Lista l
+                WHERE l.usuario.id = :usuarioId
+                ORDER BY l.id DESC
+                """, Lista.class);
+        q.setParameter("usuarioId", usuarioId);
+        return q.getResultList();
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public Optional<Lista> buscarPorIdYUsuarioId(Long idLista, Long usuarioId) {
+        var q = em.createQuery("""
+                SELECT l
+                FROM Lista l
+                WHERE l.id = :idLista
+                  AND l.usuario.id = :usuarioId
+                """, Lista.class);
+        q.setParameter("idLista", idLista);
+        q.setParameter("usuarioId", usuarioId);
+        q.setMaxResults(1);
+        return q.getResultList().stream().findFirst();
+    }
+
+    @Transactional
+    public void borrar(Lista lista) {
+        Lista gestionada = em.contains(lista) ? lista : em.merge(lista);
+        em.remove(gestionada);
     }
 }

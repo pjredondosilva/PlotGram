@@ -62,4 +62,10 @@ public class ControladorLista {
         servicioLista.eliminarLista(id, authentication.getName());
         return ResponseEntity.noContent().build();
     }
+    @PutMapping("/listas/{id}")
+    public ResponseEntity<DListaDetalle> editarLista(@PathVariable long id,
+                                                     Authentication authentication,
+                                                     @Valid @RequestBody DListaNueva dto) {
+        return ResponseEntity.ok(servicioLista.editarLista(id, authentication.getName(), dto));
+    }
 }

@@ -1,15 +1,17 @@
 package es.plotgram.backend.rest.dto;
+
 import es.plotgram.backend.entidades.Tipousuario;
 import es.plotgram.backend.entidades.Usuario;
 import es.plotgram.backend.repositorios.RepositorioUsuario;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 public class Mapeador {
     @Autowired
     RepositorioUsuario repositorioUsuarios;
+
     @Autowired
     PasswordEncoder codificadorClaves;
 
@@ -19,16 +21,21 @@ public class Mapeador {
                 usuario.getNombre(),
                 null,
                 usuario.getEmail(),
+                usuario.getFotoPerfil(),
+                usuario.getDescripcion(),
                 usuario.getTipo(),
                 usuario.isBorrado()
         );
     }
+
     public Usuario entidad(Dusuario dUsuario) {
         return new Usuario(
                 dUsuario.id(),
                 dUsuario.nombre(),
                 dUsuario.contrasenia(),
                 dUsuario.email(),
+                dUsuario.fotoPerfil(),
+                dUsuario.descripcion(),
                 dUsuario.tipo(),
                 dUsuario.borrado()
         );
@@ -39,10 +46,10 @@ public class Mapeador {
         u.setNombre(d.nombre());
         u.setContrasena(codificadorClaves.encode(d.contrasenia()));
         u.setEmail(d.email());
+        u.setFotoPerfil(null);
+        u.setDescripcion(null);
         u.setTipo(Tipousuario.USER);
         u.setBorrado(false);
         return u;
     }
-
-
 }

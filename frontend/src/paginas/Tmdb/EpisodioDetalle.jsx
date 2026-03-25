@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { DarDetallesEpisodio } from "../../servicios/ServicioTmdb.js";
 import { profileUrl, stillUrl } from "../../utils/tmdbImages.js";
+import { useAuth } from "../../servicios/authContext.jsx";
+import { crearContenidoListaEpisodio } from "../../utils/contenidoLista.js";
+import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
 import "./estilos/detalleTmdb.css";
 
 function formatearFecha(fecha) {
@@ -19,9 +22,13 @@ function formatearFecha(fecha) {
 
 export default function EpisodioDetalle() {
     const { id, temporada, episodio } = useParams();
+    const { user } = useAuth();
+
     const [episodioData, setEpisodioData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState("");
+    const [modalListaAbierto, setModalListaAbierto] = useState(false);
+    const [mensajeLista, setMensajeLista] = useState("");
 
     useEffect(() => {
         let cancelled = false;
@@ -51,6 +58,7 @@ export default function EpisodioDetalle() {
     if (!episodioData) return <div className="tmdb-vacio">No se ha encontrado el episodio.</div>;
 
     const imagen = stillUrl(episodioData.stillPath);
+    const contenidoLista = crearContenidoListaEpisodio(id, temporada, episodioData, imagen);
 
     return (
         <section className="tmdb-detalle">
@@ -76,7 +84,6 @@ export default function EpisodioDetalle() {
                                 <span className="tmdb-meta-chip">
                                     {formatearFecha(episodioData.airDate)}
                                 </span>
-
                             </div>
                         </div>
 
@@ -108,12 +115,29 @@ export default function EpisodioDetalle() {
                             <p>{episodioData.overview || "No hay sinopsis disponible."}</p>
                         </div>
 
-                        {episodioData.cast?.length > 0 && (
+                        {(user || episodioData.cast?.length > 0) && (
                             <div className="tmdb-resumen-acciones">
-                                <a className="tmdb-boton-primario" href="#reparto">
-                                    Ver reparto
-                                </a>
+
+                                {episodioData.cast?.length > 0 && (
+                                    <a className="tmdb-boton-primario" href="#reparto">
+                                        Ver reparto
+                                    </a>
+                                )}
+
+                                {user && contenidoLista && (
+                                    <button
+                                        type="button"
+                                        className="tmdb-boton-secundario"
+                                        onClick={() => setModalListaAbierto(true)}
+                                    >
+                                        Añadir a una lista
+                                    </button>
+                                )}
                             </div>
+                        )}
+
+                        {mensajeLista && (
+                            <p className="tmdb-estado-lista">{mensajeLista}</p>
                         )}
                     </div>
                 </div>
@@ -152,6 +176,15 @@ export default function EpisodioDetalle() {
                     </div>
                 )}
             </section>
+
+            <ModalAniadirALista
+                open={modalListaAbierto}
+                onClose={() => setModalListaAbierto(false)}
+                contenido={contenidoLista}
+                onAnadido={(lista) => {
+                    setMensajeLista(`Añadido a "${lista?.nombre ?? "la lista"}".`);
+                }}
+            />
         </section>
     );
 }

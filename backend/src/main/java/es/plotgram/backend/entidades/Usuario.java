@@ -2,6 +2,7 @@ package es.plotgram.backend.entidades;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,14 @@ public class Usuario {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Size(max = 255)
+    @Column(length = 255)
+    private String fotoPerfil;
+
+    @Size(max = 300)
+    @Column(length = 300)
+    private String descripcion;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Tipousuario tipo = Tipousuario.USER;
@@ -36,11 +45,15 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(Long id, String nombre, String contrasena, String email, Tipousuario tipo, boolean borrado) {
+    public Usuario(Long id, String nombre, String contrasena, String email,
+                   String fotoPerfil, String descripcion,
+                   Tipousuario tipo, boolean borrado) {
         this.id = id;
         this.nombre = nombre;
         this.contrasena = contrasena;
         this.email = email;
+        this.fotoPerfil = fotoPerfil;
+        this.descripcion = descripcion;
         this.tipo = tipo;
         this.borrado = borrado;
     }
@@ -59,6 +72,14 @@ public class Usuario {
 
     public String getEmail() {
         return email;
+    }
+
+    public String getFotoPerfil() {
+        return fotoPerfil;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
     }
 
     public Tipousuario getTipo() {
@@ -85,6 +106,14 @@ public class Usuario {
         this.email = email;
     }
 
+    public void setFotoPerfil(String fotoPerfil) {
+        this.fotoPerfil = fotoPerfil;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
+    }
+
     public void setTipo(Tipousuario tipo) {
         this.tipo = tipo;
     }
@@ -101,6 +130,7 @@ public class Usuario {
         listas.add(lista);
         lista.setUsuario(this);
     }
+
 
     public void borrarLista(Lista lista) {
         listas.remove(lista);

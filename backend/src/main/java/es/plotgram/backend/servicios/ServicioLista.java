@@ -115,6 +115,12 @@ public class ServicioLista {
     @Transactional
     public void eliminarLista(long idLista, String nombreUsuario) {
         Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
+
+        List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
+        for (ListaItem item : elementos) {
+            repositorioListaItem.borrar(item);
+        }
+
         repositorioLista.borrar(lista);
     }
 
@@ -144,6 +150,20 @@ public class ServicioLista {
         contenido.setNumeroEpisodio(dto.numeroEpisodio());
 
         return repositorioContenido.guardar(contenido);
+    }
+
+    @Transactional
+    public DListaDetalle editarLista(long idLista, String nombreUsuario, @Valid DListaNueva dto) {
+        Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
+
+        lista.setNombre(dto.nombre());
+        lista.setDescripcion(dto.descripcion());
+        lista.setImagenPortada(dto.imagenPortada());
+
+        repositorioLista.guardar(lista);
+
+        List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
+        return dtoDetalle(lista, elementos);
     }
 
     private DListaDetalle dtoDetalle(Lista lista, List<ListaItem> elementos) {

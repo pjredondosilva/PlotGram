@@ -95,4 +95,10 @@ public class ManejadorExcepcionesApi {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ApiError("USUARIO_NO_ENCONTRADO", ex.getMessage(), null));
     }
+
+    @ExceptionHandler(ContrasenaActualIncorrecta.class)
+    public ResponseEntity<ApiError> manejarContrasenaActualIncorrecta(ContrasenaActualIncorrecta ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiError("CONTRASENA_ACTUAL_INCORRECTA", ex.getMessage(), null));
+    }
 }

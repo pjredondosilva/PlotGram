@@ -1,8 +1,6 @@
 package es.plotgram.backend.rest;
 
-import es.plotgram.backend.rest.dto.DUsuarioRegistro;
-import es.plotgram.backend.rest.dto.Dusuario;
-import es.plotgram.backend.rest.dto.Mapeador;
+import es.plotgram.backend.rest.dto.*;
 import es.plotgram.backend.servicios.ServicioUsuario;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,5 +57,18 @@ public class ControladorUsuario {
         return serviciousuario.buscarUsuario(nombre)
                 .map(u -> ResponseEntity.ok(mapeador.dto(u)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+    @PostMapping("/usuarios/me/verificacioncontrasena")
+    public ResponseEntity<Void> verificarContrasena(Authentication authentication,
+                                                    @Valid @RequestBody DVerificacionContrasena dto) {
+        serviciousuario.verificarContrasenaActual(authentication.getName(), dto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/usuarios/me/actualizacionperfil")
+    public ResponseEntity<Dusuario> actualizarPerfil(Authentication authentication,
+                                                     @Valid @RequestBody DActualizacionPerfil dto) {
+        var usuario = serviciousuario.actualizarPerfil(authentication.getName(), dto);
+        return ResponseEntity.ok(mapeador.dto(usuario));
     }
 }

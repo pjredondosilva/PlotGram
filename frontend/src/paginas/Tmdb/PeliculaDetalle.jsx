@@ -3,6 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import { DarDetallesPeliculas } from "../../servicios/ServicioTmdb.js";
 import { logoUrl, profileUrl } from "../../utils/tmdbImages.js";
 import { posterUrl } from "../../utils/img.js";
+import { useAuth } from "../../servicios/authContext.jsx";
+import { crearContenidoListaPelicula } from "../../utils/contenidoLista.js";
+import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
 import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";
 import "./estilos/detalleTmdb.css";
 
@@ -31,9 +34,13 @@ function formatearDinero(valor) {
 
 export default function PeliculaDetalle() {
     const { id } = useParams();
+    const { user } = useAuth();
+
     const [pelicula, setPelicula] = useState(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState("");
+    const [modalListaAbierto, setModalListaAbierto] = useState(false);
+    const [mensajeLista, setMensajeLista] = useState("");
 
     useEffect(() => {
         let cancelled = false;
@@ -59,6 +66,11 @@ export default function PeliculaDetalle() {
     }, [id]);
 
     const poster = useMemo(() => posterUrl(pelicula?.posterPath), [pelicula]);
+    const contenidoLista = useMemo(
+        () => crearContenidoListaPelicula(pelicula, poster),
+        [pelicula, poster]
+    );
+
     const stream = pelicula?.providers?.stream ?? [];
     const rent = pelicula?.providers?.rent ?? [];
     const buy = pelicula?.providers?.buy ?? [];
@@ -68,7 +80,7 @@ export default function PeliculaDetalle() {
     const ingresosSuperanPresupuesto =
         pelicula?.budget > 0 &&
         pelicula?.revenue > 0 &&
-        pelicula.revenue > pelicula.budget*2.5;
+        pelicula.revenue > pelicula.budget * 2.5;
 
     const claseIngresos = pelicula?.revenue > 0
         ? ingresosSuperanPresupuesto
@@ -87,7 +99,7 @@ export default function PeliculaDetalle() {
             <header className="tmdb-hero tmdb-panel">
                 <div className="tmdb-hero-poster">
                     {poster ? (
-                        <img src={poster} alt={pelicula.title}/>
+                        <img src={poster} alt={pelicula.title} />
                     ) : (
                         <div className="tmdb-poster-placeholder">Sin imagen</div>
                     )}
@@ -99,17 +111,17 @@ export default function PeliculaDetalle() {
                             <h1>{pelicula.title}</h1>
 
                             <div className="tmdb-meta-inline">
-                    <span className="tmdb-meta-chip">
-                        {formatearFecha(pelicula.releaseDate)}
-                    </span>
+                                <span className="tmdb-meta-chip">
+                                    {formatearFecha(pelicula.releaseDate)}
+                                </span>
 
                                 <span className="tmdb-meta-chip">
-                        {pelicula.runtime ? `${pelicula.runtime} min` : "Duración no disponible"}
-                    </span>
+                                    {pelicula.runtime ? `${pelicula.runtime} min` : "Duración no disponible"}
+                                </span>
 
                                 <span className="tmdb-meta-chip">
-                        {pelicula.estrenadaEnCines ? "Estrenada" : "No estrenada"}
-                    </span>
+                                    {pelicula.estrenadaEnCines ? "Estrenada" : "No estrenada"}
+                                </span>
                             </div>
                         </div>
 
@@ -168,6 +180,7 @@ export default function PeliculaDetalle() {
                                 </a>
                             )}
 
+
                             {totalProviders > 0 && (
                                 <a className="tmdb-boton-secundario" href="#donde-ver">
                                     Dónde verla
@@ -185,10 +198,25 @@ export default function PeliculaDetalle() {
                                     Relacionadas
                                 </a>
                             )}
+
+                            {user && contenidoLista && (
+                                <button
+                                    type="button"
+                                    className="tmdb-boton-secundario"
+                                    onClick={() => setModalListaAbierto(true)}
+                                >
+                                    Añadir a una lista
+                                </button>
+                            )}
                         </div>
+
+                        {mensajeLista && (
+                            <p className="tmdb-estado-lista">{mensajeLista}</p>
+                        )}
                     </div>
                 </div>
             </header>
+
             <section className="tmdb-destacados">
                 <div id="trailer" className="tmdb-panel tmdb-panel-trailer">
                     <div className="tmdb-seccion-cabecera">
@@ -232,9 +260,9 @@ export default function PeliculaDetalle() {
                                                 className="tmdb-provider-item"
                                             >
                                                 {p.logoPath ? (
-                                                    <img src={logoUrl(p.logoPath)} alt={p.name}/>
+                                                    <img src={logoUrl(p.logoPath)} alt={p.name} />
                                                 ) : (
-                                                    <div className="tmdb-provider-logo-placeholder"/>
+                                                    <div className="tmdb-provider-logo-placeholder" />
                                                 )}
                                                 <span>{p.name}</span>
                                             </div>
@@ -255,9 +283,9 @@ export default function PeliculaDetalle() {
                                                 className="tmdb-provider-item"
                                             >
                                                 {p.logoPath ? (
-                                                    <img src={logoUrl(p.logoPath)} alt={p.name}/>
+                                                    <img src={logoUrl(p.logoPath)} alt={p.name} />
                                                 ) : (
-                                                    <div className="tmdb-provider-logo-placeholder"/>
+                                                    <div className="tmdb-provider-logo-placeholder" />
                                                 )}
                                                 <span>{p.name}</span>
                                             </div>
@@ -278,9 +306,9 @@ export default function PeliculaDetalle() {
                                                 className="tmdb-provider-item"
                                             >
                                                 {p.logoPath ? (
-                                                    <img src={logoUrl(p.logoPath)} alt={p.name}/>
+                                                    <img src={logoUrl(p.logoPath)} alt={p.name} />
                                                 ) : (
-                                                    <div className="tmdb-provider-logo-placeholder"/>
+                                                    <div className="tmdb-provider-logo-placeholder" />
                                                 )}
                                                 <span>{p.name}</span>
                                             </div>
@@ -295,7 +323,7 @@ export default function PeliculaDetalle() {
                 </aside>
             </section>
 
-            <section className="tmdb-bloque">
+            <section id="reparto" className="tmdb-bloque">
                 <div className="tmdb-seccion-cabecera">
                     <h2>Reparto principal</h2>
                     <p>Actores destacados de la película</p>
@@ -309,7 +337,7 @@ export default function PeliculaDetalle() {
                             return (
                                 <article key={actor.id ?? `actor-${index}`} className="tmdb-actor">
                                     {foto ? (
-                                        <img src={foto} alt={actor.name}/>
+                                        <img src={foto} alt={actor.name} />
                                     ) : (
                                         <div className="tmdb-actor-placeholder">Sin foto</div>
                                     )}
@@ -334,11 +362,20 @@ export default function PeliculaDetalle() {
                 </div>
 
                 {recomendacionesFormateadas.length ? (
-                    <MediaGrid items={recomendacionesFormateadas} type="movie"/>
+                    <MediaGrid items={recomendacionesFormateadas} type="movie" />
                 ) : (
                     <div className="tmdb-vacio tmdb-vacio-interno">No hay recomendaciones disponibles.</div>
                 )}
             </section>
+
+            <ModalAniadirALista
+                open={modalListaAbierto}
+                onClose={() => setModalListaAbierto(false)}
+                contenido={contenidoLista}
+                onAnadido={(lista) => {
+                    setMensajeLista(`Añadido a "${lista?.nombre ?? "la lista"}".`);
+                }}
+            />
         </section>
     );
 }

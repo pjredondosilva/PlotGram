@@ -1,10 +1,10 @@
 import { Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "../componentes/layout/Header";
 import AuthModal from "../componentes/auth/AuthModal";
 import FormularioLogin from "../componentes/auth/FormularioInicioDeSesion.jsx";
 import FormularioRegistro from "../componentes/auth/FormularioRegistro.jsx";
-import { getMe, logout } from "../servicios/auth";
+import { useAuth } from "../servicios/authContext.jsx";
 
 const LOGIN_FORM_INICIAL = {
     nombre: "",
@@ -18,23 +18,17 @@ const REGISTER_FORM_INICIAL = {
 };
 
 export default function MainLayout() {
-    const [user, setUser] = useState(null);
+    const { user, setUser, logout } = useAuth();
     const [modal, setModal] = useState(null); // "login" | "register" | null
 
     const [loginForm, setLoginForm] = useState(LOGIN_FORM_INICIAL);
     const [registerForm, setRegisterForm] = useState(REGISTER_FORM_INICIAL);
 
-    useEffect(() => {
-        getMe()
-            .then(setUser)
-            .catch(() => setUser(null));
-    }, []);
-
     async function handleLogout() {
         try {
             await logout();
         } finally {
-            setUser(null);
+            setModal(null);
         }
     }
 
