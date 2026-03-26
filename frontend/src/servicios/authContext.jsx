@@ -7,6 +7,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loadingMe, setLoadingMe] = useState(true);
+    const [sessionExpired, setSessionExpired] = useState(false);
 
     const refreshMe = useCallback(async () => {
         try {
@@ -14,7 +15,6 @@ export function AuthProvider({ children }) {
             setUser(me);
             return me;
         } catch (e) {
-            // Si no hay sesión, dejamos user a null sin “romper” la app
             if (e?.status === 401) setUser(null);
             throw e;
         } finally {
@@ -22,15 +22,24 @@ export function AuthProvider({ children }) {
         }
     }, []);
 
-    // Carga inicial (si hay cookie válida -> user)
     useEffect(() => {
         refreshMe().catch(() => {});
     }, [refreshMe]);
 
-    // Renovación deslizante mientras hay usuario autenticado
+    const handleSessionExpired = useCallback(async () => {
+        try {
+            await apiLogout();
+        } catch {
+            // Si falla la llamada, igualmente dejamos la app en estado anónimo
+        } finally {
+            setUser(null);
+            setSessionExpired(true);
+        }
+    }, []);
+
     useRenovacionJwt({
         enabled: !!user,
-        onSessionExpired: () => setUser(null),
+        onSessionExpired: handleSessionExpired,
     });
 
     const logout = useCallback(async () => {
@@ -38,12 +47,25 @@ export function AuthProvider({ children }) {
             await apiLogout();
         } finally {
             setUser(null);
+            setSessionExpired(false);
         }
     }, []);
 
+    const clearSessionExpired = useCallback(() => {
+        setSessionExpired(false);
+    }, []);
+
     const value = useMemo(
-        () => ({ user, setUser, refreshMe, logout, loadingMe }),
-        [user, refreshMe, logout, loadingMe]
+        () => ({
+            user,
+            setUser,
+            refreshMe,
+            logout,
+            loadingMe,
+            sessionExpired,
+            clearSessionExpired,
+        }),
+        [user, refreshMe, logout, loadingMe, sessionExpired, clearSessionExpired]
     );
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

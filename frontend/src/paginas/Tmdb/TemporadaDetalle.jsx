@@ -130,26 +130,25 @@ export default function TemporadaDetalle() {
                         </div>
 
                         <div className="tmdb-resumen-acciones">
-
                             {episodios.length > 0 && (
                                 <a className="tmdb-boton-primario" href="#episodios">
                                     Ver episodios
                                 </a>
                             )}
+
+                            {user && contenidoLista && (
+                                <button
+                                    type="button"
+                                    className="tmdb-boton-secundario"
+                                    onClick={() => setModalListaAbierto(true)}
+                                >
+                                    Añadir a una lista
+                                </button>
+                            )}
                         </div>
 
                         {mensajeLista && (
                             <p className="tmdb-estado-lista">{mensajeLista}</p>
-                        )}
-
-                        {user && contenidoLista && (
-                            <button
-                                type="button"
-                                className="tmdb-boton-secundario"
-                                onClick={() => setModalListaAbierto(true)}
-                            >
-                                Añadir a una lista
-                            </button>
                         )}
                     </div>
                 </div>

@@ -1,5 +1,5 @@
-import { Outlet } from "react-router-dom";
-import { useState } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import Header from "../componentes/layout/Header";
 import AuthModal from "../componentes/auth/AuthModal";
 import FormularioLogin from "../componentes/auth/FormularioInicioDeSesion.jsx";
@@ -18,11 +18,25 @@ const REGISTER_FORM_INICIAL = {
 };
 
 export default function MainLayout() {
-    const { user, setUser, logout } = useAuth();
-    const [modal, setModal] = useState(null); // "login" | "register" | null
+    const navigate = useNavigate();
+    const {
+        user,
+        setUser,
+        logout,
+        sessionExpired,
+        clearSessionExpired,
+    } = useAuth();
 
+    const [modal, setModal] = useState(null); // "login" | "register" | null
     const [loginForm, setLoginForm] = useState(LOGIN_FORM_INICIAL);
     const [registerForm, setRegisterForm] = useState(REGISTER_FORM_INICIAL);
+
+    useEffect(() => {
+        if (!sessionExpired) return;
+
+        setModal("login");
+        navigate("/", { replace: true });
+    }, [sessionExpired, navigate]);
 
     async function handleLogout() {
         try {
@@ -30,6 +44,23 @@ export default function MainLayout() {
         } finally {
             setModal(null);
         }
+    }
+
+    function handleCloseModal() {
+        setModal(null);
+        clearSessionExpired();
+    }
+
+    function handleLoginDone() {
+        setModal(null);
+        clearSessionExpired();
+        setLoginForm(LOGIN_FORM_INICIAL);
+    }
+
+    function handleRegisterDone() {
+        setModal(null);
+        clearSessionExpired();
+        setRegisterForm(REGISTER_FORM_INICIAL);
     }
 
     return (
@@ -45,22 +76,44 @@ export default function MainLayout() {
                 <Outlet />
             </main>
 
-            <AuthModal open={modal !== null} onClose={() => setModal(null)}>
+            <AuthModal open={modal !== null} onClose={handleCloseModal}>
                 {modal === "login" && (
-                    <FormularioLogin
-                        form={loginForm}
-                        setForm={setLoginForm}
-                        onDone={() => setModal(null)}
-                        setUser={setUser}
-                        resetForm={() => setLoginForm(LOGIN_FORM_INICIAL)}
-                    />
+                    <>
+                        {sessionExpired && (
+                            <div
+                                style={{
+                                    marginBottom: "14px",
+                                    padding: "12px 14px",
+                                    borderRadius: "12px",
+                                    border: "1px solid rgba(255,255,255,0.10)",
+                                    background: "rgba(255,255,255,0.04)",
+                                    color: "rgba(255,255,255,0.92)",
+                                }}
+                            >
+                                <strong style={{ display: "block", marginBottom: "4px" }}>
+                                    Tu sesión ha expirado
+                                </strong>
+                                <span style={{ color: "rgba(255,255,255,0.74)" }}>
+                                    Por seguridad, debes iniciar sesión de nuevo para continuar.
+                                </span>
+                            </div>
+                        )}
+
+                        <FormularioLogin
+                            form={loginForm}
+                            setForm={setLoginForm}
+                            onDone={handleLoginDone}
+                            setUser={setUser}
+                            resetForm={() => setLoginForm(LOGIN_FORM_INICIAL)}
+                        />
+                    </>
                 )}
 
                 {modal === "register" && (
                     <FormularioRegistro
                         form={registerForm}
                         setForm={setRegisterForm}
-                        onDone={() => setModal(null)}
+                        onDone={handleRegisterDone}
                         setUser={setUser}
                         resetForm={() => setRegisterForm(REGISTER_FORM_INICIAL)}
                     />
