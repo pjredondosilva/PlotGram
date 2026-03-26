@@ -228,6 +228,12 @@
     max-width: 640px;
 }
 
+.feed-aviso .tmdb-boton-primario,
+.feed-vacio .tmdb-boton-primario {
+    width: auto;
+    align-self: flex-start;
+}
+
 .feed-formulario {
     display: grid;
     gap: 12px;
@@ -253,6 +259,16 @@
 .feed-formulario-campo {
     display: grid;
     gap: 6px;
+}
+
+.feed-formulario,
+.feed-formulario-grid,
+.feed-formulario-campo {
+    min-width: 0;
+}
+
+.feed-formulario-campo > * {
+    min-width: 0;
 }
 
 .feed-formulario-campo span {
@@ -300,6 +316,7 @@
     justify-content: flex-end;
     gap: 10px;
     margin-top: 2px;
+    flex-wrap: wrap;
 }
 
 .feed-boton {
@@ -563,24 +580,48 @@
 }
 
 @media (max-width: 640px) {
+    .feed-cabecera {
+        padding: 20px;
+    }
+
+    .feed-bloque {
+        padding: 20px;
+    }
+
     .feed-label-con-ayuda {
         gap: 8px;
     }
 
+    .feed-formulario-preview-perfil {
+        max-width: 160px;
+        justify-self: center;
+    }
+
+    .feed-formulario-acciones {
+        flex-direction: column;
+    }
+
+    .feed-formulario-acciones .feed-boton {
+        width: 100%;
+    }
+
     .feed-ayuda-tooltip {
-        left: 0;
-        transform: translateX(0) translateY(-6px);
-        width: min(280px, calc(100vw - 72px));
+        left: auto;
+        right: -8px;
+        top: calc(100% + 10px);
+        transform: translateY(-6px);
+        width: min(260px, calc(100vw - 40px));
     }
 
     .feed-ayuda-tooltip::before {
-        left: 18px;
+        left: auto;
+        right: 18px;
         transform: rotate(45deg);
     }
 
     .feed-ayuda-wrapper:hover .feed-ayuda-tooltip,
     .feed-ayuda-wrapper:focus-within .feed-ayuda-tooltip {
-        transform: translateX(0) translateY(0);
+        transform: translateY(0);
     }
 }
 @media (max-width: 900px) {

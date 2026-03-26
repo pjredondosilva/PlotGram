@@ -5,20 +5,25 @@
     display:flex;
     align-items:center;
     justify-content:center;
+    padding:18px;
     z-index:9999;
+    overflow-y:auto;
+    box-sizing:border-box;
+    -webkit-overflow-scrolling: touch;
 }
 
 .pg-modal__panel{
-    width:min(420px, 92vw);
+    width:min(420px, calc(100vw - 32px));
     background:#111;
     border:1px solid rgba(255,255,255,.12);
     border-radius:14px;
     padding:22px;
     box-shadow:0 20px 60px rgba(0,0,0,.6);
-    max-height: 85vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    box-sizing: border-box;
+    max-height:min(85vh, 760px);
+    overflow-y:auto;
+    overflow-x:hidden;
+    box-sizing:border-box;
+    overscroll-behavior:contain;
 }
 
 .pg-modal__title{
@@ -36,13 +41,14 @@
 .pg-modal__input{
     width: 100%;
     box-sizing: border-box;
-    height: 34px;
-    padding: 6px 10px;
-    border-radius: 4px;
+    min-height: 42px;
+    padding: 8px 12px;
+    border-radius: 8px;
     border: 1px solid rgba(255,255,255,.25);
     background: rgba(255,255,255,.08);
     color: #fff;
     outline: none;
+    font-size: 16px;
 }
 
 .pg-modal__input::placeholder{
@@ -94,8 +100,8 @@
     width: 100%;
     box-sizing: border-box;
     margin-top: 8px;
-    height: 34px;
-    border-radius: 4px;
+    min-height: 42px;
+    border-radius: 8px;
     border: none;
     background: rgba(255,255,255,.28);
     color: #fff;
@@ -107,4 +113,21 @@
     cursor: not-allowed;
 }
 
+@media (max-width: 640px){
+    .pg-modal__backdrop{
+        align-items:flex-start;
+        padding:12px;
+    }
 
+    .pg-modal__panel{
+        width:calc(100vw - 24px);
+        margin:12px 0;
+        padding:18px 16px;
+        border-radius:18px;
+        max-height:calc(100dvh - 24px);
+    }
+
+    .pg-modal__title{
+        font-size:24px;
+    }
+}

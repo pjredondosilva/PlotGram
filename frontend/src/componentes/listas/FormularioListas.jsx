@@ -94,7 +94,29 @@ export default function FormularioLista({
                     </label>
 
                     <label className="feed-formulario-campo">
-                        <span>Imagen de portada</span>
+                        <span className="feed-label-con-ayuda">
+                            <span>Imagen de portada</span>
+
+                            <span className="feed-ayuda-wrapper" tabIndex={0}>
+                                <span
+                                    className="feed-ayuda-icono"
+                                    aria-label="Ayuda sobre cómo obtener la URL de una imagen"
+                                >
+                                    i
+                                </span>
+
+                                <span className="feed-ayuda-tooltip" role="tooltip">
+                                    Abre una imagen en internet, pulsa clic derecho sobre ella y selecciona
+                                    <strong> “Copiar dirección de imagen” </strong>
+                                    o la opción similar de tu navegador. Después pega aquí esa URL.
+                                    La dirección debe empezar por
+                                    <strong> http:// </strong>
+                                    o
+                                    <strong> https://</strong>.
+                                </span>
+                            </span>
+                        </span>
+
                         <input
                             className="pg-modal__input"
                             type="url"
