@@ -8,7 +8,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @DiscriminatorValue("EPISODIO")
-public class Episodio extends contenidoDeSerie {
+public class Episodio extends ContenidoDeSerie {
 
     @NotNull
     @Min(1)

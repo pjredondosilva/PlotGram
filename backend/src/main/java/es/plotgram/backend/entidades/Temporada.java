@@ -5,7 +5,7 @@ import jakarta.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("TEMPORADA")
-public class Temporada extends contenidoDeSerie {
+public class Temporada extends ContenidoDeSerie {
 
     public Temporada() {
     }

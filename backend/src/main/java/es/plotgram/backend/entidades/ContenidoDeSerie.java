@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-public abstract class contenidoDeSerie extends Contenido {
+public abstract class ContenidoDeSerie extends Contenido {
 
     @NotNull
     @Min(1)
@@ -18,7 +18,7 @@ public abstract class contenidoDeSerie extends Contenido {
     @Column(nullable = false)
     private Integer numeroTemporada;
 
-    public contenidoDeSerie() {
+    public ContenidoDeSerie() {
     }
 
     @Override
