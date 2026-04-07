@@ -9,12 +9,14 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING, length = 20)
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"tmdbId", "tipo"})
         }
 )
-public class Contenido {
+public abstract class Contenido {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,11 +26,6 @@ public class Contenido {
     @Min(1)
     @Column(nullable = false)
     private Long tmdbId;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private TipoContenido tipo;
 
     @NotBlank
     @Size(max = 200)
@@ -50,36 +47,7 @@ public class Contenido {
     @Column(nullable = false, length = 255)
     private String enlace;
 
-    @Min(1)
-    @Column
-    private Long serieTmdbId;
-
-    @Min(0)
-    @Column
-    private Integer numeroTemporada;
-
-    @Min(1)
-    @Column
-    private Integer numeroEpisodio;
-
-
     public Contenido() {
-    }
-
-    public Contenido(Long id, Long tmdbId, TipoContenido tipo, String titulo, String imagen,
-                            LocalDate fechaPublicacion, String sinopsis, String enlace,
-                            Long serieTmdbId, Integer numeroTemporada, Integer numeroEpisodio) {
-        this.id = id;
-        this.tmdbId = tmdbId;
-        this.tipo = tipo;
-        this.titulo = titulo;
-        this.imagen = imagen;
-        this.fechaPublicacion = fechaPublicacion;
-        this.sinopsis = sinopsis;
-        this.enlace = enlace;
-        this.serieTmdbId = serieTmdbId;
-        this.numeroTemporada = numeroTemporada;
-        this.numeroEpisodio = numeroEpisodio;
     }
 
     public Long getId() {
@@ -88,10 +56,6 @@ public class Contenido {
 
     public Long getTmdbId() {
         return tmdbId;
-    }
-
-    public TipoContenido getTipo() {
-        return tipo;
     }
 
     public String getTitulo() {
@@ -114,24 +78,8 @@ public class Contenido {
         return enlace;
     }
 
-    public Long getSerieTmdbId() {
-        return serieTmdbId;
-    }
-
-    public Integer getNumeroTemporada() {
-        return numeroTemporada;
-    }
-
-    public Integer getNumeroEpisodio() {
-        return numeroEpisodio;
-    }
-
     public void setTmdbId(Long tmdbId) {
         this.tmdbId = tmdbId;
-    }
-
-    public void setTipo(TipoContenido tipo) {
-        this.tipo = tipo;
     }
 
     public void setTitulo(String titulo) {
@@ -154,16 +102,17 @@ public class Contenido {
         this.enlace = enlace;
     }
 
-    public void setSerieTmdbId(Long serieTmdbId) {
-        this.serieTmdbId = serieTmdbId;
+    public abstract TipoContenido getTipo();
+
+    public Long getSerieTmdbId() {
+        return null;
     }
 
-    public void setNumeroTemporada(Integer numeroTemporada) {
-        this.numeroTemporada = numeroTemporada;
+    public Integer getNumeroTemporada() {
+        return null;
     }
 
-    public void setNumeroEpisodio(Integer numeroEpisodio) {
-        this.numeroEpisodio = numeroEpisodio;
+    public Integer getNumeroEpisodio() {
+        return null;
     }
-
 }
