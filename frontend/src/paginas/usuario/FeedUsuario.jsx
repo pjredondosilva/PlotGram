@@ -204,7 +204,7 @@ export default function FeedUsuario() {
                         <div className="feed-perfil-superior">
                             <h1>{user.nombre}</h1>
                             <div className="tmdb-meta-inline">
-                                <span className="tmdb-meta-chip">{listas.length} listas</span>
+                                <span className="tmdb-meta-chip">{listas.length}  listas</span>
                                 <span className="tmdb-meta-chip">Feed personal</span>
                             </div>
                         </div>
