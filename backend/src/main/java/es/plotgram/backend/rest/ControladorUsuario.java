@@ -1,13 +1,16 @@
 package es.plotgram.backend.rest;
 
-import es.plotgram.backend.rest.dto.*;
+import es.plotgram.backend.rest.dto.DActualizacionPerfil;
+import es.plotgram.backend.rest.dto.DUsuarioRegistro;
+import es.plotgram.backend.rest.dto.DVerificacionContrasena;
+import es.plotgram.backend.rest.dto.Dusuario;
+import es.plotgram.backend.rest.dto.Mapeador;
 import es.plotgram.backend.servicios.ServicioUsuario;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Controlador REST para el registro y la consulta de usuarios.
@@ -15,10 +18,14 @@ import org.springframework.security.core.Authentication;
 @RestController
 @RequestMapping("/api")
 public class ControladorUsuario {
-    @Autowired
-    Mapeador mapeador;
-    @Autowired
-    ServicioUsuario serviciousuario;
+
+    private final Mapeador mapeador;
+    private final ServicioUsuario servicioUsuario;
+
+    public ControladorUsuario(Mapeador mapeador, ServicioUsuario servicioUsuario) {
+        this.mapeador = mapeador;
+        this.servicioUsuario = servicioUsuario;
+    }
 
     /**
      * Registra un nuevo usuario en el sistema.
@@ -28,7 +35,7 @@ public class ControladorUsuario {
      */
     @PostMapping("/usuarios")
     public ResponseEntity<Void> nuevoUsuario(@Valid @RequestBody DUsuarioRegistro dto) {
-        serviciousuario.nuevoUsuario(mapeador.entidadNueva(dto));
+        servicioUsuario.nuevoUsuario(mapeador.entidadNueva(dto));
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -40,8 +47,8 @@ public class ControladorUsuario {
      */
     @GetMapping("/usuarios/{id}")
     public ResponseEntity<Dusuario> obtenerUsuario(@PathVariable long id) {
-        return serviciousuario.buscarUsuario(id)
-                .map(u -> ResponseEntity.ok(mapeador.dto(u)))
+        return servicioUsuario.buscarUsuario(id)
+                .map(usuario -> ResponseEntity.ok(mapeador.dto(usuario)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
@@ -54,21 +61,33 @@ public class ControladorUsuario {
     @GetMapping("/usuarios/me")
     public ResponseEntity<Dusuario> me(Authentication authentication) {
         String nombre = authentication.getName();
-        return serviciousuario.buscarUsuario(nombre)
-                .map(u -> ResponseEntity.ok(mapeador.dto(u)))
+        return servicioUsuario.buscarUsuario(nombre)
+                .map(usuario -> ResponseEntity.ok(mapeador.dto(usuario)))
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
+
     @PostMapping("/usuarios/me/verificacioncontrasena")
     public ResponseEntity<Void> verificarContrasena(Authentication authentication,
                                                     @Valid @RequestBody DVerificacionContrasena dto) {
-        serviciousuario.verificarContrasenaActual(authentication.getName(), dto);
+        servicioUsuario.verificarContrasenaActual(authentication.getName(), mapeador.contrasenaActual(dto));
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/usuarios/me/actualizacionperfil")
     public ResponseEntity<Dusuario> actualizarPerfil(Authentication authentication,
                                                      @Valid @RequestBody DActualizacionPerfil dto) {
-        var usuario = serviciousuario.actualizarPerfil(authentication.getName(), dto);
+        Mapeador.DatosActualizacionPerfil datos = mapeador.datosActualizacionPerfil(dto);
+
+        var usuario = servicioUsuario.actualizarPerfil(
+                authentication.getName(),
+                datos.nombre(),
+                datos.email(),
+                datos.fotoPerfil(),
+                datos.descripcion(),
+                datos.contrasenaActual(),
+                datos.nuevaContrasena()
+        );
+
         return ResponseEntity.ok(mapeador.dto(usuario));
     }
 }

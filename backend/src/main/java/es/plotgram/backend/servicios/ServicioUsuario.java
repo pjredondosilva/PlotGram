@@ -5,9 +5,6 @@ import es.plotgram.backend.excepciones.ContrasenaActualIncorrecta;
 import es.plotgram.backend.excepciones.UsuarioNoEncontrado;
 import es.plotgram.backend.excepciones.UsuarioYaRegistrado;
 import es.plotgram.backend.repositorios.RepositorioUsuario;
-import es.plotgram.backend.rest.dto.DActualizacionPerfil;
-import es.plotgram.backend.rest.dto.DVerificacionContrasena;
-import jakarta.validation.Valid;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +23,7 @@ public class ServicioUsuario {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void nuevoUsuario(@Valid Usuario usuario) {
+    public void nuevoUsuario(Usuario usuario) {
         if (usuario.getNombre() != null && repositorioUsuario.buscarPorNombre(usuario.getNombre()).isPresent()) {
             throw new UsuarioYaRegistrado("nombre");
         }
@@ -45,42 +42,32 @@ public class ServicioUsuario {
     }
 
     @Transactional(readOnly = true)
-    public void verificarContrasenaActual(String nombreUsuario, @Valid DVerificacionContrasena dto) {
+    public void verificarContrasenaActual(String nombreUsuario, String contrasenaActual) {
         Usuario usuario = obtenerUsuarioActivo(nombreUsuario);
-        validarContrasenaActual(usuario, dto.contrasenaActual());
+        validarContrasenaActual(usuario, contrasenaActual);
     }
 
     @Transactional
-    public Usuario actualizarPerfil(String nombreUsuario, @Valid DActualizacionPerfil dto) {
+    public Usuario actualizarPerfil(String nombreUsuario,
+                                    String nuevoNombre,
+                                    String nuevoEmail,
+                                    String fotoPerfil,
+                                    String descripcion,
+                                    String contrasenaActual,
+                                    String nuevaContrasena) {
         Usuario usuario = obtenerUsuarioActivo(nombreUsuario);
 
-        if (!passwordEncoder.matches(dto.contrasenaActual(), usuario.getContrasena())) {
-            throw new ContrasenaActualIncorrecta();
-        }
+        validarContrasenaActual(usuario, contrasenaActual);
+        validarUnicidad(nuevoNombre, nuevoEmail, usuario.getId());
 
-        String nuevoNombre = dto.nombre().trim();
-        String nuevoEmail = dto.email().trim();
+        usuario.setNombre(nuevoNombre.trim());
+        usuario.setEmail(nuevoEmail.trim());
+        usuario.setFotoPerfil(normalizarOpcional(fotoPerfil));
+        usuario.setDescripcion(normalizarOpcional(descripcion));
 
-        repositorioUsuario.buscarPorNombre(nuevoNombre)
-                .filter(u -> !u.getId().equals(usuario.getId()))
-                .ifPresent(u -> {
-                    throw new UsuarioYaRegistrado("nombre");
-                });
-
-        repositorioUsuario.buscarPorEmail(nuevoEmail)
-                .filter(u -> !u.getId().equals(usuario.getId()))
-                .ifPresent(u -> {
-                    throw new UsuarioYaRegistrado("email");
-                });
-
-        usuario.setNombre(nuevoNombre);
-        usuario.setEmail(nuevoEmail);
-        usuario.setFotoPerfil(normalizarOpcional(dto.fotoPerfil()));
-        usuario.setDescripcion(normalizarOpcional(dto.descripcion()));
-
-        String nuevaContrasena = normalizarOpcional(dto.nuevaContrasena());
-        if (nuevaContrasena != null) {
-            usuario.setContrasena(passwordEncoder.encode(nuevaContrasena));
+        String contrasenaNormalizada = normalizarOpcional(nuevaContrasena);
+        if (contrasenaNormalizada != null) {
+            usuario.setContrasena(passwordEncoder.encode(contrasenaNormalizada));
         }
 
         return repositorioUsuario.guardar(usuario);
@@ -97,14 +84,14 @@ public class ServicioUsuario {
         }
     }
 
-    private void validarUnicidad(DActualizacionPerfil dto, Long idUsuarioActual) {
-        repositorioUsuario.buscarPorNombre(dto.nombre().trim())
+    private void validarUnicidad(String nombre, String email, Long idUsuarioActual) {
+        repositorioUsuario.buscarPorNombre(nombre.trim())
                 .filter(otro -> !otro.getId().equals(idUsuarioActual))
                 .ifPresent(otro -> {
                     throw new UsuarioYaRegistrado("nombre");
                 });
 
-        repositorioUsuario.buscarPorEmail(dto.email().trim())
+        repositorioUsuario.buscarPorEmail(email.trim())
                 .filter(otro -> !otro.getId().equals(idUsuarioActual))
                 .ifPresent(otro -> {
                     throw new UsuarioYaRegistrado("email");

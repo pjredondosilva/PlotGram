@@ -1,12 +1,8 @@
 package es.plotgram.backend.servicios;
 
 import es.plotgram.backend.entidades.Contenido;
-import es.plotgram.backend.entidades.Episodio;
 import es.plotgram.backend.entidades.Lista;
 import es.plotgram.backend.entidades.ListaItem;
-import es.plotgram.backend.entidades.Pelicula;
-import es.plotgram.backend.entidades.Serie;
-import es.plotgram.backend.entidades.Temporada;
 import es.plotgram.backend.entidades.Usuario;
 import es.plotgram.backend.excepciones.ContenidoYaEnLista;
 import es.plotgram.backend.excepciones.ElementoNoEncontradoEnLista;
@@ -16,12 +12,6 @@ import es.plotgram.backend.repositorios.RepositorioContenido;
 import es.plotgram.backend.repositorios.RepositorioLista;
 import es.plotgram.backend.repositorios.RepositorioListaItem;
 import es.plotgram.backend.repositorios.RepositorioUsuario;
-import es.plotgram.backend.rest.dto.DContenidoListaNuevo;
-import es.plotgram.backend.rest.dto.DListaDetalle;
-import es.plotgram.backend.rest.dto.DListaElemento;
-import es.plotgram.backend.rest.dto.DListaNueva;
-import es.plotgram.backend.rest.dto.DListaResumen;
-import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -48,47 +38,44 @@ public class ServicioLista {
     }
 
     @Transactional
-    public DListaDetalle crearLista(String nombreUsuario, @Valid DListaNueva dto) {
+    public ListaDetalleServicio crearLista(String nombreUsuario, Lista listaNueva) {
         Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);
 
         Lista lista = new Lista();
-        lista.setNombre(dto.nombre());
-        lista.setDescripcion(dto.descripcion());
-        lista.setImagenPortada(dto.imagenPortada());
+        lista.setNombre(listaNueva.getNombre());
+        lista.setDescripcion(listaNueva.getDescripcion());
+        lista.setImagenPortada(listaNueva.getImagenPortada());
         lista.setUsuario(usuario);
 
         Lista listaGuardada = repositorioLista.guardar(lista);
-        return dtoDetalle(listaGuardada, List.of());
+        return new ListaDetalleServicio(listaGuardada, List.of());
     }
 
     @Transactional(readOnly = true)
-    public List<DListaResumen> obtenerListasDelUsuario(String nombreUsuario) {
+    public List<ListaResumenServicio> obtenerListasDelUsuario(String nombreUsuario) {
         Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);
 
         return repositorioLista.buscarPorUsuarioId(usuario.getId()).stream()
-                .map(lista -> new DListaResumen(
-                        lista.getId(),
-                        lista.getNombre(),
-                        lista.getDescripcion(),
-                        lista.getImagenPortada(),
+                .map(lista -> new ListaResumenServicio(
+                        lista,
                         repositorioListaItem.contarPorListaId(lista.getId())
                 ))
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public DListaDetalle obtenerLista(long idLista, String nombreUsuario) {
+    public ListaDetalleServicio obtenerLista(long idLista, String nombreUsuario) {
         Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
         List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
-        return dtoDetalle(lista, elementos);
+        return new ListaDetalleServicio(lista, elementos);
     }
 
     @Transactional
-    public DListaDetalle aniadirContenido(long idLista, String nombreUsuario, @Valid DContenidoListaNuevo dto) {
+    public ListaDetalleServicio aniadirContenido(long idLista, String nombreUsuario, Contenido contenidoNuevo) {
         Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
 
-        Contenido contenido = repositorioContenido.buscarPorTmdbIdYTipo(dto.tmdbId(), dto.tipo())
-                .orElseGet(() -> crearContenido(dto));
+        Contenido contenido = repositorioContenido.buscarPorTmdbIdYTipo(contenidoNuevo.getTmdbId(), contenidoNuevo.getTipo())
+                .orElseGet(() -> repositorioContenido.guardar(contenidoNuevo));
 
         if (repositorioListaItem.existePorListaIdYContenidoId(lista.getId(), contenido.getId())) {
             throw new ContenidoYaEnLista();
@@ -129,17 +116,17 @@ public class ServicioLista {
     }
 
     @Transactional
-    public DListaDetalle editarLista(long idLista, String nombreUsuario, @Valid DListaNueva dto) {
+    public ListaDetalleServicio editarLista(long idLista, String nombreUsuario, Lista datosLista) {
         Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
 
-        lista.setNombre(dto.nombre());
-        lista.setDescripcion(dto.descripcion());
-        lista.setImagenPortada(dto.imagenPortada());
+        lista.setNombre(datosLista.getNombre());
+        lista.setDescripcion(datosLista.getDescripcion());
+        lista.setImagenPortada(datosLista.getImagenPortada());
 
         repositorioLista.guardar(lista);
 
         List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
-        return dtoDetalle(lista, elementos);
+        return new ListaDetalleServicio(lista, elementos);
     }
 
     private Usuario obtenerUsuarioPorNombre(String nombreUsuario) {
@@ -154,65 +141,7 @@ public class ServicioLista {
                 .orElseThrow(ListaNoEncontrada::new);
     }
 
-    private Contenido crearContenido(DContenidoListaNuevo dto) {
-        Contenido contenido = switch (dto.tipo()) {
-            case PELICULA -> new Pelicula();
-            case SERIE -> new Serie();
-            case TEMPORADA -> {
-                Temporada temporada = new Temporada();
-                temporada.setSerieTmdbId(dto.serieTmdbId());
-                temporada.setNumeroTemporada(dto.numeroTemporada());
-                yield temporada;
-            }
-            case EPISODIO -> {
-                Episodio episodio = new Episodio();
-                episodio.setSerieTmdbId(dto.serieTmdbId());
-                episodio.setNumeroTemporada(dto.numeroTemporada());
-                episodio.setNumeroEpisodio(dto.numeroEpisodio());
-                yield episodio;
-            }
-        };
+    public record ListaDetalleServicio(Lista lista, List<ListaItem> elementos) {}
 
-        aplicarDatosComunes(contenido, dto);
-        return repositorioContenido.guardar(contenido);
-    }
-
-    private void aplicarDatosComunes(Contenido contenido, DContenidoListaNuevo dto) {
-        contenido.setTmdbId(dto.tmdbId());
-        contenido.setTitulo(dto.titulo());
-        contenido.setImagen(dto.imagen());
-        contenido.setFechaPublicacion(dto.fechaPublicacion());
-        contenido.setSinopsis(dto.sinopsis());
-        contenido.setEnlace(dto.enlace());
-    }
-
-    private DListaDetalle dtoDetalle(Lista lista, List<ListaItem> elementos) {
-        return new DListaDetalle(
-                lista.getId(),
-                lista.getNombre(),
-                lista.getDescripcion(),
-                lista.getImagenPortada(),
-                elementos.stream().map(this::dtoElemento).toList()
-        );
-    }
-
-    private DListaElemento dtoElemento(ListaItem item) {
-        Contenido contenido = item.getContenido();
-
-        return new DListaElemento(
-                item.getId(),
-                item.getOrden(),
-                contenido.getId(),
-                contenido.getTmdbId(),
-                contenido.getTipo(),
-                contenido.getTitulo(),
-                contenido.getImagen(),
-                contenido.getFechaPublicacion(),
-                contenido.getSinopsis(),
-                contenido.getEnlace(),
-                contenido.getSerieTmdbId(),
-                contenido.getNumeroTemporada(),
-                contenido.getNumeroEpisodio()
-        );
-    }
+    public record ListaResumenServicio(Lista lista, long totalElementos) {}
 }
