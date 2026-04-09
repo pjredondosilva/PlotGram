@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AuthModal from "../auth/AuthModal.jsx";
+import { useAuth } from "../../servicios/authContext.jsx";
 import { aniadirContenidoALista, obtenerMisListas } from "../../servicios/ServicioListas.js";
 import "../../paginas/tmdb/estilos/detalleTmdb.css";
 
 export default function ModalAniadirALista({ open, onClose, contenido, onAnadido }) {
+    const { user } = useAuth();
+
     const [listas, setListas] = useState([]);
     const [listaSeleccionada, setListaSeleccionada] = useState(null);
     const [cargando, setCargando] = useState(false);
     const [guardando, setGuardando] = useState(false);
     const [error, setError] = useState("");
+
+    const rutaFeed = user?.id != null ? `/usuarios/${user.id}/feed` : "/";
 
     useEffect(() => {
         if (!open) {
@@ -83,7 +88,7 @@ export default function ModalAniadirALista({ open, onClose, contenido, onAnadido
                     <div className="tmdb-selector-lista-vacio">
                         <h3>Aún no tienes listas creadas</h3>
                         <p>Crea una lista en tu feed para poder guardar películas, series, temporadas o episodios.</p>
-                        <Link className="tmdb-boton-primario" to="/mi-feed" onClick={onClose}>
+                        <Link className="tmdb-boton-primario" to={rutaFeed} onClick={onClose}>
                             Ir a mi feed
                         </Link>
                     </div>

@@ -72,7 +72,12 @@ export default function Header({ user, onLogin, onRegister, onLogout }) {
                                         type="button"
                                         onClick={() => {
                                             setMenuOpen(false);
-                                            navigate("/mi-feed");
+
+                                            if (user?.id != null) {
+                                                navigate(`/usuarios/${user.id}/feed`);
+                                            } else {
+                                                navigate("/");
+                                            }
                                         }}
                                     >
                                         Mi feed

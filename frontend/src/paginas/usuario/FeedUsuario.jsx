@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../servicios/authContext.jsx";
 import {
     borrarLista,
@@ -24,6 +24,7 @@ function inicialUsuario(nombre) {
 function TarjetaLista({
                           lista,
                           nombreUsuario,
+                          idUsuario,
                           menuAbierto,
                           onAbrirMenu,
                           onCerrarMenu,
@@ -45,6 +46,15 @@ function TarjetaLista({
         window.addEventListener("mousedown", cerrar);
         return () => window.removeEventListener("mousedown", cerrar);
     }, [menuAbierto, onCerrarMenu]);
+
+    function abrirDetalle() {
+        if (idUsuario == null) {
+            window.alert("No se puede abrir la lista porque falta el id del usuario autenticado.");
+            return;
+        }
+
+        navigate(`/usuarios/${idUsuario}/feed/listas/${lista.id}`);
+    }
 
     return (
         <article className="feed-lista-card tmdb-panel">
@@ -77,7 +87,7 @@ function TarjetaLista({
             <button
                 type="button"
                 className="feed-lista-enlace"
-                onClick={() => navigate(`/listas/${lista.id}`)}
+                onClick={abrirDetalle}
             >
                 <div className="feed-lista-portada">
                     {lista.imagenPortada ? (
@@ -103,7 +113,10 @@ function TarjetaLista({
 }
 
 export default function FeedUsuario() {
+    const { idUsuario } = useParams();
+    const navigate = useNavigate();
     const { user, setUser, logout, loadingMe } = useAuth();
+
     const [listas, setListas] = useState([]);
     const [cargandoListas, setCargandoListas] = useState(true);
     const [error, setError] = useState("");
@@ -127,8 +140,19 @@ export default function FeedUsuario() {
             return;
         }
 
+        if (user.id == null) {
+            setError("No se ha podido resolver el id del usuario autenticado.");
+            setCargandoListas(false);
+            return;
+        }
+
+        if (String(user.id) !== String(idUsuario)) {
+            navigate(`/usuarios/${user.id}/feed`, { replace: true });
+            return;
+        }
+
         cargarListas();
-    }, [user, loadingMe]);
+    }, [user, loadingMe, idUsuario, navigate]);
 
     async function cargarListas() {
         setCargandoListas(true);
@@ -204,7 +228,7 @@ export default function FeedUsuario() {
                         <div className="feed-perfil-superior">
                             <h1>{user.nombre}</h1>
                             <div className="tmdb-meta-inline">
-                                <span className="tmdb-meta-chip">{listas.length}  listas</span>
+                                <span className="tmdb-meta-chip">{listas.length} listas</span>
                                 <span className="tmdb-meta-chip">Feed personal</span>
                             </div>
                         </div>
@@ -263,6 +287,7 @@ export default function FeedUsuario() {
                                 key={lista.id}
                                 lista={lista}
                                 nombreUsuario={user.nombre}
+                                idUsuario={user.id}
                                 menuAbierto={menuAbiertoId === lista.id}
                                 onAbrirMenu={setMenuAbiertoId}
                                 onCerrarMenu={() => setMenuAbiertoId(null)}

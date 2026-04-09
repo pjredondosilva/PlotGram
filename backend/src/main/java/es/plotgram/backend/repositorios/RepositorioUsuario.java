@@ -24,10 +24,12 @@ EntityManager em;
      */
     @Transactional
     public Usuario guardar(Usuario usuario) {
-        if (usuario.getId() == null) {
-            em.persist(usuario);
-            return usuario;
-        }
+        em.persist(usuario);
+        return usuario;
+    }
+
+    @Transactional
+    public Usuario actualizar(Usuario usuario) {
         return em.merge(usuario);
     }
 

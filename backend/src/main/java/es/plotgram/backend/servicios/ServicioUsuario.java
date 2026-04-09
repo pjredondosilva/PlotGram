@@ -47,7 +47,6 @@ public class ServicioUsuario {
         validarContrasenaActual(usuario, contrasenaActual);
     }
 
-    @Transactional
     public Usuario actualizarPerfil(String nombreUsuario,
                                     String nuevoNombre,
                                     String nuevoEmail,
@@ -70,7 +69,7 @@ public class ServicioUsuario {
             usuario.setContrasena(passwordEncoder.encode(contrasenaNormalizada));
         }
 
-        return repositorioUsuario.guardar(usuario);
+        return repositorioUsuario.actualizar(usuario);
     }
 
     private Usuario obtenerUsuarioActivo(String nombreUsuario) {

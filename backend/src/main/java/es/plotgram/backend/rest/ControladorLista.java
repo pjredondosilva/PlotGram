@@ -26,7 +26,7 @@ public class ControladorLista {
         this.mapeador = mapeador;
     }
 
-    @PostMapping("/listas")
+    @PostMapping("/usuarios/me/listas")
     public ResponseEntity<DListaDetalle> crearLista(Authentication authentication,
                                                     @Valid @RequestBody DListaNueva dto) {
         var detalle = servicioLista.crearLista(authentication.getName(), mapeador.entidadNueva(dto));
@@ -34,50 +34,59 @@ public class ControladorLista {
                 .body(mapeador.dtoDetalle(detalle.lista(), detalle.elementos()));
     }
 
-    @GetMapping("/listas/me")
+    @GetMapping("/usuarios/me/listas")
     public ResponseEntity<List<DListaResumen>> obtenerMisListas(Authentication authentication) {
-        List<DListaResumen> listas = servicioLista.obtenerListasDelUsuario(authentication.getName()).stream()
+        List<DListaResumen> listas = servicioLista.obtenerMisListas(authentication.getName()).stream()
                 .map(resumen -> mapeador.dtoResumen(resumen.lista(), resumen.totalElementos()))
                 .toList();
 
         return ResponseEntity.ok(listas);
     }
 
-    @GetMapping("/listas/{id}")
-    public ResponseEntity<DListaDetalle> obtenerLista(@PathVariable long id,
-                                                      Authentication authentication) {
-        var detalle = servicioLista.obtenerLista(id, authentication.getName());
+    @PutMapping("/usuarios/me/listas/{idLista}")
+    public ResponseEntity<DListaDetalle> editarMiLista(@PathVariable long idLista,
+                                                       Authentication authentication,
+                                                       @Valid @RequestBody DListaNueva dto) {
+        var detalle = servicioLista.editarLista(idLista, authentication.getName(), mapeador.entidadNueva(dto));
         return ResponseEntity.ok(mapeador.dtoDetalle(detalle.lista(), detalle.elementos()));
     }
 
-    @PostMapping("/listas/{id}/elementos")
-    public ResponseEntity<DListaDetalle> aniadirElemento(@PathVariable long id,
+    @DeleteMapping("/usuarios/me/listas/{idLista}")
+    public ResponseEntity<Void> eliminarMiLista(@PathVariable long idLista,
+                                                Authentication authentication) {
+        servicioLista.eliminarLista(idLista, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/usuarios/me/listas/{idLista}/elementos")
+    public ResponseEntity<DListaDetalle> aniadirElemento(@PathVariable long idLista,
                                                          Authentication authentication,
                                                          @Valid @RequestBody DContenidoListaNuevo dto) {
-        var detalle = servicioLista.aniadirContenido(id, authentication.getName(), mapeador.entidadNueva(dto));
+        var detalle = servicioLista.aniadirContenido(idLista, authentication.getName(), mapeador.entidadNueva(dto));
         return ResponseEntity.ok(mapeador.dtoDetalle(detalle.lista(), detalle.elementos()));
     }
 
-    @DeleteMapping("/listas/{id}/elementos/{idElemento}")
-    public ResponseEntity<Void> eliminarElemento(@PathVariable long id,
+    @DeleteMapping("/usuarios/me/listas/{idLista}/elementos/{idElemento}")
+    public ResponseEntity<Void> eliminarElemento(@PathVariable long idLista,
                                                  @PathVariable long idElemento,
                                                  Authentication authentication) {
-        servicioLista.eliminarElemento(id, idElemento, authentication.getName());
+        servicioLista.eliminarElemento(idLista, idElemento, authentication.getName());
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/listas/{id}")
-    public ResponseEntity<Void> eliminarLista(@PathVariable long id,
-                                              Authentication authentication) {
-        servicioLista.eliminarLista(id, authentication.getName());
-        return ResponseEntity.noContent().build();
+    @GetMapping("/usuarios/{idUsuario}/listas")
+    public ResponseEntity<List<DListaResumen>> obtenerListasDeUsuario(@PathVariable long idUsuario) {
+        List<DListaResumen> listas = servicioLista.obtenerListasDeUsuario(idUsuario).stream()
+                .map(resumen -> mapeador.dtoResumen(resumen.lista(), resumen.totalElementos()))
+                .toList();
+
+        return ResponseEntity.ok(listas);
     }
 
-    @PutMapping("/listas/{id}")
-    public ResponseEntity<DListaDetalle> editarLista(@PathVariable long id,
-                                                     Authentication authentication,
-                                                     @Valid @RequestBody DListaNueva dto) {
-        var detalle = servicioLista.editarLista(id, authentication.getName(), mapeador.entidadNueva(dto));
+    @GetMapping("/usuarios/{idUsuario}/listas/{idLista}")
+    public ResponseEntity<DListaDetalle> obtenerListaDeUsuario(@PathVariable long idUsuario,
+                                                               @PathVariable long idLista) {
+        var detalle = servicioLista.obtenerListaDeUsuario(idUsuario, idLista);
         return ResponseEntity.ok(mapeador.dtoDetalle(detalle.lista(), detalle.elementos()));
     }
 }

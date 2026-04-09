@@ -4,7 +4,7 @@ import { useAuth } from "../../servicios/authContext.jsx";
 import {
     borrarLista,
     editarLista,
-    obtenerDetalleLista,
+    obtenerDetalleListaDeUsuario,
 } from "../../servicios/ServicioListas.js";
 import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
 import "../tmdb/estilos/detalleTmdb.css";
@@ -94,7 +94,7 @@ function TarjetaContenido({ item }) {
 }
 
 export default function DetalleLista() {
-    const { id } = useParams();
+    const { idUsuario, idLista } = useParams();
     const navigate = useNavigate();
     const { user, loadingMe } = useAuth();
 
@@ -103,21 +103,31 @@ export default function DetalleLista() {
     const [error, setError] = useState("");
     const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
 
+    const esPropietario =
+        user?.id != null && Number(user.id) === Number(idUsuario);
+
+    const nombreAutor = esPropietario
+        ? user?.nombre || `Usuario ${idUsuario}`
+        : `Usuario ${idUsuario}`;
+
     const avatar = useMemo(() => {
-        return (user?.nombre || "?").trim().charAt(0).toUpperCase();
-    }, [user]);
+        return (nombreAutor || "?").trim().charAt(0).toUpperCase();
+    }, [nombreAutor]);
+
+    const rutaVolver = esPropietario
+        ? `/usuarios/${idUsuario}/feed`
+        : "/";
 
     useEffect(() => {
-        if (loadingMe) return;
         cargarDetalle();
-    }, [id, loadingMe]);
+    }, [idUsuario, idLista]);
 
     async function cargarDetalle() {
         setLoading(true);
         setError("");
 
         try {
-            const data = await obtenerDetalleLista(id);
+            const data = await obtenerDetalleListaDeUsuario(idUsuario, idLista);
             setLista(data);
         } catch (e) {
             setError(e.message || "No se pudo cargar la lista.");
@@ -127,7 +137,7 @@ export default function DetalleLista() {
     }
 
     async function manejarEditar(dto) {
-        await editarLista(id, dto);
+        await editarLista(idLista, dto);
         setModalEditarAbierto(false);
         await cargarDetalle();
     }
@@ -138,26 +148,12 @@ export default function DetalleLista() {
         );
         if (!confirmado) return;
 
-        await borrarLista(id);
-        navigate("/mi-feed");
+        await borrarLista(idLista);
+        navigate(`/usuarios/${idUsuario}/feed`);
     }
 
-    if (loadingMe || loading) {
+    if (loading) {
         return <div className="tmdb-cargando">Cargando lista...</div>;
-    }
-
-    if (!user) {
-        return (
-            <section className="tmdb-detalle feed-usuario">
-                <div className="tmdb-panel feed-aviso">
-                    <h1>Lista privada</h1>
-                    <p>Necesitas iniciar sesión para ver tus listas.</p>
-                    <Link to="/" className="tmdb-boton-primario">
-                        Volver al inicio
-                    </Link>
-                </div>
-            </section>
-        );
     }
 
     if (error) {
@@ -170,8 +166,8 @@ export default function DetalleLista() {
 
     return (
         <section className="tmdb-detalle feed-usuario">
-            <Link to="/mi-feed" className="tmdb-volver">
-                ← Volver al feed
+            <Link to={rutaVolver} className="tmdb-volver">
+                ← Volver
             </Link>
 
             <header className="tmdb-hero tmdb-panel">
@@ -192,14 +188,16 @@ export default function DetalleLista() {
                                 <span className="tmdb-meta-chip">
                                     {lista.elementos?.length ?? 0} elementos
                                 </span>
-                                <span className="tmdb-meta-chip">Colección personal</span>
+                                <span className="tmdb-meta-chip">
+                                    {esPropietario ? "Tu lista" : "Lista pública"}
+                                </span>
                             </div>
                         </div>
 
                         <div className="feed-autor-lista">
                             <div className="feed-avatar feed-avatar-pequeno">{avatar}</div>
                             <div>
-                                <strong>{user.nombre}</strong>
+                                <strong>{nombreAutor}</strong>
                                 <p>Creador de la lista</p>
                             </div>
                         </div>
@@ -209,23 +207,25 @@ export default function DetalleLista() {
                             <p>{lista.descripcion || "Esta lista no tiene descripción."}</p>
                         </div>
 
-                        <div className="tmdb-resumen-acciones">
-                            <button
-                                type="button"
-                                className="tmdb-boton-primario"
-                                onClick={() => setModalEditarAbierto(true)}
-                            >
-                                Editar lista
-                            </button>
+                        {!loadingMe && esPropietario && (
+                            <div className="tmdb-resumen-acciones">
+                                <button
+                                    type="button"
+                                    className="tmdb-boton-primario"
+                                    onClick={() => setModalEditarAbierto(true)}
+                                >
+                                    Editar lista
+                                </button>
 
-                            <button
-                                type="button"
-                                className="tmdb-boton-secundario feed-boton-peligro"
-                                onClick={manejarBorrar}
-                            >
-                                Borrar lista
-                            </button>
-                        </div>
+                                <button
+                                    type="button"
+                                    className="tmdb-boton-secundario feed-boton-peligro"
+                                    onClick={manejarBorrar}
+                                >
+                                    Borrar lista
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             </header>

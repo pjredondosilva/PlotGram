@@ -8,7 +8,6 @@ import FeedUsuario from "../paginas/usuario/FeedUsuario.jsx";
 import EpisodioDetalle from "../paginas/tmdb/EpisodioDetalle.jsx";
 import DetalleLista from "../paginas/usuario/DetalleLista.jsx";
 
-
 export const router = createBrowserRouter([
     {
         element: <MainLayout />,
@@ -22,7 +21,7 @@ export const router = createBrowserRouter([
                 element: <PeliculaDetalle />,
             },
             {
-                path: "mi-feed",
+                path: "usuarios/:idUsuario/feed",
                 element: <FeedUsuario />,
             },
             {
@@ -30,7 +29,7 @@ export const router = createBrowserRouter([
                 element: <SerieDetalle />,
             },
             {
-                path: "listas/:id",
+                path: "usuarios/:idUsuario/feed/listas/:idLista",
                 element: <DetalleLista />,
             },
             {
