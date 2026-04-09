@@ -20,13 +20,13 @@ public class ServicioTmdb {
     private final WebClient tmdb;
     private final String lang;
     private final MapeadorTmdb mapeador;
-    private static final String LANG_GENEROS = "es-ES";
+    private static final String lenguaGeneros = "es-ES";
 
     private volatile Map<Integer, String> cacheGenerosPeliculas = Map.of();
     private volatile Map<Integer, String> cacheGenerosSeries = Map.of();
 
-    private final Object lockGenerosPeliculas = new Object();
-    private final Object lockGenerosSeries = new Object();
+    private final Object bloqueoGenerosPeliculas = new Object();
+    private final Object bloqueoGenerosSeries = new Object();
 
     public ServicioTmdb(WebClient tmdbWebClient,
                         @Value("${tmdb.lang:es-ES}") String lang,
@@ -345,7 +345,7 @@ public class ServicioTmdb {
         try {
             Map<Integer, String> nuevos = actualizarGenerosPeliculas();
             if (!nuevos.isEmpty()) {
-                synchronized (lockGenerosPeliculas) {
+                synchronized (bloqueoGenerosPeliculas) {
                     cacheGenerosPeliculas = Map.copyOf(nuevos);
                 }
             }
@@ -355,7 +355,7 @@ public class ServicioTmdb {
         try {
             Map<Integer, String> nuevos = actualizarGenerosSeries();
             if (!nuevos.isEmpty()) {
-                synchronized (lockGenerosSeries) {
+                synchronized (bloqueoGenerosSeries) {
                     cacheGenerosSeries = Map.copyOf(nuevos);
                 }
             }
@@ -374,7 +374,7 @@ public class ServicioTmdb {
     private Map<Integer, String> actualizarGenerosPeliculas() {
         DRespuestaGenerosTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/genre/movie/list")
-                        .queryParam("language", LANG_GENEROS)
+                        .queryParam("language", lenguaGeneros)
                         .build())
                 .retrieve()
                 .bodyToMono(DRespuestaGenerosTmdb.class)
@@ -394,7 +394,7 @@ public class ServicioTmdb {
     private Map<Integer, String> actualizarGenerosSeries() {
         DRespuestaGenerosTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/genre/tv/list")
-                        .queryParam("language", LANG_GENEROS)
+                        .queryParam("language", lenguaGeneros)
                         .build())
                 .retrieve()
                 .bodyToMono(DRespuestaGenerosTmdb.class)
@@ -411,7 +411,7 @@ public class ServicioTmdb {
                 ));
     }
 
-    public DPeliculaDetalle detallePelicula(long peliculaId) {
+    public DPeliculaDetalle detallePelicula(Long peliculaId) {
         var respuesta = tmdb.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/movie/{id}")
@@ -429,7 +429,7 @@ public class ServicioTmdb {
         return mapeador.DtoPeliculaDetalle(respuesta);
     }
 
-    public DSerieDetalle detalleSerie(long serieId) {
+    public DSerieDetalle detalleSerie(Long serieId) {
         var respuesta = tmdb.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/tv/{id}")
@@ -447,7 +447,7 @@ public class ServicioTmdb {
         return mapeador.DtoSerieDetalle(respuesta);
     }
 
-    public DTemporadaDetalle detalleTemporada(long serieId, int numeroTemporada) {
+    public DTemporadaDetalle detalleTemporada(Long serieId, int numeroTemporada) {
         var respuesta = tmdb.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/tv/{id}/season/{seasonNumber}")
@@ -464,7 +464,7 @@ public class ServicioTmdb {
         return mapeador.DtoTemporadaDetalle(respuesta);
     }
 
-    public DEpisodioDetalle detalleEpisodio(long serieId, int numeroTemporada, int numeroEpisodio) {
+    public DEpisodioDetalle detalleEpisodio(Long serieId, int numeroTemporada, int numeroEpisodio) {
         var respuesta = tmdb.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/tv/{id}/season/{seasonNumber}/episode/{episodeNumber}")

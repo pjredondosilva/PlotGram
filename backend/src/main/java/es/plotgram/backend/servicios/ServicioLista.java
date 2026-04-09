@@ -64,14 +64,14 @@ public class ServicioLista {
     }
 
     @Transactional(readOnly = true)
-    public ListaDetalleServicio obtenerLista(long idLista, String nombreUsuario) {
+    public ListaDetalleServicio obtenerLista(Long idLista, String nombreUsuario) {
         Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
         List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
         return new ListaDetalleServicio(lista, elementos);
     }
 
     @Transactional
-    public ListaDetalleServicio aniadirContenido(long idLista, String nombreUsuario, Contenido contenidoNuevo) {
+    public ListaDetalleServicio aniadirContenido(Long idLista, String nombreUsuario, Contenido contenidoNuevo) {
         Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
 
         Contenido contenido = repositorioContenido.buscarPorTmdbIdYTipo(contenidoNuevo.getTmdbId(), contenidoNuevo.getTipo())
@@ -94,7 +94,7 @@ public class ServicioLista {
     }
 
     @Transactional
-    public void eliminarElemento(long idLista, long idItem, String nombreUsuario) {
+    public void eliminarElemento(Long idLista, Long idItem, String nombreUsuario) {
         Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
 
         ListaItem listaItem = repositorioListaItem.buscarPorIdYListaId(idItem, lista.getId())
@@ -104,7 +104,7 @@ public class ServicioLista {
     }
 
     @Transactional
-    public void eliminarLista(long idLista, String nombreUsuario) {
+    public void eliminarLista(Long idLista, String nombreUsuario) {
         Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
 
         List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
@@ -116,7 +116,7 @@ public class ServicioLista {
     }
 
     @Transactional
-    public ListaDetalleServicio editarLista(long idLista, String nombreUsuario, Lista datosLista) {
+    public ListaDetalleServicio editarLista(Long idLista, String nombreUsuario, Lista datosLista) {
         Lista lista = obtenerListaDelUsuario(idLista, nombreUsuario);
 
         lista.setNombre(datosLista.getNombre());
@@ -134,7 +134,7 @@ public class ServicioLista {
                 .orElseThrow(UsuarioNoEncontrado::new);
     }
 
-    private Lista obtenerListaDelUsuario(long idLista, String nombreUsuario) {
+    private Lista obtenerListaDelUsuario(Long idLista, String nombreUsuario) {
         Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);
 
         return repositorioLista.buscarPorIdYUsuarioId(idLista, usuario.getId())
@@ -143,5 +143,5 @@ public class ServicioLista {
 
     public record ListaDetalleServicio(Lista lista, List<ListaItem> elementos) {}
 
-    public record ListaResumenServicio(Lista lista, long totalElementos) {}
+    public record ListaResumenServicio(Lista lista, Long totalElementos) {}
 }

@@ -33,7 +33,7 @@ public class ServicioUsuario {
         repositorioUsuario.guardar(usuario);
     }
 
-    public Optional<Usuario> buscarUsuario(long id) {
+    public Optional<Usuario> buscarUsuario(Long id) {
         return repositorioUsuario.buscarPorID(id);
     }
 
