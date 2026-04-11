@@ -116,7 +116,6 @@ public class ServicioLista {
         repositorioLista.borrar(lista);
     }
 
-    @Transactional
     public ListaDetalleServicio editarLista(Long idLista, String nombreUsuario, Lista datosLista) {
         Lista lista = obtenerListaDelUsuarioAutenticado(idLista, nombreUsuario);
 
@@ -124,10 +123,10 @@ public class ServicioLista {
         lista.setDescripcion(datosLista.getDescripcion());
         lista.setImagenPortada(datosLista.getImagenPortada());
 
-        repositorioLista.guardar(lista);
+        Lista listaActualizada = repositorioLista.actualizar(lista);
 
-        List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
-        return new ListaDetalleServicio(lista, elementos);
+        List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(listaActualizada.getId());
+        return new ListaDetalleServicio(listaActualizada, elementos);
     }
 
     private List<ListaResumenServicio> construirResumenesDeUsuario(Long usuarioId) {

@@ -18,13 +18,14 @@ public class RepositorioLista {
 
     @Transactional
     public Lista guardar(Lista lista) {
-        if (lista.getId() == null) {
-            em.persist(lista);
-            return lista;
-        }
-        return em.merge(lista);
+        em.persist(lista);
+        return lista;
     }
 
+    @Transactional
+    public Lista actualizar(Lista lista) {
+        return em.merge(lista);
+    }
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public List<Lista> buscarPorUsuarioId(Long usuarioId) {
         var q = em.createQuery("""

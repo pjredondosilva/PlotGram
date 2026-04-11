@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../servicios/authContext.jsx";
 import {
     borrarLista,
     editarLista,
+    eliminarElementoDeLista,
     obtenerDetalleListaDeUsuario,
 } from "../../servicios/ServicioListas.js";
 import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
@@ -44,8 +45,29 @@ function normalizarEnlace(enlace) {
     return enlace.startsWith("/") ? enlace : `/${enlace}`;
 }
 
-function TarjetaContenido({ item }) {
+function TarjetaContenido({
+                              item,
+                              esPropietario,
+                              menuAbierto,
+                              onAbrirMenu,
+                              onCerrarMenu,
+                              onEliminar,
+                          }) {
     const enlace = normalizarEnlace(item.enlace);
+    const menuRef = useRef(null);
+
+    useEffect(() => {
+        if (!menuAbierto) return;
+
+        function cerrar(e) {
+            if (!menuRef.current?.contains(e.target)) {
+                onCerrarMenu();
+            }
+        }
+
+        window.addEventListener("mousedown", cerrar);
+        return () => window.removeEventListener("mousedown", cerrar);
+    }, [menuAbierto, onCerrarMenu]);
 
     const contenido = (
         <>
@@ -69,12 +91,11 @@ function TarjetaContenido({ item }) {
         </>
     );
 
+    let card;
     if (!enlace) {
-        return <article className="feed-contenido-card tmdb-panel">{contenido}</article>;
-    }
-
-    if (enlace.startsWith("http")) {
-        return (
+        card = <article className="feed-contenido-card tmdb-panel">{contenido}</article>;
+    } else if (enlace.startsWith("http")) {
+        card = (
             <a
                 className="feed-contenido-card tmdb-panel"
                 href={enlace}
@@ -84,12 +105,51 @@ function TarjetaContenido({ item }) {
                 {contenido}
             </a>
         );
+    } else {
+        card = (
+            <Link className="feed-contenido-card tmdb-panel" to={enlace}>
+                {contenido}
+            </Link>
+        );
     }
 
     return (
-        <Link className="feed-contenido-card tmdb-panel" to={enlace}>
-            {contenido}
-        </Link>
+        <div className="feed-contenido-card-wrapper">
+            {esPropietario && (
+                <div className="feed-lista-card-menu" ref={menuRef}>
+                    <button
+                        type="button"
+                        className="feed-menu-boton"
+                        aria-label={`Abrir opciones de ${item.titulo}`}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            menuAbierto ? onCerrarMenu() : onAbrirMenu(item.idItem);
+                        }}
+                    >
+                        ⋯
+                    </button>
+
+                    {menuAbierto && (
+                        <div className="feed-menu-desplegable">
+                            <button
+                                type="button"
+                                className="feed-menu-opcion-peligro"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    onEliminar(item);
+                                }}
+                            >
+                                Borrar
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {card}
+        </div>
     );
 }
 
@@ -102,6 +162,7 @@ export default function DetalleLista() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
+    const [menuAbiertoId, setMenuAbiertoId] = useState(null);
 
     const esPropietario =
         user?.id != null && Number(user.id) === Number(idUsuario);
@@ -150,6 +211,27 @@ export default function DetalleLista() {
 
         await borrarLista(idLista);
         navigate(`/usuarios/${idUsuario}/feed`);
+    }
+
+    async function manejarEliminarElemento(item) {
+        const confirmado = window.confirm(
+            `¿Seguro que quieres quitar "${item.titulo}" de esta lista?`
+        );
+        if (!confirmado) return;
+
+        try {
+            await eliminarElementoDeLista(idLista, item.idItem);
+
+            setLista((prev) => ({
+                ...prev,
+                elementos: (prev?.elementos || []).filter(
+                    (elemento) => elemento.idItem !== item.idItem
+                ),
+            }));
+            setMenuAbiertoId(null);
+        } catch (e) {
+            window.alert(e.message || "No se pudo eliminar el elemento de la lista.");
+        }
     }
 
     if (loading) {
@@ -239,7 +321,15 @@ export default function DetalleLista() {
                 {lista.elementos?.length ? (
                     <div className="feed-contenido-grid">
                         {lista.elementos.map((item) => (
-                            <TarjetaContenido key={item.idItem} item={item} />
+                            <TarjetaContenido
+                                key={item.idItem}
+                                item={item}
+                                esPropietario={esPropietario}
+                                menuAbierto={menuAbiertoId === item.idItem}
+                                onAbrirMenu={setMenuAbiertoId}
+                                onCerrarMenu={() => setMenuAbiertoId(null)}
+                                onEliminar={manejarEliminarElemento}
+                            />
                         ))}
                     </div>
                 ) : (

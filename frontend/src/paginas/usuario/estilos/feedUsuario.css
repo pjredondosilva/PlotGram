@@ -388,6 +388,15 @@
     overflow: hidden;
 }
 
+.feed-contenido-card-wrapper {
+    position: relative;
+}
+
+.feed-contenido-card-wrapper .feed-contenido-card {
+    display: block;
+    height: 100%;
+}
+
 .feed-contenido-imagen {
     aspect-ratio: 2 / 3;
     background: rgba(255, 255, 255, 0.05);

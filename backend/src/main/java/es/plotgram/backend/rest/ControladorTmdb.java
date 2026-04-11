@@ -17,7 +17,7 @@ public class ControladorTmdb {
     }
 
     @GetMapping("/peliculas")
-    public DRespuestaPaginadaTmdb<DPeliculaListado> DarPeliculas(
+    public DRespuestaPaginadaTmdb<DPeliculaListado> darPeliculas(
             @RequestParam(required = false) String consulta,
             @RequestParam(defaultValue = "1") int pagina,
             @RequestParam(required = false) String fechaDesde,
@@ -28,7 +28,7 @@ public class ControladorTmdb {
     }
 
     @GetMapping("/series")
-    public DRespuestaPaginadaTmdb<DSerieListado> DarSeries(
+    public DRespuestaPaginadaTmdb<DSerieListado> darSeries(
             @RequestParam(required = false) String consulta,
             @RequestParam(defaultValue = "1") int pagina,
             @RequestParam(required = false) String fechaDesde,
@@ -39,27 +39,27 @@ public class ControladorTmdb {
     }
 
     @GetMapping("/peliculas/generos")
-    public List<String> DarGenerosPeliculas() {
+    public List<String> darGenerosPeliculas() {
         return servicioTmdb.nombresGenerosPeliculas();
     }
 
     @GetMapping("/series/generos")
-    public List<String> DarGenerosSeries() {
+    public List<String> darGenerosSeries() {
         return servicioTmdb.nombresGenerosSeries();
     }
 
     @GetMapping("/peliculas/{id}")
-    public DPeliculaDetalle DarPeliculaPorId(@PathVariable long id) {
+    public DPeliculaDetalle darPeliculaPorId(@PathVariable long id) {
         return servicioTmdb.detallePelicula(id);
     }
 
     @GetMapping("/series/{id}")
-    public DSerieDetalle DarSeriePorId(@PathVariable long id) {
+    public DSerieDetalle darSeriePorId(@PathVariable long id) {
         return servicioTmdb.detalleSerie(id);
     }
 
     @GetMapping("/series/{id}/temporadas/{temporada}")
-    public DTemporadaDetalle DarTemporadaPorId(
+    public DTemporadaDetalle darTemporadaPorId(
             @PathVariable long id,
             @PathVariable int temporada
     ) {
@@ -67,7 +67,7 @@ public class ControladorTmdb {
     }
 
     @GetMapping("/series/{id}/temporadas/{temporada}/episodios/{episodio}")
-    public DEpisodioDetalle DarEpisodioPorId(
+    public DEpisodioDetalle darEpisodioPorId(
             @PathVariable long id,
             @PathVariable int temporada,
             @PathVariable int episodio
