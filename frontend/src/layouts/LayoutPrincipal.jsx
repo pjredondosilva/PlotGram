@@ -1,10 +1,10 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Header from "../componentes/layout/Header";
-import AuthModal from "../componentes/auth/AuthModal";
-import FormularioLogin from "../componentes/auth/FormularioInicioDeSesion.jsx";
-import FormularioRegistro from "../componentes/auth/FormularioRegistro.jsx";
-import { useAuth } from "../servicios/authContext.jsx";
+import Encabezado from "../componentes/layout/Encabezado.jsx";
+import ModalAutenticacion from "../componentes/Autenticacion/ModalAutenticacion.jsx";
+import FormularioLogin from "../componentes/Autenticacion/FormularioInicioDeSesion.jsx";
+import FormularioRegistro from "../componentes/Autenticacion/FormularioRegistro.jsx";
+import { useAuth } from "../servicios/ContextoDeAutenticacion.jsx";
 
 const LOGIN_FORM_INICIAL = {
     nombre: "",
@@ -17,7 +17,7 @@ const REGISTER_FORM_INICIAL = {
     contrasenia: "",
 };
 
-export default function MainLayout() {
+export default function LayoutPrincipal() {
     const navigate = useNavigate();
     const {
         user,
@@ -65,7 +65,7 @@ export default function MainLayout() {
 
     return (
         <>
-            <Header
+            <Encabezado
                 user={user}
                 onLogin={() => setModal("login")}
                 onRegister={() => setModal("register")}
@@ -76,7 +76,7 @@ export default function MainLayout() {
                 <Outlet />
             </main>
 
-            <AuthModal open={modal !== null} onClose={handleCloseModal}>
+            <ModalAutenticacion open={modal !== null} onClose={handleCloseModal}>
                 {modal === "login" && (
                     <>
                         {sessionExpired && (
@@ -118,7 +118,7 @@ export default function MainLayout() {
                         resetForm={() => setRegisterForm(REGISTER_FORM_INICIAL)}
                     />
                 )}
-            </AuthModal>
+            </ModalAutenticacion>
         </>
     );
 }

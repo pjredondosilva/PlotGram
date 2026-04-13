@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { DarDetallesEpisodio } from "../../servicios/ServicioTmdb.js";
-import { profileUrl, stillUrl } from "../../utils/tmdbImages.js";
-import { useAuth } from "../../servicios/authContext.jsx";
+import { profileUrl, stillUrl } from "../../utils/tmdbImagenes.js";
+import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { crearContenidoListaEpisodio } from "../../utils/contenidoLista.js";
 import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
 import "./estilos/detalleTmdb.css";

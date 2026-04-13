@@ -1,7 +1,7 @@
 import "./estilos/AuthModal.css";
 import { useEffect } from "react";
 
-export default function AuthModal({ open, onClose, children }) {
+export default function ModalAutenticacion({ open, onClose, children }) {
     useEffect(() => {
         function onKey(e) {
             if (e.key === "Escape") onClose();

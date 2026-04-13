@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthModal from "../auth/AuthModal.jsx";
-import { useAuth } from "../../servicios/authContext.jsx";
-import { actualizarMiPerfil, verificarContrasenaActual } from "../../servicios/auth.js";
+import ModalAutenticacion from "../Autenticacion/ModalAutenticacion.jsx";
+import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
+import { actualizarMiPerfil, verificarContrasenaActual } from "../../servicios/ServicioAutenticacion.js";
 import "../../paginas/usuario/estilos/feedUsuario.css";
 
 const FORMULARIO_VACIO = {
@@ -138,7 +138,7 @@ export default function FormularioEditarPerfil({
     }
 
     return (
-        <AuthModal open={open} onClose={onClose}>
+        <ModalAutenticacion open={open} onClose={onClose}>
             <div className="feed-formulario">
                 {paso === "verificacion" ? (
                     <>
@@ -355,6 +355,6 @@ export default function FormularioEditarPerfil({
                     </>
                 )}
             </div>
-        </AuthModal>
+        </ModalAutenticacion>
     );
 }

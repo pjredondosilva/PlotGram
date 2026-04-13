@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../../servicios/authContext.jsx";
+import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import {
     borrarLista,
     crearLista,

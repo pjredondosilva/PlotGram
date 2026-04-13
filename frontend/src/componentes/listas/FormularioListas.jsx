@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import AuthModal from "../auth/AuthModal.jsx";
+import ModalAutenticacion from "../Autenticacion/ModalAutenticacion.jsx";
 import "../../paginas/usuario/estilos/feedUsuario.css";
 
 const VACIO = {
@@ -57,7 +57,7 @@ export default function FormularioLista({
     }
 
     return (
-        <AuthModal open={open} onClose={onClose}>
+        <ModalAutenticacion open={open} onClose={onClose}>
             <div className="feed-formulario">
                 <h2>{titulo}</h2>
                 <p className="feed-formulario-subtitulo">
@@ -160,6 +160,6 @@ export default function FormularioLista({
                     </div>
                 </form>
             </div>
-        </AuthModal>
+        </ModalAutenticacion>
     );
 }

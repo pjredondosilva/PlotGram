@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { DarDetallesPeliculas } from "../../servicios/ServicioTmdb.js";
-import { logoUrl, profileUrl } from "../../utils/tmdbImages.js";
+import { logoUrl, profileUrl } from "../../utils/tmdbImagenes.js";
 import { posterUrl } from "../../utils/img.js";
-import { useAuth } from "../../servicios/authContext.jsx";
+import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { crearContenidoListaPelicula } from "../../utils/contenidoLista.js";
 import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
 import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";

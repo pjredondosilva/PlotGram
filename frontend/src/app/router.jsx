@@ -1,16 +1,16 @@
 import { createBrowserRouter } from "react-router-dom";
-import MainLayout from "../layouts/MainLayout";
+import LayoutPrincipal from "../layouts/LayoutPrincipal.jsx";
 import Home from "../paginas/home/Home";
 import PeliculaDetalle from "../paginas/tmdb/PeliculaDetalle.jsx";
 import SerieDetalle from "../paginas/tmdb/SerieDetalle.jsx";
 import TemporadaDetalle from "../paginas/tmdb/TemporadaDetalle.jsx";
 import FeedUsuario from "../paginas/usuario/FeedUsuario.jsx";
 import EpisodioDetalle from "../paginas/tmdb/EpisodioDetalle.jsx";
-import DetalleLista from "../paginas/usuario/DetalleLista.jsx";
+import DetalleLista from "../paginas/Listas/DetalleLista.jsx";
 
 export const router = createBrowserRouter([
     {
-        element: <MainLayout />,
+        element: <LayoutPrincipal />,
         children: [
             {
                 index: true,

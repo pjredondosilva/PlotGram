@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loginUser, getMe } from "../../servicios/auth";
+import { loginUsuario, getMe } from "../../servicios/ServicioAutenticacion.js";
 
 export default function FormularioLogin({ onDone, setUser, form, setForm, resetForm }) {
     const [loading, setLoading] = useState(false);
@@ -13,7 +13,7 @@ export default function FormularioLogin({ onDone, setUser, form, setForm, resetF
         setLoading(true);
 
         try {
-            await loginUser({ nombre, contrasenia });
+            await loginUsuario({ nombre, contrasenia });
             const me = await getMe();
             setUser(me);
 

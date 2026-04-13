@@ -8,10 +8,7 @@ import es.plotgram.backend.excepciones.ContenidoYaEnLista;
 import es.plotgram.backend.excepciones.ElementoNoEncontradoEnLista;
 import es.plotgram.backend.excepciones.ListaNoEncontrada;
 import es.plotgram.backend.excepciones.UsuarioNoEncontrado;
-import es.plotgram.backend.repositorios.RepositorioContenido;
 import es.plotgram.backend.repositorios.RepositorioLista;
-import es.plotgram.backend.repositorios.RepositorioListaItem;
-import es.plotgram.backend.repositorios.RepositorioUsuario;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -23,18 +20,18 @@ import java.util.List;
 public class ServicioLista {
 
     private final RepositorioLista repositorioLista;
-    private final RepositorioListaItem repositorioListaItem;
-    private final RepositorioContenido repositorioContenido;
-    private final RepositorioUsuario repositorioUsuario;
+    private final ServicioListaItem servicioListaItem;
+    private final ServicioContenido servicioContenido;
+    private final ServicioUsuario servicioUsuario;
 
     public ServicioLista(RepositorioLista repositorioLista,
-                         RepositorioListaItem repositorioListaItem,
-                         RepositorioContenido repositorioContenido,
-                         RepositorioUsuario repositorioUsuario) {
+                         ServicioListaItem servicioListaItem,
+                         ServicioContenido servicioContenido,
+                         ServicioUsuario servicioUsuario) {
         this.repositorioLista = repositorioLista;
-        this.repositorioListaItem = repositorioListaItem;
-        this.repositorioContenido = repositorioContenido;
-        this.repositorioUsuario = repositorioUsuario;
+        this.servicioListaItem = servicioListaItem;
+        this.servicioContenido = servicioContenido;
+        this.servicioUsuario = servicioUsuario;
     }
 
     @Transactional
@@ -66,7 +63,7 @@ public class ServicioLista {
     @Transactional(readOnly = true)
     public ListaDetalleServicio obtenerListaDeUsuario(Long idUsuario, Long idLista) {
         Lista lista = obtenerListaPorUsuarioId(idLista, idUsuario);
-        List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
+        List<ListaItem> elementos = servicioListaItem.buscarPorListaIdOrdenados(lista.getId());
         return new ListaDetalleServicio(lista, elementos);
     }
 
@@ -74,23 +71,22 @@ public class ServicioLista {
     public ListaDetalleServicio aniadirContenido(Long idLista, String nombreUsuario, Contenido contenidoNuevo) {
         Lista lista = obtenerListaDelUsuarioAutenticado(idLista, nombreUsuario);
 
-        Contenido contenido = repositorioContenido.buscarPorTmdbIdYTipo(contenidoNuevo.getTmdbId(), contenidoNuevo.getTipo())
-                .orElseGet(() -> repositorioContenido.guardar(contenidoNuevo));
+        Contenido contenido = servicioContenido.buscarOGuardar(contenidoNuevo);
 
-        if (repositorioListaItem.existePorListaIdYContenidoId(lista.getId(), contenido.getId())) {
+        if (servicioListaItem.existePorListaIdYContenidoId(lista.getId(), contenido.getId())) {
             throw new ContenidoYaEnLista();
         }
 
-        Integer ultimoOrden = repositorioListaItem.buscarUltimoOrdenDeLista(lista.getId());
+        Integer ultimoOrden = servicioListaItem.buscarUltimoOrdenDeLista(lista.getId());
 
         ListaItem listaItem = new ListaItem();
         listaItem.setLista(lista);
         listaItem.setContenido(contenido);
         listaItem.setOrden(ultimoOrden == null ? 0 : ultimoOrden + 1);
 
-        repositorioListaItem.guardar(listaItem);
+        servicioListaItem.guardar(listaItem);
 
-        List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
+        List<ListaItem> elementos = servicioListaItem.buscarPorListaIdOrdenados(lista.getId());
         return new ListaDetalleServicio(lista, elementos);
     }
 
@@ -98,24 +94,25 @@ public class ServicioLista {
     public void eliminarElemento(Long idLista, Long idItem, String nombreUsuario) {
         Lista lista = obtenerListaDelUsuarioAutenticado(idLista, nombreUsuario);
 
-        ListaItem listaItem = repositorioListaItem.buscarPorIdYListaId(idItem, lista.getId())
+        ListaItem listaItem = servicioListaItem.buscarPorIdYListaId(idItem, lista.getId())
                 .orElseThrow(ElementoNoEncontradoEnLista::new);
 
-        repositorioListaItem.borrar(listaItem);
+        servicioListaItem.borrar(listaItem);
     }
 
     @Transactional
     public void eliminarLista(Long idLista, String nombreUsuario) {
         Lista lista = obtenerListaDelUsuarioAutenticado(idLista, nombreUsuario);
 
-        List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(lista.getId());
+        List<ListaItem> elementos = servicioListaItem.buscarPorListaIdOrdenados(lista.getId());
         for (ListaItem item : elementos) {
-            repositorioListaItem.borrar(item);
+            servicioListaItem.borrar(item);
         }
 
         repositorioLista.borrar(lista);
     }
 
+    @Transactional
     public ListaDetalleServicio editarLista(Long idLista, String nombreUsuario, Lista datosLista) {
         Lista lista = obtenerListaDelUsuarioAutenticado(idLista, nombreUsuario);
 
@@ -125,7 +122,7 @@ public class ServicioLista {
 
         Lista listaActualizada = repositorioLista.actualizar(lista);
 
-        List<ListaItem> elementos = repositorioListaItem.buscarPorListaIdOrdenados(listaActualizada.getId());
+        List<ListaItem> elementos = servicioListaItem.buscarPorListaIdOrdenados(listaActualizada.getId());
         return new ListaDetalleServicio(listaActualizada, elementos);
     }
 
@@ -133,18 +130,18 @@ public class ServicioLista {
         return repositorioLista.buscarPorUsuarioId(usuarioId).stream()
                 .map(lista -> new ListaResumenServicio(
                         lista,
-                        repositorioListaItem.contarPorListaId(lista.getId())
+                        servicioListaItem.contarPorListaId(lista.getId())
                 ))
                 .toList();
     }
 
     private Usuario obtenerUsuarioPorNombre(String nombreUsuario) {
-        return repositorioUsuario.buscarPorNombre(nombreUsuario)
+        return servicioUsuario.buscarUsuario(nombreUsuario)
                 .orElseThrow(UsuarioNoEncontrado::new);
     }
 
     private Usuario obtenerUsuarioPorId(Long idUsuario) {
-        return repositorioUsuario.buscarPorID(idUsuario)
+        return servicioUsuario.buscarUsuario(idUsuario)
                 .orElseThrow(UsuarioNoEncontrado::new);
     }
 

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { getSessionState, refreshSession } from "./auth.js";
+import { getEstadoSesion, RefrescarSesion } from "./ServicioAutenticacion.js";
 
 /**
  * Hook para renovación deslizante del JWT (Propuesta B).
@@ -29,7 +29,7 @@ export function useRenovacionJwt({ enabled, onSessionExpired } = {}) {
       if (cancelled || !runningRef.current) return;
 
       try {
-        const state = await getSessionState();
+        const state = await getEstadoSesion();
         const remaining = Number(state?.remainingSeconds ?? 0);
         const hardRemaining = Number(state?.hardRemainingSeconds ?? 0);
         const refreshWindow = Number(state?.refreshWindowSeconds ?? 600);
@@ -42,7 +42,7 @@ export function useRenovacionJwt({ enabled, onSessionExpired } = {}) {
 
         // Si estamos dentro de la ventana, intentamos refrescar.
         if (remaining > 0 && remaining <= refreshWindow) {
-          await refreshSession().catch(() => null);
+          await RefrescarSesion().catch(() => null);
         }
 
         // Estrategia adaptativa (pocas peticiones lejos de expirar, más cerca al final).

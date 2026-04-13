@@ -1,10 +1,10 @@
 import {apiDelete, apiGet, apiPost, apiPut} from "./api.js";
 
-export function registerUser({ nombre, email, contrasenia }) {
+export function registrarUsuario({ nombre, email, contrasenia }) {
     return apiPost("/api/usuarios", { nombre, email, contrasenia });
 }
 
-export function loginUser({ nombre, contrasenia }) {
+export function loginUsuario({ nombre, contrasenia }) {
     return apiPost("/api/sesiones", { nombre, contrasenia });
 }
 export async function logout() {
@@ -15,11 +15,11 @@ export async function getMe() {
     return apiGet("/api/usuarios/me");
 }
 
-export async function getSessionState() {
+export async function getEstadoSesion() {
     return apiGet("/api/sesiones/estado");
 }
 
-export async function refreshSession() {
+export async function RefrescarSesion() {
     return apiPost("/api/sesiones/renovacion");
 }
 

@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./estilos/Header.css";
+import "./estilos/Encabezado.css";
 
 function inicialUsuario(nombre) {
     return (nombre || "?").trim().charAt(0).toUpperCase();
 }
 
-export default function Header({ user, onLogin, onRegister, onLogout }) {
+export default function Encabezado({ user, onLogin, onRegister, onLogout }) {
     const navigate = useNavigate();
     const [menuOpen, setMenuOpen] = useState(false);
     const menuRef = useRef(null);

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "../../servicios/authContext.jsx";
+import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import {
     borrarLista,
     editarLista,
@@ -8,8 +8,8 @@ import {
     obtenerDetalleListaDeUsuario,
 } from "../../servicios/ServicioListas.js";
 import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
-import "../tmdb/estilos/detalleTmdb.css";
-import "./estilos/feedUsuario.css";
+import "../Tmdb/estilos/detalleTmdb.css";
+import "../usuario/estilos/feedUsuario.css";
 
 function formatearFecha(fecha) {
     if (!fecha) return "Fecha no disponible";

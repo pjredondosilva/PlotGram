@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { registerUser, loginUser, getMe } from "../../servicios/auth";
+import { registrarUsuario, loginUsuario, getMe } from "../../servicios/ServicioAutenticacion.js";
 
 const hasUpper = (s) => /[A-Z]/.test(s);
 const hasDigit = (s) => /\d/.test(s);
@@ -47,13 +47,13 @@ export default function FormularioRegistro({ onDone, setUser, form, setForm, res
 
         setLoading(true);
         try {
-            await registerUser({
+            await registrarUsuario({
                 nombre: nombreTrim,
                 email: emailTrim,
                 contrasenia,
             });
 
-            await loginUser({ nombre: nombreTrim, contrasenia });
+            await loginUsuario({ nombre: nombreTrim, contrasenia });
             const me = await getMe();
             setUser?.(me);
 
