@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import {
@@ -8,7 +8,9 @@ import {
     obtenerMisListas,
 } from "../../servicios/ServicioListas.js";
 import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
+import TarjetaLista from "../../componentes/listas/TarjetaLista.jsx";
 import FormularioEditarPerfil from "../../componentes/usuario/FormularioEditarPerfil.jsx";
+import ModalAutenticacion from "../../componentes/Autenticacion/ModalAutenticacion.jsx";
 import "../tmdb/estilos/detalleTmdb.css";
 import "./estilos/feedUsuario.css";
 
@@ -19,97 +21,6 @@ function descripcionUsuarioPorDefecto(nombre) {
 
 function inicialUsuario(nombre) {
     return (nombre || "?").trim().charAt(0).toUpperCase();
-}
-
-function TarjetaLista({
-                          lista,
-                          nombreUsuario,
-                          idUsuario,
-                          menuAbierto,
-                          onAbrirMenu,
-                          onCerrarMenu,
-                          onEditar,
-                          onBorrar,
-                      }) {
-    const navigate = useNavigate();
-    const menuRef = useRef(null);
-
-    useEffect(() => {
-        if (!menuAbierto) return;
-
-        function cerrar(e) {
-            if (!menuRef.current?.contains(e.target)) {
-                onCerrarMenu();
-            }
-        }
-
-        window.addEventListener("mousedown", cerrar);
-        return () => window.removeEventListener("mousedown", cerrar);
-    }, [menuAbierto, onCerrarMenu]);
-
-    function abrirDetalle() {
-        if (idUsuario == null) {
-            window.alert("No se puede abrir la lista porque falta el id del usuario autenticado.");
-            return;
-        }
-
-        navigate(`/usuarios/${idUsuario}/feed/listas/${lista.id}`);
-    }
-
-    return (
-        <article className="feed-lista-card tmdb-panel">
-            <div className="feed-lista-card-menu" ref={menuRef}>
-                <button
-                    type="button"
-                    className="feed-menu-boton"
-                    onClick={() => (menuAbierto ? onCerrarMenu() : onAbrirMenu(lista.id))}
-                    aria-label={`Abrir opciones de la lista ${lista.nombre}`}
-                >
-                    ⋯
-                </button>
-
-                {menuAbierto && (
-                    <div className="feed-menu-desplegable">
-                        <button type="button" onClick={() => onEditar(lista)}>
-                            Editar
-                        </button>
-                        <button
-                            type="button"
-                            className="feed-menu-opcion-peligro"
-                            onClick={() => onBorrar(lista)}
-                        >
-                            Borrar
-                        </button>
-                    </div>
-                )}
-            </div>
-
-            <button
-                type="button"
-                className="feed-lista-enlace"
-                onClick={abrirDetalle}
-            >
-                <div className="feed-lista-portada">
-                    {lista.imagenPortada ? (
-                        <img src={lista.imagenPortada} alt={lista.nombre} />
-                    ) : (
-                        <div className="feed-lista-portada-vacia">Sin portada</div>
-                    )}
-                </div>
-
-                <div className="feed-lista-cuerpo">
-                    <div className="feed-lista-meta">
-                        <span className="feed-lista-autor">{nombreUsuario}</span>
-                        <span className="feed-lista-separador">·</span>
-                        <span>{lista.numeroElementos} elementos</span>
-                    </div>
-
-                    <h3>{lista.nombre}</h3>
-                    <p>{lista.descripcion || "Sin descripción."}</p>
-                </div>
-            </button>
-        </article>
-    );
 }
 
 export default function FeedUsuario() {
@@ -302,22 +213,34 @@ export default function FeedUsuario() {
                 )}
             </section>
 
-            <FormularioLista
+            <ModalAutenticacion
                 open={modalNuevaAbierto}
                 onClose={() => setModalNuevaAbierto(false)}
-                onSubmit={manejarCrearLista}
-                titulo="Crear nueva lista"
-                textoBoton="Crear lista"
-            />
+            >
+                {modalNuevaAbierto && (
+                    <FormularioLista
+                        onClose={() => setModalNuevaAbierto(false)}
+                        onSubmit={manejarCrearLista}
+                        titulo="Crear nueva lista"
+                        textoBoton="Crear lista"
+                    />
+                )}
+            </ModalAutenticacion>
 
-            <FormularioLista
+            <ModalAutenticacion
                 open={!!listaEnEdicion}
                 onClose={() => setListaEnEdicion(null)}
-                onSubmit={manejarEditarLista}
-                titulo="Editar lista"
-                textoBoton="Guardar cambios"
-                valoresIniciales={listaEnEdicion}
-            />
+            >
+                {listaEnEdicion && (
+                    <FormularioLista
+                        onClose={() => setListaEnEdicion(null)}
+                        onSubmit={manejarEditarLista}
+                        titulo="Editar lista"
+                        textoBoton="Guardar cambios"
+                        valoresIniciales={listaEnEdicion}
+                    />
+                )}
+            </ModalAutenticacion>
 
             <FormularioEditarPerfil
                 open={modalEditarPerfilAbierto}

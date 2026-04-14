@@ -25,11 +25,6 @@ public class ServicioContenido {
     }
 
     @Transactional
-    public Contenido guardar(Contenido contenido) {
-        return repositorioContenido.guardar(contenido);
-    }
-
-    @Transactional
     public Contenido buscarOGuardar(Contenido contenido) {
         return repositorioContenido.buscarPorTmdbIdYTipo(contenido.getTmdbId(), contenido.getTipo())
                 .orElseGet(() -> repositorioContenido.guardar(contenido));
