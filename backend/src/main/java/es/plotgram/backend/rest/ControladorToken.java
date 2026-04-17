@@ -5,7 +5,6 @@ import es.plotgram.backend.seguridad.AutenticacionPorTokens.UtilJwt;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,10 +36,10 @@ public class ControladorToken {
     int tiempoExpiracionToken;
 
     @Value("${app.auth.jwt.refrescarventana}")
-    int refreshWindowMin;
+    int tiempoRefrescarSesion;
 
     @Value("${app.auth.jwt.maxhorassesion}")
-    int maxSessionHours;
+    int TiempoMaximoSesion;
 
     //poner a true en producción
     @Value("${app.auth.cookie.secure:false}")
@@ -150,7 +149,7 @@ public class ControladorToken {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new ManejadorExcepcionesApi.ApiError("TOKEN_EXPIRED", "La sesión ha caducado. Inicia sesión de nuevo.", null));
         }
-        if (remainingSeconds > refreshWindowMin * 60L) {
+        if (remainingSeconds > tiempoRefrescarSesion * 60L) {
             return ResponseEntity.noContent().build();
         }
 
@@ -160,7 +159,7 @@ public class ControladorToken {
         }
 
         Instant sessionStart = Instant.ofEpochMilli(sessionStartMs);
-        Instant hardEnd = sessionStart.plus(Duration.ofHours(maxSessionHours));
+        Instant hardEnd = sessionStart.plus(Duration.ofHours(TiempoMaximoSesion));
 
         if (!now.isBefore(hardEnd)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -220,7 +219,7 @@ public class ControladorToken {
         Long sessionStartMs = claims.get("session_start", Long.class);
         if (sessionStartMs == null) sessionStartMs = now.toEpochMilli();
         Instant sessionStart = Instant.ofEpochMilli(sessionStartMs);
-        Instant hardEnd = sessionStart.plus(Duration.ofHours(maxSessionHours));
+        Instant hardEnd = sessionStart.plus(Duration.ofHours(TiempoMaximoSesion));
 
         long hardRemainingSeconds = Math.max(0, Duration.between(now, hardEnd).getSeconds());
 
@@ -230,7 +229,7 @@ public class ControladorToken {
                         "usuario", claims.getSubject(),
                         "expiresAt", exp.toEpochMilli(),
                         "remainingSeconds", remainingSeconds,
-                        "refreshWindowSeconds", refreshWindowMin * 60L,
+                        "refreshWindowSeconds", tiempoRefrescarSesion * 60L,
                         "hardEndAt", hardEnd.toEpochMilli(),
                         "hardRemainingSeconds", hardRemainingSeconds
                 ));
