@@ -1,7 +1,7 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Encabezado from "../componentes/layout/Encabezado.jsx";
-import ModalAutenticacion from "../componentes/Autenticacion/ModalAutenticacion.jsx";
+import ModalSistema from "../componentes/Autenticacion/ModalSistema.jsx";
 import FormularioLogin from "../componentes/Autenticacion/FormularioInicioDeSesion.jsx";
 import FormularioRegistro from "../componentes/Autenticacion/FormularioRegistro.jsx";
 import { useAuth } from "../servicios/ContextoDeAutenticacion.jsx";
@@ -76,7 +76,7 @@ export default function LayoutPrincipal() {
                 <Outlet />
             </main>
 
-            <ModalAutenticacion open={modal !== null} onClose={handleCloseModal}>
+            <ModalSistema open={modal !== null} onClose={handleCloseModal}>
                 {modal === "login" && (
                     <>
                         {sessionExpired && (
@@ -118,7 +118,7 @@ export default function LayoutPrincipal() {
                         resetForm={() => setRegisterForm(REGISTER_FORM_INICIAL)}
                     />
                 )}
-            </ModalAutenticacion>
+            </ModalSistema>
         </>
     );
 }

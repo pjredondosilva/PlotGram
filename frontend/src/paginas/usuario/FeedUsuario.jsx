@@ -10,7 +10,7 @@ import {
 import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
 import TarjetaLista from "../../componentes/listas/TarjetaLista.jsx";
 import FormularioEditarPerfil from "../../componentes/usuario/FormularioEditarPerfil.jsx";
-import ModalAutenticacion from "../../componentes/Autenticacion/ModalAutenticacion.jsx";
+import ModalSistema from "../../componentes/Autenticacion/ModalSistema.jsx";
 import "../tmdb/estilos/detalleTmdb.css";
 import "./estilos/feedUsuario.css";
 
@@ -213,7 +213,7 @@ export default function FeedUsuario() {
                 )}
             </section>
 
-            <ModalAutenticacion
+            <ModalSistema
                 open={modalNuevaAbierto}
                 onClose={() => setModalNuevaAbierto(false)}
             >
@@ -225,9 +225,9 @@ export default function FeedUsuario() {
                         textoBoton="Crear lista"
                     />
                 )}
-            </ModalAutenticacion>
+            </ModalSistema>
 
-            <ModalAutenticacion
+            <ModalSistema
                 open={!!listaEnEdicion}
                 onClose={() => setListaEnEdicion(null)}
             >
@@ -240,7 +240,7 @@ export default function FeedUsuario() {
                         valoresIniciales={listaEnEdicion}
                     />
                 )}
-            </ModalAutenticacion>
+            </ModalSistema>
 
             <FormularioEditarPerfil
                 open={modalEditarPerfilAbierto}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import ModalAutenticacion from "../Autenticacion/ModalAutenticacion.jsx";
+import ModalSistema from "../Autenticacion/ModalSistema.jsx";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { aniadirContenidoALista, obtenerMisListas } from "../../servicios/ServicioListas.js";
 import "../../paginas/tmdb/estilos/detalleTmdb.css";
@@ -73,7 +73,7 @@ export default function ModalAniadirALista({ open, onClose, contenido, onAnadido
     }
 
     return (
-        <ModalAutenticacion open={open} onClose={onClose}>
+        <ModalSistema open={open} onClose={onClose}>
             <div className="tmdb-selector-lista-modal">
                 <div className="tmdb-selector-lista-cabecera">
                     <h2>Añadir a una lista</h2>
@@ -148,6 +148,6 @@ export default function ModalAniadirALista({ open, onClose, contenido, onAnadido
                     </>
                 )}
             </div>
-        </ModalAutenticacion>
+        </ModalSistema>
     );
 }

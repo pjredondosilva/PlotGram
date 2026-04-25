@@ -9,7 +9,7 @@ import {
 } from "../../servicios/ServicioListas.js";
 import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
 import TarjetaContenido from "../../componentes/listas/TarjetaContenido.jsx";
-import ModalAutenticacion from "../../componentes/Autenticacion/ModalAutenticacion.jsx";
+import ModalSistema from "../../componentes/Autenticacion/ModalSistema.jsx";
 import "../Tmdb/estilos/detalleTmdb.css";
 import "../usuario/estilos/feedUsuario.css";
 
@@ -200,7 +200,7 @@ export default function DetalleLista() {
                 )}
             </section>
 
-            <ModalAutenticacion
+            <ModalSistema
                 open={modalEditarAbierto}
                 onClose={() => setModalEditarAbierto(false)}
             >
@@ -213,7 +213,7 @@ export default function DetalleLista() {
                         valoresIniciales={lista}
                     />
                 )}
-            </ModalAutenticacion>
+            </ModalSistema>
         </section>
     );
 }

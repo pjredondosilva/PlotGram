@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ModalAutenticacion from "../Autenticacion/ModalAutenticacion.jsx";
+import ModalSistema from "../Autenticacion/ModalSistema.jsx";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { actualizarMiPerfil, verificarContrasenaActual } from "../../servicios/ServicioAutenticacion.js";
 import "../../paginas/usuario/estilos/feedUsuario.css";
@@ -138,7 +138,7 @@ export default function FormularioEditarPerfil({
     }
 
     return (
-        <ModalAutenticacion open={open} onClose={onClose}>
+        <ModalSistema open={open} onClose={onClose}>
             <div className="feed-formulario">
                 {paso === "verificacion" ? (
                     <>
@@ -355,6 +355,6 @@ export default function FormularioEditarPerfil({
                     </>
                 )}
             </div>
-        </ModalAutenticacion>
+        </ModalSistema>
     );
 }
