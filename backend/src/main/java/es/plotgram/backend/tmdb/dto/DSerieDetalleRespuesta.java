@@ -42,6 +42,6 @@ public record DSerieDetalleRespuesta(
         DVideosTmdbRespuesta videos,
         @JsonProperty("watch/providers")
         DProveedoresConsultaTmdbRespuesta watchProviders,
-        DRecomendacionesSeriesTmdbRespuesta recommendations
+        DSeriesRelacionadasTmdbRespuesta recommendations
 ) {
 }

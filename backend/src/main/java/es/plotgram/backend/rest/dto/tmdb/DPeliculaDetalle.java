@@ -15,7 +15,7 @@ public record DPeliculaDetalle(
         List<DActorTmdb> cast,
         DTrailer trailer,
         DProveedoresPelicula providers,
-        List<DPeliculaRecomendada> recommendations,
+        List<DPeliculaRelacionada> recommendations,
         String director,
         String guionista,
         Long budget,

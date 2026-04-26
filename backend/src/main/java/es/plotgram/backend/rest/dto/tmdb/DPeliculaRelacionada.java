@@ -1,8 +1,6 @@
 package es.plotgram.backend.rest.dto.tmdb;
 
-import java.util.List;
-
-public record DPeliculaRecomendada(
+public record DPeliculaRelacionada(
         long id,
         String title,
         String releaseDate,

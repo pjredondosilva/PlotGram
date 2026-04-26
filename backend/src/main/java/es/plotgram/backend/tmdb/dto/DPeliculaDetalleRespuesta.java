@@ -30,7 +30,7 @@ public record DPeliculaDetalleRespuesta(
         List<DGeneroTmdb> genres,
         DCreditosTmdbRespuesta credits,
         DVideosTmdbRespuesta videos,
-        DRecomendacionesPeliculasTmdbRespuesta recommendations,
+        DPeliculasRelacionadasTmdbRespuesta recommendations,
 
         @JsonProperty("watch/providers")
         DProveedoresConsultaTmdbRespuesta watchProviders,

@@ -251,7 +251,7 @@ public class MapeadorTmdb {
         );
     }
 
-    private List<DPeliculaRecomendada> mapRecomendaciones(DRecomendacionesPeliculasTmdbRespuesta recommendations) {
+    private List<DPeliculaRelacionada> mapRecomendaciones(DPeliculasRelacionadasTmdbRespuesta recommendations) {
         if (recommendations == null || recommendations.results() == null) {
             return List.of();
         }
@@ -262,8 +262,8 @@ public class MapeadorTmdb {
                 .toList();
     }
 
-    private DPeliculaRecomendada DtoPeliculaRecomendada(DPeliculaListadoRespuesta p) {
-        return new DPeliculaRecomendada(
+    private DPeliculaRelacionada DtoPeliculaRecomendada(DPeliculaListadoRespuesta p) {
+        return new DPeliculaRelacionada(
                 p.id(),
                 p.title(),
                 p.releaseDate(),
@@ -377,7 +377,7 @@ public class MapeadorTmdb {
                 .orElse("No disponible");
     }
 
-    private List<DSerieRelacionada> mapRecomendacionesSeries(DRecomendacionesSeriesTmdbRespuesta recommendations) {
+    private List<DSerieRelacionada> mapRecomendacionesSeries(DSeriesRelacionadasTmdbRespuesta recommendations) {
         if (recommendations == null || recommendations.results() == null) {
             return List.of();
         }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record DRecomendacionesPeliculasTmdbRespuesta(
+public record DPeliculasRelacionadasTmdbRespuesta(
         Integer page,
         List<DPeliculaListadoRespuesta> results,
         @JsonProperty("total_pages")
