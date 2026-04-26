@@ -9,9 +9,11 @@ import es.plotgram.backend.excepciones.ElementoNoEncontradoEnLista;
 import es.plotgram.backend.excepciones.ListaNoEncontrada;
 import es.plotgram.backend.excepciones.UsuarioNoEncontrado;
 import es.plotgram.backend.repositorios.RepositorioLista;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -37,7 +39,8 @@ public class ServicioLista {
     @Transactional
     public ListaDetalleServicio crearLista(String nombreUsuario, Lista listaNueva) {
         Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);
-
+        String nombreNormalizado = normalizarNombreLista(listaNueva.getNombre());
+        validarNombreDisponible(usuario.getId(), nombreNormalizado, null);
         Lista lista = new Lista();
         lista.setNombre(listaNueva.getNombre());
         lista.setDescripcion(listaNueva.getDescripcion());
@@ -114,7 +117,11 @@ public class ServicioLista {
 
     @Transactional
     public ListaDetalleServicio editarLista(Long idLista, String nombreUsuario, Lista datosLista) {
+        Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);
         Lista lista = obtenerListaDelUsuarioAutenticado(idLista, nombreUsuario);
+
+        String nombreNormalizado = normalizarNombreLista(datosLista.getNombre());
+        validarNombreDisponible(usuario.getId(), nombreNormalizado, lista.getId());
 
         lista.setNombre(datosLista.getNombre());
         lista.setDescripcion(datosLista.getDescripcion());
@@ -124,6 +131,32 @@ public class ServicioLista {
 
         List<ListaItem> elementos = servicioListaItem.buscarPorListaIdOrdenados(listaActualizada.getId());
         return new ListaDetalleServicio(listaActualizada, elementos);
+    }
+
+    private void validarNombreDisponible(Long usuarioId, String nombre, Long idListaActual) {
+        boolean nombreEnUso = idListaActual == null
+                ? repositorioLista.existePorUsuarioIdYNombre(usuarioId, nombre)
+                : repositorioLista.existePorUsuarioIdYNombreEIdDistinto(usuarioId, nombre, idListaActual);
+
+        if (nombreEnUso) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Ya tienes una lista con ese nombre. Elige otro nombre."
+            );
+        }
+    }
+
+    private String normalizarNombreLista(String nombre) {
+        String nombreNormalizado = nombre == null ? "" : nombre.trim();
+
+        if (nombreNormalizado.isBlank()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "El nombre de la lista es obligatorio."
+            );
+        }
+
+        return nombreNormalizado;
     }
 
     private List<ListaResumenServicio> construirResumenesDeUsuario(Long usuarioId) {

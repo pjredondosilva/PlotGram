@@ -23,6 +23,10 @@ function inicialUsuario(nombre) {
     return (nombre || "?").trim().charAt(0).toUpperCase();
 }
 
+function normalizarNombreLista(nombre) {
+    return (nombre || "").trim().toLowerCase();
+}
+
 export default function FeedUsuario() {
     const { idUsuario } = useParams();
     const navigate = useNavigate();
@@ -79,14 +83,33 @@ export default function FeedUsuario() {
         }
     }
 
+    function validarNombreListaDisponible(nombre, idListaIgnorada = null) {
+        const nombreNormalizado = normalizarNombreLista(nombre);
+
+        const existe = listas.some((lista) => {
+            const esLaMismaLista =
+                idListaIgnorada != null && String(lista.id) === String(idListaIgnorada);
+
+            return !esLaMismaLista && normalizarNombreLista(lista.nombre) === nombreNormalizado;
+        });
+
+        if (existe) {
+            throw new Error("Ya tienes una lista con ese nombre. Elige otro nombre.");
+        }
+    }
+
     async function manejarCrearLista(dto) {
+        validarNombreListaDisponible(dto.nombre);
         await crearLista(dto);
         await cargarListas();
     }
 
     async function manejarEditarLista(dto) {
         if (!listaEnEdicion) return;
+
+        validarNombreListaDisponible(dto.nombre, listaEnEdicion.id);
         await editarLista(listaEnEdicion.id, dto);
+
         setListaEnEdicion(null);
         await cargarListas();
     }
