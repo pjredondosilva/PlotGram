@@ -9,15 +9,27 @@ async function handleResponse(res) {
 
     if (!res.ok) {
         let msg =
-            typeof body === "string" ? body :
-                body?.message ? body.message :
-                    body?.fieldErrors ? Object.values(body.fieldErrors).join("\n") :
+            typeof body === "string" && body.trim()
+                    ? body
+                    : body?.mensaje
+                        ? body.mensaje
+                        : body?.message
+                            ? body.message
+                            : body?.detail
+                                ? body.detail
+                                : body?.error
+                                    ? body.error
+                                    : body?.fieldErrors
+                                        ? Object.values(body.fieldErrors).join("\n"):
                         "";
         if (!msg && res.status === 401) {
             msg = "Nombre o contraseña incorrectos.";
         }
         if (!msg && res.status === 403) {
             msg = "No autorizado.";
+        }
+        if (!msg && res.status === 409) {
+            msg = "Ya tienes una lista con ese nombre. Elige otro nombre.";
         }
         const err = new Error(msg || `HTTP ${res.status}`);
         err.status = res.status;

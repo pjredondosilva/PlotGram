@@ -19,11 +19,6 @@ public class ServicioContenido {
         this.repositorioContenido = repositorioContenido;
     }
 
-    @Transactional(readOnly = true)
-    public Optional<Contenido> buscarPorTmdbIdYTipo(Long tmdbId, TipoContenido tipo) {
-        return repositorioContenido.buscarPorTmdbIdYTipo(tmdbId, tipo);
-    }
-
     @Transactional
     public Contenido buscarOGuardar(Contenido contenido) {
         return repositorioContenido.buscarPorTmdbIdYTipo(contenido.getTmdbId(), contenido.getTipo())

@@ -27,6 +27,12 @@ public class ManejadorExcepcionesApi {
                 .body(new ApiError("USUARIO_YA_EXISTE", ex.getMessage(), Map.of(ex.getCampo(), ex.getMessage())));
     }
 
+    @ExceptionHandler(ListaYaRegistrada.class)
+    public ResponseEntity<ApiError> manejarListaYaRegistrada(ListaYaRegistrada ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ApiError("LISTA_YA_EXISTE", ex.getMessage(), Map.of(ex.getCampo(), ex.getMessage())));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiError> manejarValidacion(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new LinkedHashMap<>();
@@ -101,4 +107,5 @@ public class ManejadorExcepcionesApi {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiError("CONTRASENA_ACTUAL_INCORRECTA", ex.getMessage(), null));
     }
+
 }

@@ -4,10 +4,7 @@ import es.plotgram.backend.entidades.Contenido;
 import es.plotgram.backend.entidades.Lista;
 import es.plotgram.backend.entidades.ListaItem;
 import es.plotgram.backend.entidades.Usuario;
-import es.plotgram.backend.excepciones.ContenidoYaEnLista;
-import es.plotgram.backend.excepciones.ElementoNoEncontradoEnLista;
-import es.plotgram.backend.excepciones.ListaNoEncontrada;
-import es.plotgram.backend.excepciones.UsuarioNoEncontrado;
+import es.plotgram.backend.excepciones.*;
 import es.plotgram.backend.repositorios.RepositorioLista;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -39,8 +36,10 @@ public class ServicioLista {
     @Transactional
     public ListaDetalleServicio crearLista(String nombreUsuario, Lista listaNueva) {
         Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);
+
         String nombreNormalizado = normalizarNombreLista(listaNueva.getNombre());
         validarNombreDisponible(usuario.getId(), nombreNormalizado, null);
+
         Lista lista = new Lista();
         lista.setNombre(listaNueva.getNombre());
         lista.setDescripcion(listaNueva.getDescripcion());
@@ -139,10 +138,7 @@ public class ServicioLista {
                 : repositorioLista.existePorUsuarioIdYNombreEIdDistinto(usuarioId, nombre, idListaActual);
 
         if (nombreEnUso) {
-            throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "Ya tienes una lista con ese nombre. Elige otro nombre."
-            );
+            throw new ListaYaRegistrada("nombre");
         }
     }
 

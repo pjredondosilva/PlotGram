@@ -23,10 +23,6 @@ function inicialUsuario(nombre) {
     return (nombre || "?").trim().charAt(0).toUpperCase();
 }
 
-function normalizarNombreLista(nombre) {
-    return (nombre || "").trim().toLowerCase();
-}
-
 export default function FeedUsuario() {
     const { idUsuario } = useParams();
     const navigate = useNavigate();
@@ -41,8 +37,12 @@ export default function FeedUsuario() {
     const [menuAbiertoId, setMenuAbiertoId] = useState(null);
 
     const avatar = useMemo(() => inicialUsuario(user?.nombre), [user]);
+
     const descripcionUsuario = useMemo(
-        () => (user?.descripcion?.trim() ? user.descripcion : descripcionUsuarioPorDefecto(user?.nombre)),
+        () =>
+            user?.descripcion?.trim()
+                ? user.descripcion
+                : descripcionUsuarioPorDefecto(user?.nombre),
         [user]
     );
 
@@ -83,23 +83,7 @@ export default function FeedUsuario() {
         }
     }
 
-    function validarNombreListaDisponible(nombre, idListaIgnorada = null) {
-        const nombreNormalizado = normalizarNombreLista(nombre);
-
-        const existe = listas.some((lista) => {
-            const esLaMismaLista =
-                idListaIgnorada != null && String(lista.id) === String(idListaIgnorada);
-
-            return !esLaMismaLista && normalizarNombreLista(lista.nombre) === nombreNormalizado;
-        });
-
-        if (existe) {
-            throw new Error("Ya tienes una lista con ese nombre. Elige otro nombre.");
-        }
-    }
-
     async function manejarCrearLista(dto) {
-        validarNombreListaDisponible(dto.nombre);
         await crearLista(dto);
         await cargarListas();
     }
@@ -107,7 +91,6 @@ export default function FeedUsuario() {
     async function manejarEditarLista(dto) {
         if (!listaEnEdicion) return;
 
-        validarNombreListaDisponible(dto.nombre, listaEnEdicion.id);
         await editarLista(listaEnEdicion.id, dto);
 
         setListaEnEdicion(null);
@@ -118,16 +101,20 @@ export default function FeedUsuario() {
         const confirmado = window.confirm(
             `¿Seguro que quieres borrar la lista "${lista.nombre}"?`
         );
+
         if (!confirmado) return;
 
         await borrarLista(lista.id);
+
         setMenuAbiertoId(null);
         setListas((prev) => prev.filter((item) => item.id !== lista.id));
     }
 
     async function manejarNuevoLoginRequerido() {
         await logout();
-        window.alert("Perfil actualizado. Inicia sesión de nuevo con tus credenciales actualizadas.");
+        window.alert(
+            "Perfil actualizado. Inicia sesión de nuevo con tus credenciales actualizadas."
+        );
     }
 
     if (loadingMe || cargandoListas) {
@@ -153,7 +140,11 @@ export default function FeedUsuario() {
             <header className="tmdb-panel feed-cabecera">
                 <div className="feed-perfil">
                     {user.fotoPerfil ? (
-                        <img className="feed-avatar-imagen" src={user.fotoPerfil} alt={user.nombre} />
+                        <img
+                            className="feed-avatar-imagen"
+                            src={user.fotoPerfil}
+                            alt={user.nombre}
+                        />
                     ) : (
                         <div className="feed-avatar">{avatar}</div>
                     )}
@@ -161,9 +152,14 @@ export default function FeedUsuario() {
                     <div className="feed-perfil-texto">
                         <div className="feed-perfil-superior">
                             <h1>{user.nombre}</h1>
+
                             <div className="tmdb-meta-inline">
-                                <span className="tmdb-meta-chip">{listas.length} listas</span>
-                                <span className="tmdb-meta-chip">Feed personal</span>
+                                <span className="tmdb-meta-chip">
+                                    {listas.length} listas
+                                </span>
+                                <span className="tmdb-meta-chip">
+                                    Feed personal
+                                </span>
                             </div>
                         </div>
 
@@ -186,7 +182,10 @@ export default function FeedUsuario() {
                 <div className="tmdb-seccion-cabecera feed-bloque-cabecera">
                     <div>
                         <h2>Mis listas</h2>
-                        <p>Organiza tu perfil con una cuadrícula visual al estilo de la aplicación.</p>
+                        <p>
+                            Organiza tu perfil con una cuadrícula visual al estilo
+                            de la aplicación.
+                        </p>
                     </div>
 
                     <button
@@ -204,8 +203,10 @@ export default function FeedUsuario() {
                     <div className="feed-vacio">
                         <h3>Aún no has creado ninguna lista</h3>
                         <p>
-                            Crea tu primera lista para empezar a llenar tu feed con portadas y colecciones personalizadas.
+                            Crea tu primera lista para empezar a llenar tu feed con
+                            portadas y colecciones personalizadas.
                         </p>
+
                         <button
                             type="button"
                             className="tmdb-boton-primario"

@@ -41,7 +41,6 @@ public class ServicioUsuario {
         return repositorioUsuario.buscarPorNombre(nombre);
     }
 
-    @Transactional(readOnly = true)
     public void verificarContrasenaActual(String nombreUsuario, String contrasenaActual) {
         Usuario usuario = obtenerUsuarioActivo(nombreUsuario);
         validarContrasenaActual(usuario, contrasenaActual);
