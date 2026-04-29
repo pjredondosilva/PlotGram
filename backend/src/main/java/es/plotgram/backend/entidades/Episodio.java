@@ -10,9 +10,8 @@ import jakarta.validation.constraints.NotNull;
 @DiscriminatorValue("EPISODIO")
 public class Episodio extends ContenidoDeSerie {
 
-    @NotNull
     @Min(1)
-    @Column(nullable = false)
+    @Column
     private Integer numeroEpisodio;
 
     public Episodio() {

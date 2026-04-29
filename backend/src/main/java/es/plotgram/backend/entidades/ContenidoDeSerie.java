@@ -8,14 +8,12 @@ import jakarta.validation.constraints.NotNull;
 @Entity
 public abstract class ContenidoDeSerie extends Contenido {
 
-    @NotNull
     @Min(1)
-    @Column(nullable = false)
+    @Column
     private Long serieTmdbId;
 
-    @NotNull
     @Min(0)
-    @Column(nullable = false)
+    @Column
     private Integer numeroTemporada;
 
     public ContenidoDeSerie() {
