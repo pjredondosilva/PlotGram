@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { DarDetallesSeries } from "../../servicios/ServicioTmdb.js";
 import { logoUrl, profileUrl } from "../../utils/tmdbImagenes.js";
 import { posterUrl } from "../../utils/img.js";
@@ -22,8 +22,95 @@ function formatearFecha(fecha) {
     });
 }
 
+const URLS_PROVEEDORES = {
+    2: "https://tv.apple.com/es",
+    3: "https://play.google.com/store/movies",
+    8: "https://www.netflix.com/es",
+    9: "https://www.primevideo.com",
+    10: "https://www.amazon.es/gp/video/storefront",
+    11: "https://mubi.com/es",
+    35: "https://rakuten.tv/es",
+    63: "https://www.filmin.es",
+    68: "https://www.microsoft.com/es-es/store/movies-and-tv",
+    119: "https://www.primevideo.com",
+    149: "https://ver.movistarplus.es",
+    283: "https://www.crunchyroll.com/es",
+    337: "https://www.disneyplus.com/es-es",
+    384: "https://www.max.com/es/es",
+    393: "https://flixole.com",
+    110: "https://www.dazn.com/es-ES/home",
+    350: "https://tv.apple.com/es/channel/tvs.sbd.4000",
+    1773: "https://www.skyshowtime.com/es",
+    1796: "https://www.netflix.com/es",
+    1899: "https://www.max.com/es/es",
+    netflix: "https://www.netflix.com/es",
+    "amazon prime video": "https://www.primevideo.com",
+    "prime video": "https://www.primevideo.com",
+    "disney plus": "https://www.disneyplus.com/es-es",
+    "disney+": "https://www.disneyplus.com/es-es",
+    max: "https://www.max.com/es/es",
+    "hbo max": "https://www.max.com/es/es",
+    filmin: "https://www.filmin.es",
+    "apple tv": "https://tv.apple.com/es",
+    "apple tv plus": "https://tv.apple.com/es/channel/tvs.sbd.4000",
+    "apple tv+": "https://tv.apple.com/es/channel/tvs.sbd.4000",
+    "rakuten tv": "https://rakuten.tv/es",
+    "movistar plus": "https://ver.movistarplus.es",
+    "movistar plus+": "https://ver.movistarplus.es",
+    "google play movies": "https://play.google.com/store/movies",
+    "microsoft store": "https://www.microsoft.com/es-es/store/movies-and-tv",
+    mubi: "https://mubi.com/es",
+    crunchyroll: "https://www.crunchyroll.com/es",
+    skyshowtime: "https://www.skyshowtime.com/es",
+    flixole: "https://flixole.com",
+    dazn: "https://www.dazn.com/es-ES/home",
+};
+
+function normalizarProveedor(nombre) {
+    return (nombre || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
+
+function obtenerUrlProveedor(proveedor) {
+    if (proveedor?.url) return proveedor.url;
+    if (proveedor?.link) return proveedor.link;
+
+    const id = proveedor?.id != null ? String(proveedor.id) : null;
+    const nombre = normalizarProveedor(proveedor?.name);
+
+    return (id && URLS_PROVEEDORES[id])
+        || URLS_PROVEEDORES[nombre]
+        || `https://www.google.com/search?q=${encodeURIComponent(proveedor?.name || "plataforma streaming")}`;
+}
+
+function ProviderItem({ provider }) {
+    const url = obtenerUrlProveedor(provider);
+
+    return (
+        <a
+            className="tmdb-provider-item"
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            title={`Abrir ${provider.name}`}
+            aria-label={`Abrir ${provider.name}`}
+        >
+            {provider.logoPath ? (
+                <img src={logoUrl(provider.logoPath)} alt={provider.name} />
+            ) : (
+                <div className="tmdb-provider-logo-placeholder" />
+            )}
+            <span>{provider.name}</span>
+        </a>
+    );
+}
+
 export default function SerieDetalle() {
     const { id } = useParams();
+    const location = useLocation();
     const { user } = useAuth();
 
     const [serie, setSerie] = useState(null);
@@ -68,6 +155,8 @@ export default function SerieDetalle() {
     const rent = serie?.providers?.rent ?? [];
     const buy = serie?.providers?.buy ?? [];
     const totalProviders = stream.length + rent.length + buy.length;
+    const rutaVolver = location.state?.volverA || "/?tipo=series";
+    const textoVolver = location.state?.textoVolver || "Volver al listado";
 
     if (loading) return <div className="tmdb-cargando">Cargando ficha de la serie...</div>;
     if (err) return <div className="tmdb-error">{err}</div>;
@@ -75,7 +164,7 @@ export default function SerieDetalle() {
 
     return (
         <section className="tmdb-detalle">
-            <Link to="/?tipo=series" className="tmdb-volver">← Volver al listado</Link>
+            <Link to={rutaVolver} className="tmdb-volver">← {textoVolver}</Link>
 
             <header className="tmdb-hero tmdb-panel">
                 <div className="tmdb-hero-poster">
@@ -206,6 +295,10 @@ export default function SerieDetalle() {
                                     key={temporada.id ?? `temporada-${index}`}
                                     className="tmdb-card tmdb-card-temporada"
                                     to={`/series/${serie.id}/temporadas/${temporada.seasonNumber}`}
+                                    state={{
+                                        volverA: `/series/${serie.id}`,
+                                        textoVolver: "Volver a la serie",
+                                    }}
                                 >
                                     {posterTemporada ? (
                                         <img
@@ -249,17 +342,10 @@ export default function SerieDetalle() {
                             {stream.length ? (
                                 <div className="tmdb-provider-list">
                                     {stream.map((p, index) => (
-                                        <div
+                                        <ProviderItem
                                             key={`stream-${p.id ?? p.name ?? index}`}
-                                            className="tmdb-provider-item"
-                                        >
-                                            {p.logoPath ? (
-                                                <img src={logoUrl(p.logoPath)} alt={p.name} />
-                                            ) : (
-                                                <div className="tmdb-provider-logo-placeholder" />
-                                            )}
-                                            <span>{p.name}</span>
-                                        </div>
+                                            provider={p}
+                                        />
                                     ))}
                                 </div>
                             ) : (
@@ -272,17 +358,10 @@ export default function SerieDetalle() {
                             {rent.length ? (
                                 <div className="tmdb-provider-list">
                                     {rent.map((p, index) => (
-                                        <div
+                                        <ProviderItem
                                             key={`rent-${p.id ?? p.name ?? index}`}
-                                            className="tmdb-provider-item"
-                                        >
-                                            {p.logoPath ? (
-                                                <img src={logoUrl(p.logoPath)} alt={p.name} />
-                                            ) : (
-                                                <div className="tmdb-provider-logo-placeholder" />
-                                            )}
-                                            <span>{p.name}</span>
-                                        </div>
+                                            provider={p}
+                                        />
                                     ))}
                                 </div>
                             ) : (
@@ -295,17 +374,10 @@ export default function SerieDetalle() {
                             {buy.length ? (
                                 <div className="tmdb-provider-list">
                                     {buy.map((p, index) => (
-                                        <div
+                                        <ProviderItem
                                             key={`buy-${p.id ?? p.name ?? index}`}
-                                            className="tmdb-provider-item"
-                                        >
-                                            {p.logoPath ? (
-                                                <img src={logoUrl(p.logoPath)} alt={p.name} />
-                                            ) : (
-                                                <div className="tmdb-provider-logo-placeholder" />
-                                            )}
-                                            <span>{p.name}</span>
-                                        </div>
+                                            provider={p}
+                                        />
                                     ))}
                                 </div>
                             ) : (

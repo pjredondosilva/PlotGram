@@ -39,6 +39,11 @@ export default function DetalleLista() {
         ? `/usuarios/${idUsuario}/feed`
         : "/";
 
+    const estadoNavegacionContenido = useMemo(() => ({
+        volverA: `/usuarios/${idUsuario}/feed/listas/${idLista}`,
+        textoVolver: "Volver a la lista",
+    }), [idUsuario, idLista]);
+
     useEffect(() => {
         cargarDetalle();
     }, [idUsuario, idLista]);
@@ -189,6 +194,7 @@ export default function DetalleLista() {
                                 onAbrirMenu={setMenuAbiertoId}
                                 onCerrarMenu={() => setMenuAbiertoId(null)}
                                 onEliminar={manejarEliminarElemento}
+                                estadoNavegacion={estadoNavegacionContenido}
                             />
                         ))}
                     </div>

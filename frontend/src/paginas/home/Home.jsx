@@ -180,6 +180,13 @@ export default function Home() {
         setFechaHasta(valor);
     }
 
+    function cambiarPagina(nuevaPagina) {
+        setPage(nuevaPagina);
+        window.requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+    }
+
     return (
         <div className="home">
             <div className="toolbar">
@@ -248,7 +255,7 @@ export default function Home() {
             <div className="pager">
                 <button
                     disabled={page <= 1}
-                    onClick={() => setPage((p) => p - 1)}
+                    onClick={() => cambiarPagina(page - 1)}
                 >
                     Anterior
                 </button>
@@ -257,7 +264,7 @@ export default function Home() {
 
                 <button
                     disabled={page >= totalPages}
-                    onClick={() => setPage((p) => p + 1)}
+                    onClick={() => cambiarPagina(page + 1)}
                 >
                     Siguiente
                 </button>

@@ -588,44 +588,56 @@
     transform: translateX(-50%) translateY(0);
 }
 
+/* Efecto interactivo unificado para tarjetas de listas y contenidos */
+.feed-lista-card,
+.feed-contenido-card {
+    transition:
+            transform 0.18s ease,
+            background 0.18s ease,
+            border-color 0.18s ease,
+            box-shadow 0.18s ease;
+}
+
+.feed-lista-card:hover,
+.feed-lista-card:focus-within,
+.feed-contenido-card:hover,
+.feed-contenido-card:focus-visible {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.075);
+    border-color: rgba(255, 138, 0, 0.55);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
+    outline: none;
+}
+
+.feed-lista-enlace:focus-visible {
+    outline: none;
+}
+
 @media (max-width: 640px) {
-    .feed-cabecera {
-        padding: 20px;
-    }
-
-    .feed-bloque {
-        padding: 20px;
-    }
-
     .feed-label-con-ayuda {
-        gap: 8px;
+        align-items: flex-start;
+        flex-wrap: wrap;
     }
 
-    .feed-formulario-preview-perfil {
-        max-width: 160px;
-        justify-self: center;
-    }
-
-    .feed-formulario-acciones {
-        flex-direction: column;
-    }
-
-    .feed-formulario-acciones .feed-boton {
-        width: 100%;
+    .feed-ayuda-wrapper {
+        position: static;
     }
 
     .feed-ayuda-tooltip {
-        left: auto;
-        right: -8px;
-        top: calc(100% + 10px);
-        transform: translateY(-6px);
-        width: min(260px, calc(100vw - 40px));
+        position: fixed;
+        left: 20px;
+        right: 20px;
+        bottom: 24px;
+        top: auto;
+        width: auto;
+        max-height: 60vh;
+        overflow: auto;
+        transform: translateY(12px);
+        z-index: 9999;
     }
 
     .feed-ayuda-tooltip::before {
-        left: auto;
-        right: 18px;
-        transform: rotate(45deg);
+        display: none;
     }
 
     .feed-ayuda-wrapper:hover .feed-ayuda-tooltip,

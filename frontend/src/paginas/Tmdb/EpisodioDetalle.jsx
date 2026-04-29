@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { DarDetallesEpisodio } from "../../servicios/ServicioTmdb.js";
 import { profileUrl, stillUrl } from "../../utils/tmdbImagenes.js";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
@@ -22,6 +22,7 @@ function formatearFecha(fecha) {
 
 export default function EpisodioDetalle() {
     const { id, temporada, episodio } = useParams();
+    const location = useLocation();
     const { user } = useAuth();
 
     const [episodioData, setEpisodioData] = useState(null);
@@ -59,11 +60,13 @@ export default function EpisodioDetalle() {
 
     const imagen = stillUrl(episodioData.stillPath);
     const contenidoLista = crearContenidoListaEpisodio(id, temporada, episodioData, imagen);
+    const rutaVolver = location.state?.volverA || `/series/${id}/temporadas/${temporada}`;
+    const textoVolver = location.state?.textoVolver || "Volver a la temporada";
 
     return (
         <section className="tmdb-detalle">
-            <Link to={`/series/${id}/temporadas/${temporada}`} className="tmdb-volver">
-                ← Volver a la temporada
+            <Link to={rutaVolver} className="tmdb-volver">
+                ← {textoVolver}
             </Link>
 
             <header className="tmdb-hero tmdb-panel">

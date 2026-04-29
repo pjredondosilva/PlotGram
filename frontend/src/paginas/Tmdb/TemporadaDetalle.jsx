@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import { DarDetallesTemporada } from "../../servicios/ServicioTmdb.js";
 import { posterUrl } from "../../utils/img.js";
 import { stillUrl } from "../../utils/tmdbImagenes.js";
@@ -35,6 +35,7 @@ function obtenerEstadoTemporada(fecha) {
 
 export default function TemporadaDetalle() {
     const { id, temporada } = useParams();
+    const location = useLocation();
     const { user } = useAuth();
 
     const [temporadaData, setTemporadaData] = useState(null);
@@ -74,6 +75,8 @@ export default function TemporadaDetalle() {
 
     const episodios = temporadaData?.episodes ?? [];
     const estado = obtenerEstadoTemporada(temporadaData?.airDate);
+    const rutaVolver = location.state?.volverA || `/series/${id}`;
+    const textoVolver = location.state?.textoVolver || "Volver a la serie";
 
     if (loading) return <div className="tmdb-cargando">Cargando temporada...</div>;
     if (err) return <div className="tmdb-error">{err}</div>;
@@ -81,7 +84,7 @@ export default function TemporadaDetalle() {
 
     return (
         <section className="tmdb-detalle">
-            <Link to={`/series/${id}`} className="tmdb-volver">← Volver a la serie</Link>
+            <Link to={rutaVolver} className="tmdb-volver">← {textoVolver}</Link>
 
             <header className="tmdb-hero tmdb-panel">
                 <div className="tmdb-hero-poster">
@@ -170,6 +173,10 @@ export default function TemporadaDetalle() {
                                     key={episodio.id ?? `episodio-${index}`}
                                     className="tmdb-card tmdb-card-episodio"
                                     to={`/series/${id}/temporadas/${temporadaData.seasonNumber}/episodios/${episodio.episodeNumber}`}
+                                    state={{
+                                        volverA: `/series/${id}/temporadas/${temporadaData.seasonNumber}`,
+                                        textoVolver: "Volver a la temporada",
+                                    }}
                                 >
                                     {still ? (
                                         <img

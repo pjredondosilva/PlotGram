@@ -44,6 +44,7 @@ export default function TarjetaContenido({
                                              onAbrirMenu,
                                              onCerrarMenu,
                                              onEliminar,
+                                             estadoNavegacion,
                                          }) {
     const enlace = normalizarEnlace(item.enlace);
     const menuRef = useRef(null);
@@ -99,7 +100,11 @@ export default function TarjetaContenido({
         );
     } else {
         card = (
-            <Link className="feed-contenido-card tmdb-panel" to={enlace}>
+            <Link
+                className="feed-contenido-card tmdb-panel"
+                to={enlace}
+                state={estadoNavegacion}
+            >
                 {contenido}
             </Link>
         );
