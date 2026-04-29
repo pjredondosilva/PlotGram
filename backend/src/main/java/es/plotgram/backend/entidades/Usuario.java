@@ -126,14 +126,4 @@ public class Usuario {
         this.listas = listas;
     }
 
-    public void aniadirLista(Lista lista) {
-        listas.add(lista);
-        lista.setUsuario(this);
-    }
-
-
-    public void borrarLista(Lista lista) {
-        listas.remove(lista);
-        lista.setUsuario(null);
-    }
 }
