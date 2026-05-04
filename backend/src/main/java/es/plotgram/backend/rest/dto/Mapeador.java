@@ -24,6 +24,10 @@ public class Mapeador {
     }
 
     public Dusuario dto(Usuario usuario) {
+        return dto(usuario, null);
+    }
+
+    public Dusuario dto(Usuario usuario, Boolean loSigo) {
         return new Dusuario(
                 usuario.getId(),
                 usuario.getNombre(),
@@ -32,7 +36,10 @@ public class Mapeador {
                 usuario.getFotoPerfil(),
                 usuario.getDescripcion(),
                 usuario.getTipo(),
-                usuario.isBorrado()
+                usuario.isBorrado(),
+                usuario.getSeguidores().size(),
+                usuario.getSeguidos().size(),
+                loSigo
         );
     }
 

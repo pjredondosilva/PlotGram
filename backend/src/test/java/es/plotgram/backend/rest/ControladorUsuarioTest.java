@@ -64,7 +64,7 @@ class ControladorUsuarioTest {
         servicioUsuario.nuevoUsuario(usuario("OscarConsulta", "hash-oscar", "oscar.consulta@gmail.com"));
         Long id = servicioUsuario.buscarUsuario("OscarConsulta").orElseThrow().getId();
 
-        var respuesta = controlador.obtenerUsuario(id);
+        var respuesta = controlador.obtenerUsuario(id, null);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).isNotNull();
@@ -77,7 +77,7 @@ class ControladorUsuarioTest {
     @Test
     @DisplayName("GET /api/usuarios/{id} KO: devuelve 404 si el usuario no existe")
     void testObtenerUsuarioNoExistente() {
-        var respuesta = controlador.obtenerUsuario(999999L);
+        var respuesta = controlador.obtenerUsuario(999999L, null);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(respuesta.getBody()).isNull();

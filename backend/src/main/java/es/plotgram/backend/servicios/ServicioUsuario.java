@@ -22,7 +22,8 @@ public class ServicioUsuario {
     private final RepositorioUsuario repositorioUsuario;
     private final PasswordEncoder passwordEncoder;
 
-    public ServicioUsuario(RepositorioUsuario repositorioUsuario, PasswordEncoder passwordEncoder) {
+    public ServicioUsuario(RepositorioUsuario repositorioUsuario, 
+                           PasswordEncoder passwordEncoder) {
         this.repositorioUsuario = repositorioUsuario;
         this.passwordEncoder = passwordEncoder;
     }
@@ -134,5 +135,53 @@ public class ServicioUsuario {
         if (valor == null) return null;
         String limpio = valor.trim();
         return limpio.isBlank() ? null : limpio;
+    }
+
+    /**
+     * Busca usuarios que coincidan con un término de búsqueda.
+     */
+    public java.util.List<Usuario> buscarUsuarios(String query) {
+        if (query == null || query.isBlank()) return java.util.Collections.emptyList();
+        return repositorioUsuario.buscarPorNombreCoincidencia(query.trim(), 10);
+    }
+
+    /**
+     * Un usuario sigue a otro.
+     */
+    @Transactional
+    public void seguir(Long idSeguido, String nombreSeguidor) {
+        Usuario seguidor = obtenerUsuarioActivo(nombreSeguidor);
+        Usuario seguido = repositorioUsuario.buscarPorID(idSeguido)
+                .orElseThrow(UsuarioNoEncontrado::new);
+
+        if (seguidor.getId().equals(seguido.getId())) {
+            throw new IllegalArgumentException("No puedes seguirte a ti mismo");
+        }
+
+        seguidor.seguir(seguido);
+        repositorioUsuario.actualizar(seguidor);
+    }
+
+    /**
+     * Un usuario deja de seguir a otro.
+     */
+    @Transactional
+    public void dejarDeSeguir(Long idSeguido, String nombreSeguidor) {
+        Usuario seguidor = obtenerUsuarioActivo(nombreSeguidor);
+        Usuario seguido = repositorioUsuario.buscarPorID(idSeguido)
+                .orElseThrow(UsuarioNoEncontrado::new);
+
+        seguidor.dejarDeSeguir(seguido);
+        repositorioUsuario.actualizar(seguidor);
+    }
+
+    /**
+     * Comprueba si un usuario sigue a otro.
+     */
+    @Transactional(readOnly = true)
+    public boolean esSeguidor(String nombreSeguidor, Long idSeguido) {
+        Usuario seguidor = obtenerUsuarioActivo(nombreSeguidor);
+        return seguidor.getSeguidos().stream()
+                .anyMatch(u -> u.getId().equals(idSeguido));
     }
 }

@@ -27,17 +27,13 @@ export default function DetalleLista() {
     const esPropietario =
         user?.id != null && Number(user.id) === Number(idUsuario);
 
-    const nombreAutor = esPropietario
-        ? user?.nombre || `Usuario ${idUsuario}`
-        : `Usuario ${idUsuario}`;
+    const nombreAutor = lista?.nombreUsuario || (esPropietario ? user?.nombre : `Usuario ${idUsuario}`);
 
     const avatar = useMemo(() => {
         return (nombreAutor || "?").trim().charAt(0).toUpperCase();
     }, [nombreAutor]);
 
-    const rutaVolver = esPropietario
-        ? `/usuarios/${idUsuario}/feed`
-        : "/";
+    const rutaVolver = `/usuarios/${idUsuario}/feed`;
 
     const estadoNavegacionContenido = useMemo(() => ({
         volverA: `/usuarios/${idUsuario}/feed/listas/${idLista}`,

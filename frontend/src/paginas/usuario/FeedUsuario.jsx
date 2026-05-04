@@ -12,6 +12,7 @@ import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
 import TarjetaLista from "../../componentes/listas/TarjetaLista.jsx";
 import FormularioEditarPerfil from "../../componentes/usuario/FormularioEditarPerfil.jsx";
 import ModalSistema from "../../componentes/Autenticacion/ModalSistema.jsx";
+import { seguirUsuario, dejarDeSeguirUsuario } from "../../servicios/ServicioAutenticacion.js";
 import "../tmdb/estilos/detalleTmdb.css";
 import "./estilos/feedUsuario.css";
 
@@ -37,6 +38,8 @@ export default function FeedUsuario() {
     const [modalEditarPerfilAbierto, setModalEditarPerfilAbierto] = useState(false);
     const [listaEnEdicion, setListaEnEdicion] = useState(null);
     const [menuAbiertoId, setMenuAbiertoId] = useState(null);
+
+    const [animacionSeguir, setAnimacionSeguir] = useState(false);
 
     const esPropietario = useMemo(() => {
         return user && String(user.id) === String(idUsuario);
@@ -65,13 +68,9 @@ export default function FeedUsuario() {
             setCargando(true);
             setError("");
             try {
-                // Cargar perfil
-                if (esPropietario) {
-                    setPerfil(user);
-                } else {
-                    const datosUsuario = await obtenerUsuario(idUsuario);
-                    setPerfil(datosUsuario);
-                }
+                // Cargar perfil siempre desde el servidor para tener datos frescos (seguidores, etc)
+                const datosUsuario = await obtenerUsuario(idUsuario);
+                setPerfil(datosUsuario);
 
                 // Cargar listas
                 const data = await obtenerListasDeUsuario(idUsuario);
@@ -123,6 +122,26 @@ export default function FeedUsuario() {
             "Perfil actualizado. Inicia sesión de nuevo con tus credenciales actualizadas."
         );
     }
+
+    async function manejarSeguir() {
+        if (!perfil) return;
+        setAnimacionSeguir(true);
+        try {
+            if (perfil.loSigo) {
+                await dejarDeSeguirUsuario(perfil.id);
+            } else {
+                await seguirUsuario(perfil.id);
+            }
+            // Recargar perfil para actualizar contadores y loSigo
+            const datosUsuario = await obtenerUsuario(idUsuario);
+            setPerfil(datosUsuario);
+        } catch (err) {
+            console.error("Error al seguir/dejar de seguir:", err);
+        } finally {
+            setTimeout(() => setAnimacionSeguir(false), 600);
+        }
+    }
+
 
     if (loadingMe || cargando) {
         return <div className="tmdb-cargando">Cargando perfil...</div>;
@@ -186,13 +205,22 @@ export default function FeedUsuario() {
                                     {esPropietario ? "Feed personal" : "Perfil de usuario"}
                                 </span>
                             </div>
+
+                            <div className="feed-social-info">
+                                <div className="feed-social-count">
+                                    <strong>{perfil.seguidoresCount || 0}</strong> seguidores
+                                </div>
+                                <div className="feed-social-count">
+                                    <strong>{perfil.seguidosCount || 0}</strong> seguidos
+                                </div>
+                            </div>
                         </div>
 
                         <p>{descripcionUsuario}</p>
                     </div>
                 </div>
 
-                {esPropietario && (
+                {esPropietario ? (
                     <div className="feed-cabecera-acciones">
                         <button
                             type="button"
@@ -200,6 +228,16 @@ export default function FeedUsuario() {
                             onClick={() => setModalEditarPerfilAbierto(true)}
                         >
                             Editar perfil
+                        </button>
+                    </div>
+                ) : (
+                    <div className="feed-cabecera-acciones">
+                        <button
+                            type="button"
+                            className={`feed-boton-seguir ${perfil.loSigo ? 'is-following' : ''} ${animacionSeguir ? 'animate' : ''}`}
+                            onClick={manejarSeguir}
+                        >
+                            {perfil.loSigo ? "Siguiendo" : "Seguir"}
                         </button>
                     </div>
                 )}
@@ -294,6 +332,7 @@ export default function FeedUsuario() {
                         setUser={setUser}
                         onRequiereNuevoLogin={manejarNuevoLoginRequerido}
                     />
+
                 </>
             )}
         </section>

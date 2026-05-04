@@ -46,6 +46,17 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Lista> listas = new ArrayList<>();
 
+    @ManyToMany
+    @JoinTable(
+        name = "seguidores",
+        joinColumns = @JoinColumn(name = "seguido_id"),
+        inverseJoinColumns = @JoinColumn(name = "seguidor_id")
+    )
+    private List<Usuario> seguidores = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "seguidores")
+    private List<Usuario> seguidos = new ArrayList<>();
+
     public Usuario() {
     }
 
@@ -128,6 +139,26 @@ public class Usuario {
 
     public void setListas(List<Lista> listas) {
         this.listas = listas;
+    }
+
+    public List<Usuario> getSeguidores() {
+        return seguidores;
+    }
+
+    public List<Usuario> getSeguidos() {
+        return seguidos;
+    }
+
+    public void seguir(Usuario usuario) {
+        if (!this.seguidos.contains(usuario)) {
+            this.seguidos.add(usuario);
+            usuario.getSeguidores().add(this);
+        }
+    }
+
+    public void dejarDeSeguir(Usuario usuario) {
+        this.seguidos.remove(usuario);
+        usuario.getSeguidores().remove(this);
     }
 
 }

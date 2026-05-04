@@ -42,14 +42,21 @@ public class ControladorUsuario {
 
     /**
      * Obtiene un usuario a partir de su identificador.
+     * Incluye información de si el usuario autenticado le sigue.
      *
      * @param id identificador del usuario
      * @return el usuario solicitado si existe; en caso contrario, respuesta 404
      */
     @GetMapping("/usuarios/{id}")
-    public ResponseEntity<Dusuario> obtenerUsuario(@PathVariable long id) {
+    public ResponseEntity<Dusuario> obtenerUsuario(@PathVariable long id, Authentication authentication) {
         return servicioUsuario.buscarUsuario(id)
-                .map(usuario -> ResponseEntity.ok(mapeador.dto(usuario)))
+                .map(usuario -> {
+                    Boolean loSigo = null;
+                    if (authentication != null && authentication.isAuthenticated()) {
+                        loSigo = servicioUsuario.esSeguidor(authentication.getName(), id);
+                    }
+                    return ResponseEntity.ok(mapeador.dto(usuario, loSigo));
+                })
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
@@ -91,4 +98,33 @@ public class ControladorUsuario {
 
         return ResponseEntity.ok(mapeador.dto(usuario));
     }
+
+    /**
+     * Busca usuarios cuyo nombre coincida con el término proporcionado.
+     */
+    @GetMapping("/usuarios/busqueda")
+    public java.util.List<Dusuario> buscarUsuarios(@RequestParam String q) {
+        return servicioUsuario.buscarUsuarios(q).stream()
+                .map(mapeador::dto)
+                .toList();
+    }
+
+    /**
+     * El usuario autenticado sigue al usuario indicado.
+     */
+    @PostMapping("/usuarios/{id}/seguidores")
+    public ResponseEntity<Void> seguir(@PathVariable Long id, Authentication authentication) {
+        servicioUsuario.seguir(id, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * El usuario autenticado deja de seguir al usuario indicado.
+     */
+    @DeleteMapping("/usuarios/{id}/seguidores")
+    public ResponseEntity<Void> dejarDeSeguir(@PathVariable Long id, Authentication authentication) {
+        servicioUsuario.dejarDeSeguir(id, authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
+
 }

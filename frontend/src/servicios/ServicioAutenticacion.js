@@ -34,3 +34,15 @@ export async function verificarContrasenaActual(contrasenaActual) {
 export async function actualizarMiPerfil(dto) {
     return apiPut("/api/usuarios/me/actualizacionperfil", dto);
 }
+
+export async function buscarUsuarios(query) {
+    return apiGet(`/api/usuarios/busqueda?q=${encodeURIComponent(query)}`);
+}
+
+export async function seguirUsuario(id) {
+    return apiPost(`/api/usuarios/${id}/seguidores`);
+}
+
+export async function dejarDeSeguirUsuario(id) {
+    return apiDelete(`/api/usuarios/${id}/seguidores`);
+}

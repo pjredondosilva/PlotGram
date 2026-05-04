@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import BuscadorUsuarios from "./BuscadorUsuarios.jsx";
 import "./estilos/Encabezado.css";
 
 function inicialUsuario(nombre) {
@@ -35,6 +36,7 @@ export default function Encabezado({ user, onLogin, onRegister, onLogout }) {
             </div>
 
             <div className="pg-header__right">
+                {user && <BuscadorUsuarios />}
                 {!user ? (
                     <>
                         <button className="pg-link" onClick={onLogin}>Iniciar sesión</button>
