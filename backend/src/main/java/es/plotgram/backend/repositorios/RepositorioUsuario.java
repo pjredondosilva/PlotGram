@@ -21,7 +21,7 @@ EntityManager em;
     /**
      * Guarda un usuario nuevo en la base de datos.
      * @param usuario El usuario a persistir.
-     */
+     *///
     @Transactional
     public Usuario guardar(Usuario usuario) {
         em.persist(usuario);
