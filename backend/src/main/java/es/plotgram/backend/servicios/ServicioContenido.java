@@ -9,6 +9,10 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 
+/**
+ * Servicio encargado de la gestión y persistencia de los objetos de contenido.
+ * Asegura que no se dupliquen contenidos con el mismo ID de TMDB.
+ */
 @Service
 @Validated
 public class ServicioContenido {
@@ -19,6 +23,12 @@ public class ServicioContenido {
         this.repositorioContenido = repositorioContenido;
     }
 
+    /**
+     * Busca un contenido en la base de datos local o lo guarda si no existe.
+     * 
+     * @param contenido Contenido a buscar o persistir.
+     * @return El contenido persistido con su ID generado.
+     */
     @Transactional
     public Contenido buscarOGuardar(Contenido contenido) {
         return repositorioContenido.buscarPorTmdbIdYTipo(contenido.getTmdbId(), contenido.getTipo())

@@ -14,6 +14,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * Servicio encargado de la comunicación con la API externa de The Movie Database (TMDB).
+ * Gestiona la búsqueda de contenidos, la recuperación de detalles, créditos, videos,
+ * proveedores de streaming y la internacionalización de géneros.
+ */
 @Service
 public class ServicioTmdb {
 
@@ -36,6 +41,10 @@ public class ServicioTmdb {
         this.mapeador = mapeador;
     }
 
+    /**
+     * Lista películas permitiendo búsqueda por texto, filtros de fecha o géneros.
+     * Si no hay filtros, devuelve las películas en cartelera.
+     */
     public DRespuestaPaginadaTmdb<DPeliculaListado> listarPeliculas(String consulta,
                                                                     int pagina,
                                                                     String fechaDesde,
@@ -55,6 +64,10 @@ public class ServicioTmdb {
         return taquillaPeliculas(pagina);
     }
 
+    /**
+     * Lista series permitiendo búsqueda por texto, filtros de fecha o géneros.
+     * Si no hay filtros, devuelve las series del momento.
+     */
     public DRespuestaPaginadaTmdb<DSerieListado> listarSeries(String consulta,
                                                               int pagina,
                                                               String fechaDesde,
@@ -411,6 +424,11 @@ public class ServicioTmdb {
                 ));
     }
 
+    /**
+     * Obtiene el detalle completo de una película incluyendo créditos y proveedores.
+     * 
+     * @param peliculaId ID de la película en TMDB.
+     */
     public DPeliculaDetalle detallePelicula(Long peliculaId) {
         var respuesta = tmdb.get()
                 .uri(uriBuilder -> uriBuilder
@@ -429,6 +447,11 @@ public class ServicioTmdb {
         return mapeador.DtoPeliculaDetalle(respuesta);
     }
 
+    /**
+     * Obtiene el detalle completo de una serie.
+     * 
+     * @param serieId ID de la serie en TMDB.
+     */
     public DSerieDetalle detalleSerie(Long serieId) {
         var respuesta = tmdb.get()
                 .uri(uriBuilder -> uriBuilder

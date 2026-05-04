@@ -7,6 +7,10 @@ import jakarta.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Representa a un usuario registrado en la plataforma.
+ * Contiene información de perfil, credenciales y roles.
+ */
 @Entity
 public class Usuario {
 

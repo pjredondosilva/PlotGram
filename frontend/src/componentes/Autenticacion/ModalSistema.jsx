@@ -1,7 +1,7 @@
 import "./estilos/AuthModal.css";
 import { useEffect } from "react";
 
-export default function ModalSistema({ open, onClose, children }) {
+export default function ModalSistema({ open, onClose, children, className = "" }) {
     useEffect(() => {
         function onKey(e) {
             if (e.key === "Escape") onClose();
@@ -14,7 +14,7 @@ export default function ModalSistema({ open, onClose, children }) {
 
     return (
         <div className="pg-modal__backdrop" onClick={onClose}>
-            <div className="pg-modal__panel" onClick={(e) => e.stopPropagation()}>
+            <div className={`pg-modal__panel ${className}`} onClick={(e) => e.stopPropagation()}>
                 {children}
             </div>
         </div>

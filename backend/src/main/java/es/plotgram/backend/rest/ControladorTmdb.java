@@ -6,6 +6,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controlador REST para el descubrimiento de contenidos (Películas y Series)
+ * mediante la integración con la API externa de TMDB.
+ */
 @RestController
 @RequestMapping("/api")
 public class ControladorTmdb {

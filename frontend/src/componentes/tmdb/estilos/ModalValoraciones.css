@@ -1,0 +1,190 @@
+.pg-modal__panel.modal-valoraciones-ancho {
+    width: min(650px, calc(100vw - 32px)) !important;
+    padding: 0; /* Remove default padding to handle header/body better */
+}
+
+.modal-valoraciones-scroll-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    background: var(--bg-panel);
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+}
+
+/* Custom scrollbar for better aesthetics */
+.modal-valoraciones-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-valoraciones-scroll-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.modal-valoraciones-scroll-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.modal-valoraciones-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.form-valoracion {
+    margin-bottom: 2.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.form-valoracion h3 {
+    margin-top: 0;
+    margin-bottom: 1.2rem;
+    font-size: 1.2rem;
+    color: var(--color-primary, #fff);
+}
+
+.estrellas-selector-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.estrellas-selector {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.estrella-btn {
+    background: none;
+    border: none;
+    font-size: 2.2rem;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.15);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s ease, filter 0.2s ease;
+    padding: 0;
+    line-height: 1;
+}
+
+.estrella-btn:hover {
+    transform: scale(1.25);
+    color: rgba(255, 204, 0, 0.5);
+}
+
+.estrella-btn.activa {
+    color: #ffcc00;
+    filter: drop-shadow(0 0 10px rgba(255, 204, 0, 0.7)) drop-shadow(0 0 20px rgba(255, 204, 0, 0.3));
+    transform: scale(1.15);
+}
+
+.estrella-btn:active {
+    transform: scale(0.9);
+}
+
+.puntuacion-label {
+    font-size: 0.9rem;
+    color: var(--color-muted, #999);
+    font-weight: 500;
+}
+
+.tmdb-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    color: #fff;
+    border-radius: 8px;
+    padding: 1rem;
+    min-height: 100px;
+    margin-bottom: 1.5rem;
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.95rem;
+}
+
+.tmdb-textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.valoracion-error-msg {
+    color: var(--color-error);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: -0.5rem 0 0.5rem 0;
+    text-align: right;
+}
+
+.lista-reseñas {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.reseña-item {
+    padding-bottom: 0.5rem;
+}
+
+.reseña-header {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.reseña-avatar, .reseña-avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--border-color, #333);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.reseña-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #fff;
+    background: linear-gradient(135deg, #444, #222);
+}
+
+.reseña-usuario-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.reseña-usuario-nombre {
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.05rem;
+}
+
+.reseña-usuario-nombre:hover {
+    color: var(--color-accent);
+}
+
+.reseña-estrellas {
+    color: #ffd700;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+}
+
+.reseña-comentario {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #ddd;
+    white-space: pre-wrap;
+    padding-left: 0.2rem;
+}
+
+.reseña-fecha {
+    font-size: 0.8rem;
+    color: var(--color-muted, #777);
+    margin-top: 0.8rem;
+    padding-left: 0.2rem;
+}

@@ -15,6 +15,10 @@ export async function getMe() {
     return apiGet("/api/usuarios/me");
 }
 
+export async function obtenerUsuario(id) {
+    return apiGet(`/api/usuarios/${id}`);
+}
+
 export async function getEstadoSesion() {
     return apiGet("/api/sesiones/estado");
 }

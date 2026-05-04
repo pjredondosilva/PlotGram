@@ -6,8 +6,10 @@ import { posterUrl } from "../../utils/img.js";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { crearContenidoListaSerie } from "../../utils/contenidoLista.js";
 import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
+import ModalValoraciones from "../../componentes/tmdb/ModalValoraciones.jsx";
 import "./estilos/detalleTmdb.css";
 import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";
+import { obtenerMediaValoraciones } from "../../servicios/ServicioValoraciones.js";
 
 function formatearFecha(fecha) {
     if (!fecha) return "Fecha no disponible";
@@ -118,6 +120,8 @@ export default function SerieDetalle() {
     const [err, setErr] = useState("");
     const [modalListaAbierto, setModalListaAbierto] = useState(false);
     const [mensajeLista, setMensajeLista] = useState("");
+    const [modalValoracionesAbierto, setModalValoracionesAbierto] = useState(false);
+    const [mediaValoracion, setMediaValoracion] = useState({ media: 0, total: 0 });
 
     useEffect(() => {
         let cancelled = false;
@@ -127,8 +131,14 @@ export default function SerieDetalle() {
             setErr("");
 
             try {
-                const data = await DarDetallesSeries(id);
-                if (!cancelled) setSerie(data);
+                const [data, mediaData] = await Promise.all([
+                    DarDetallesSeries(id),
+                    obtenerMediaValoraciones("tv", id).catch(() => ({ media: 0, total: 0 }))
+                ]);
+                if (!cancelled) {
+                    setSerie(data);
+                    setMediaValoracion(mediaData);
+                }
             } catch (e) {
                 if (!cancelled) setErr(e.message || "No se pudo cargar la serie.");
             } finally {
@@ -141,6 +151,15 @@ export default function SerieDetalle() {
             cancelled = true;
         };
     }, [id]);
+
+    async function refrescarMedia() {
+        try {
+            const mediaData = await obtenerMediaValoraciones("tv", id);
+            setMediaValoracion(mediaData);
+        } catch (e) {
+            console.error(e);
+        }
+    }
 
     const poster = useMemo(() => posterUrl(serie?.posterPath), [serie]);
     const contenidoLista = useMemo(
@@ -186,6 +205,10 @@ export default function SerieDetalle() {
                                 </span>
                                 <span className="tmdb-meta-chip">
                                     {serie.status || "No disponible"}
+                                </span>
+
+                                <span className="tmdb-meta-chip" style={{ color: "#ffd700", fontWeight: "bold" }}>
+                                    ⭐ {mediaValoracion.media > 0 ? mediaValoracion.media.toFixed(1) : "N/A"}
                                 </span>
                             </div>
                         </div>
@@ -268,6 +291,16 @@ export default function SerieDetalle() {
                                     onClick={() => setModalListaAbierto(true)}
                                 >
                                     Añadir a una lista
+                                </button>
+                            )}
+
+                            {user && (
+                                <button
+                                    type="button"
+                                    className="tmdb-boton-secundario"
+                                    onClick={() => setModalValoracionesAbierto(true)}
+                                >
+                                    Valoraciones
                                 </button>
                             )}
                         </div>
@@ -440,6 +473,14 @@ export default function SerieDetalle() {
                 onAnadido={(lista) => {
                     setMensajeLista(`Añadido a "${lista?.nombre ?? "la lista"}".`);
                 }}
+            />
+            <ModalValoraciones
+                open={modalValoracionesAbierto}
+                onClose={() => setModalValoracionesAbierto(false)}
+                tmdbId={id}
+                tipo="tv"
+                contenidoMetadata={contenidoLista}
+                onNuevaValoracion={refrescarMedia}
             />
         </section>
     );

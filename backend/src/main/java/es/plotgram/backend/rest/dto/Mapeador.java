@@ -138,6 +138,23 @@ public class Mapeador {
         );
     }
 
+    public es.plotgram.backend.rest.dto.valoraciones.DValoracionResumen dto(es.plotgram.backend.entidades.Valoracion valoracion) {
+        Usuario u = valoracion.getUsuario();
+        return new es.plotgram.backend.rest.dto.valoraciones.DValoracionResumen(
+                valoracion.getId(),
+                u.getId(),
+                u.getNombre(),
+                u.getFotoPerfil(),
+                valoracion.getPuntuacion(),
+                valoracion.getComentario(),
+                valoracion.getFecha()
+        );
+    }
+
+    public es.plotgram.backend.rest.dto.valoraciones.DMediaValoracion dtoMedia(Double media, long total) {
+        return new es.plotgram.backend.rest.dto.valoraciones.DMediaValoracion(media, total);
+    }
+
     public String contrasenaActual(DVerificacionContrasena dto) {
         return dto.contrasenaActual();
     }

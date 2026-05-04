@@ -6,7 +6,9 @@ import { posterUrl } from "../../utils/img.js";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { crearContenidoListaPelicula } from "../../utils/contenidoLista.js";
 import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
+import ModalValoraciones from "../../componentes/tmdb/ModalValoraciones.jsx";
 import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";
+import { obtenerMediaValoraciones } from "../../servicios/ServicioValoraciones.js";
 import "./estilos/detalleTmdb.css";
 
 function formatearFecha(fecha) {
@@ -128,6 +130,8 @@ export default function PeliculaDetalle() {
     const [err, setErr] = useState("");
     const [modalListaAbierto, setModalListaAbierto] = useState(false);
     const [mensajeLista, setMensajeLista] = useState("");
+    const [modalValoracionesAbierto, setModalValoracionesAbierto] = useState(false);
+    const [mediaValoracion, setMediaValoracion] = useState({ media: 0, total: 0 });
 
     useEffect(() => {
         let cancelled = false;
@@ -137,8 +141,14 @@ export default function PeliculaDetalle() {
             setErr("");
 
             try {
-                const data = await DarDetallesPeliculas(id);
-                if (!cancelled) setPelicula(data);
+                const [data, mediaData] = await Promise.all([
+                    DarDetallesPeliculas(id),
+                    obtenerMediaValoraciones("movie", id).catch(() => ({ media: 0, total: 0 }))
+                ]);
+                if (!cancelled) {
+                    setPelicula(data);
+                    setMediaValoracion(mediaData);
+                }
             } catch (e) {
                 if (!cancelled) setErr(e.message || "No se pudo cargar la película.");
             } finally {
@@ -151,6 +161,15 @@ export default function PeliculaDetalle() {
             cancelled = true;
         };
     }, [id]);
+
+    async function refrescarMedia() {
+        try {
+            const mediaData = await obtenerMediaValoraciones("movie", id);
+            setMediaValoracion(mediaData);
+        } catch (e) {
+            console.error(e);
+        }
+    }
 
     const poster = useMemo(() => posterUrl(pelicula?.posterPath), [pelicula]);
     const contenidoLista = useMemo(
@@ -210,6 +229,10 @@ export default function PeliculaDetalle() {
 
                                 <span className="tmdb-meta-chip">
                                     {pelicula.estrenadaEnCines ? "Estrenada" : "No estrenada"}
+                                </span>
+
+                                <span className="tmdb-meta-chip" style={{ color: "#ffd700", fontWeight: "bold" }}>
+                                    ⭐ {mediaValoracion.media > 0 ? mediaValoracion.media.toFixed(1) : "N/A"}
                                 </span>
                             </div>
                         </div>
@@ -295,6 +318,16 @@ export default function PeliculaDetalle() {
                                     onClick={() => setModalListaAbierto(true)}
                                 >
                                     Añadir a una lista
+                                </button>
+                            )}
+
+                            {user && (
+                                <button
+                                    type="button"
+                                    className="tmdb-boton-secundario"
+                                    onClick={() => setModalValoracionesAbierto(true)}
+                                >
+                                    Valoraciones
                                 </button>
                             )}
                         </div>
@@ -443,6 +476,14 @@ export default function PeliculaDetalle() {
                 onAnadido={(lista) => {
                     setMensajeLista(`Añadido a "${lista?.nombre ?? "la lista"}".`);
                 }}
+            />
+            <ModalValoraciones
+                open={modalValoracionesAbierto}
+                onClose={() => setModalValoracionesAbierto(false)}
+                tmdbId={id}
+                tipo="movie"
+                contenidoMetadata={contenidoLista}
+                onNuevaValoracion={refrescarMedia}
             />
         </section>
     );

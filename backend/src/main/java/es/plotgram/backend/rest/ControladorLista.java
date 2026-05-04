@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controlador REST para la gestión de listas de reproducción personalizadas.
+ * Permite a los usuarios crear, editar, eliminar y consultar colecciones de contenido.
+ */
 @RestController
 @RequestMapping("/api")
 public class ControladorLista {

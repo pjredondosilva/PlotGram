@@ -6,6 +6,9 @@ import jakarta.persistence.Entity;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Representa un episodio individual dentro de una temporada de una serie.
+ */
 @Entity
 @DiscriminatorValue("EPISODIO")
 public class Episodio extends ContenidoDeSerie {

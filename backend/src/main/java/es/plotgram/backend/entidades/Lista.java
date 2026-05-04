@@ -5,6 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+/**
+ * Representa una lista personalizada de contenidos creada por un usuario.
+ * Puede contener películas, series, temporadas o episodios.
+ */
 @Entity
 public class Lista {
 

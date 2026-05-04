@@ -1,5 +1,14 @@
 :root{
   color-scheme: dark;
+
+  --bg-panel: #121212;
+  --color-primary: #ffffff;
+  --color-muted: #999999;
+  --color-accent: #ff8a00;
+  --color-error: #e50914;
+  --border-color: rgba(255, 255, 255, 0.1);
+
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
 body{

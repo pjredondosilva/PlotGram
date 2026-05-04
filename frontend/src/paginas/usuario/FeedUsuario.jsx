@@ -5,8 +5,9 @@ import {
     borrarLista,
     crearLista,
     editarLista,
-    obtenerMisListas,
+    obtenerListasDeUsuario,
 } from "../../servicios/ServicioListas.js";
+import { obtenerUsuario } from "../../servicios/ServicioAutenticacion.js";
 import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
 import TarjetaLista from "../../componentes/listas/TarjetaLista.jsx";
 import FormularioEditarPerfil from "../../componentes/usuario/FormularioEditarPerfil.jsx";
@@ -28,58 +29,69 @@ export default function FeedUsuario() {
     const navigate = useNavigate();
     const { user, setUser, logout, loadingMe } = useAuth();
 
+    const [perfil, setPerfil] = useState(null);
     const [listas, setListas] = useState([]);
-    const [cargandoListas, setCargandoListas] = useState(true);
+    const [cargando, setCargando] = useState(true);
     const [error, setError] = useState("");
     const [modalNuevaAbierto, setModalNuevaAbierto] = useState(false);
     const [modalEditarPerfilAbierto, setModalEditarPerfilAbierto] = useState(false);
     const [listaEnEdicion, setListaEnEdicion] = useState(null);
     const [menuAbiertoId, setMenuAbiertoId] = useState(null);
 
-    const avatar = useMemo(() => inicialUsuario(user?.nombre), [user]);
+    const esPropietario = useMemo(() => {
+        return user && String(user.id) === String(idUsuario);
+    }, [user, idUsuario]);
+
+    const avatar = useMemo(() => inicialUsuario(perfil?.nombre), [perfil]);
 
     const descripcionUsuario = useMemo(
         () =>
-            user?.descripcion?.trim()
-                ? user.descripcion
-                : descripcionUsuarioPorDefecto(user?.nombre),
-        [user]
+            perfil?.descripcion?.trim()
+                ? perfil.descripcion
+                : descripcionUsuarioPorDefecto(perfil?.nombre),
+        [perfil]
     );
 
     useEffect(() => {
         if (loadingMe) return;
 
+        // Si no hay usuario, no cargamos nada (la UI mostrará el aviso de login)
         if (!user) {
-            setListas([]);
-            setCargandoListas(false);
+            setCargando(false);
             return;
         }
 
-        if (user.id == null) {
-            setError("No se ha podido resolver el id del usuario autenticado.");
-            setCargandoListas(false);
-            return;
+        async function cargarDatos() {
+            setCargando(true);
+            setError("");
+            try {
+                // Cargar perfil
+                if (esPropietario) {
+                    setPerfil(user);
+                } else {
+                    const datosUsuario = await obtenerUsuario(idUsuario);
+                    setPerfil(datosUsuario);
+                }
+
+                // Cargar listas
+                const data = await obtenerListasDeUsuario(idUsuario);
+                setListas(data ?? []);
+            } catch (e) {
+                setError(e.message || "No se pudieron cargar los datos del perfil.");
+            } finally {
+                setCargando(false);
+            }
         }
 
-        if (String(user.id) !== String(idUsuario)) {
-            navigate(`/usuarios/${user.id}/feed`, { replace: true });
-            return;
-        }
-
-        cargarListas();
-    }, [user, loadingMe, idUsuario, navigate]);
+        cargarDatos();
+    }, [idUsuario, user, loadingMe, esPropietario]);
 
     async function cargarListas() {
-        setCargandoListas(true);
-        setError("");
-
         try {
-            const data = await obtenerMisListas();
+            const data = await obtenerListasDeUsuario(idUsuario);
             setListas(data ?? []);
         } catch (e) {
-            setError(e.message || "No se pudieron cargar tus listas.");
-        } finally {
-            setCargandoListas(false);
+            setError(e.message || "No se pudieron cargar las listas.");
         }
     }
 
@@ -90,9 +102,7 @@ export default function FeedUsuario() {
 
     async function manejarEditarLista(dto) {
         if (!listaEnEdicion) return;
-
         await editarLista(listaEnEdicion.id, dto);
-
         setListaEnEdicion(null);
         await cargarListas();
     }
@@ -101,11 +111,8 @@ export default function FeedUsuario() {
         const confirmado = window.confirm(
             `¿Seguro que quieres borrar la lista "${lista.nombre}"?`
         );
-
         if (!confirmado) return;
-
         await borrarLista(lista.id);
-
         setMenuAbiertoId(null);
         setListas((prev) => prev.filter((item) => item.id !== lista.id));
     }
@@ -117,16 +124,30 @@ export default function FeedUsuario() {
         );
     }
 
-    if (loadingMe || cargandoListas) {
-        return <div className="tmdb-cargando">Cargando tu feed...</div>;
+    if (loadingMe || cargando) {
+        return <div className="tmdb-cargando">Cargando perfil...</div>;
     }
 
     if (!user) {
         return (
             <section className="tmdb-detalle feed-usuario">
                 <div className="tmdb-panel feed-aviso">
-                    <h1>Tu feed de listas</h1>
-                    <p>Inicia sesión para crear y gestionar tus listas personales.</p>
+                    <h1>Acceso restringido</h1>
+                    <p>Para ver perfiles de otros usuarios y sus listas, debes estar registrado e iniciar sesión en PlotGram.</p>
+                    <Link to="/" className="tmdb-boton-primario">
+                        Volver al inicio
+                    </Link>
+                </div>
+            </section>
+        );
+    }
+
+    if (!perfil) {
+        return (
+            <section className="tmdb-detalle feed-usuario">
+                <div className="tmdb-panel feed-aviso">
+                    <h1>{error ? "Error al cargar" : "Usuario no encontrado"}</h1>
+                    <p>{error || "El perfil que buscas no existe o no está disponible."}</p>
                     <Link to="/" className="tmdb-boton-primario">
                         Volver al inicio
                     </Link>
@@ -139,11 +160,15 @@ export default function FeedUsuario() {
         <section className="tmdb-detalle feed-usuario">
             <header className="tmdb-panel feed-cabecera">
                 <div className="feed-perfil">
-                    {user.fotoPerfil ? (
+                    {perfil.fotoPerfil ? (
                         <img
                             className="feed-avatar-imagen"
-                            src={user.fotoPerfil}
-                            alt={user.nombre}
+                            src={perfil.fotoPerfil}
+                            alt={perfil.nombre}
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y";
+                            }}
                         />
                     ) : (
                         <div className="feed-avatar">{avatar}</div>
@@ -151,14 +176,14 @@ export default function FeedUsuario() {
 
                     <div className="feed-perfil-texto">
                         <div className="feed-perfil-superior">
-                            <h1>{user.nombre}</h1>
+                            <h1>{perfil.nombre}</h1>
 
                             <div className="tmdb-meta-inline">
                                 <span className="tmdb-meta-chip">
                                     {listas.length} listas
                                 </span>
                                 <span className="tmdb-meta-chip">
-                                    Feed personal
+                                    {esPropietario ? "Feed personal" : "Perfil de usuario"}
                                 </span>
                             </div>
                         </div>
@@ -167,53 +192,47 @@ export default function FeedUsuario() {
                     </div>
                 </div>
 
-                <div className="feed-cabecera-acciones">
-                    <button
-                        type="button"
-                        className="tmdb-boton-secundario"
-                        onClick={() => setModalEditarPerfilAbierto(true)}
-                    >
-                        Editar perfil
-                    </button>
-                </div>
+                {esPropietario && (
+                    <div className="feed-cabecera-acciones">
+                        <button
+                            type="button"
+                            className="tmdb-boton-secundario"
+                            onClick={() => setModalEditarPerfilAbierto(true)}
+                        >
+                            Editar perfil
+                        </button>
+                    </div>
+                )}
             </header>
 
             <section className="tmdb-bloque feed-bloque">
                 <div className="tmdb-seccion-cabecera feed-bloque-cabecera">
                     <div>
-                        <h2>Mis listas</h2>
+                        <h2>{esPropietario ? "Mis listas" : `Listas de ${perfil.nombre}`}</h2>
                         <p>
-                            Organiza tu perfil con una cuadrícula visual al estilo
-                            de la aplicación.
+                            Explora las colecciones guardadas por este usuario.
                         </p>
                     </div>
 
-                    <button
-                        type="button"
-                        className="tmdb-boton-secundario"
-                        onClick={() => setModalNuevaAbierto(true)}
-                    >
-                        Añadir lista
-                    </button>
+                    {esPropietario && (
+                        <button
+                            type="button"
+                            className="tmdb-boton-secundario"
+                            onClick={() => setModalNuevaAbierto(true)}
+                        >
+                            Añadir lista
+                        </button>
+                    )}
                 </div>
 
                 {error && <div className="tmdb-error">{error}</div>}
 
                 {!listas.length ? (
                     <div className="feed-vacio">
-                        <h3>Aún no has creado ninguna lista</h3>
+                        <h3>No hay listas públicas</h3>
                         <p>
-                            Crea tu primera lista para empezar a llenar tu feed con
-                            portadas y colecciones personalizadas.
+                            Este usuario aún no ha creado ninguna lista o son privadas.
                         </p>
-
-                        <button
-                            type="button"
-                            className="tmdb-boton-primario"
-                            onClick={() => setModalNuevaAbierto(true)}
-                        >
-                            Crear primera lista
-                        </button>
                     </div>
                 ) : (
                     <div className="feed-listas-grid">
@@ -221,58 +240,62 @@ export default function FeedUsuario() {
                             <TarjetaLista
                                 key={lista.id}
                                 lista={lista}
-                                nombreUsuario={user.nombre}
-                                idUsuario={user.id}
+                                nombreUsuario={perfil.nombre}
+                                idUsuario={perfil.id}
                                 menuAbierto={menuAbiertoId === lista.id}
-                                onAbrirMenu={setMenuAbiertoId}
+                                onAbrirMenu={esPropietario ? setMenuAbiertoId : () => {}}
                                 onCerrarMenu={() => setMenuAbiertoId(null)}
-                                onEditar={(listaSeleccionada) => {
+                                onEditar={esPropietario ? (listaSeleccionada) => {
                                     setMenuAbiertoId(null);
                                     setListaEnEdicion(listaSeleccionada);
-                                }}
-                                onBorrar={manejarBorrarLista}
+                                } : null}
+                                onBorrar={esPropietario ? manejarBorrarLista : null}
                             />
                         ))}
                     </div>
                 )}
             </section>
 
-            <ModalSistema
-                open={modalNuevaAbierto}
-                onClose={() => setModalNuevaAbierto(false)}
-            >
-                {modalNuevaAbierto && (
-                    <FormularioLista
+            {esPropietario && (
+                <>
+                    <ModalSistema
+                        open={modalNuevaAbierto}
                         onClose={() => setModalNuevaAbierto(false)}
-                        onSubmit={manejarCrearLista}
-                        titulo="Crear nueva lista"
-                        textoBoton="Crear lista"
-                    />
-                )}
-            </ModalSistema>
+                    >
+                        {modalNuevaAbierto && (
+                            <FormularioLista
+                                onClose={() => setModalNuevaAbierto(false)}
+                                onSubmit={manejarCrearLista}
+                                titulo="Crear nueva lista"
+                                textoBoton="Crear lista"
+                            />
+                        )}
+                    </ModalSistema>
 
-            <ModalSistema
-                open={!!listaEnEdicion}
-                onClose={() => setListaEnEdicion(null)}
-            >
-                {listaEnEdicion && (
-                    <FormularioLista
+                    <ModalSistema
+                        open={!!listaEnEdicion}
                         onClose={() => setListaEnEdicion(null)}
-                        onSubmit={manejarEditarLista}
-                        titulo="Editar lista"
-                        textoBoton="Guardar cambios"
-                        valoresIniciales={listaEnEdicion}
-                    />
-                )}
-            </ModalSistema>
+                    >
+                        {listaEnEdicion && (
+                            <FormularioLista
+                                onClose={() => setListaEnEdicion(null)}
+                                onSubmit={manejarEditarLista}
+                                titulo="Editar lista"
+                                textoBoton="Guardar cambios"
+                                valoresIniciales={listaEnEdicion}
+                            />
+                        )}
+                    </ModalSistema>
 
-            <FormularioEditarPerfil
-                open={modalEditarPerfilAbierto}
-                onClose={() => setModalEditarPerfilAbierto(false)}
-                user={user}
-                setUser={setUser}
-                onRequiereNuevoLogin={manejarNuevoLoginRequerido}
-            />
+                    <FormularioEditarPerfil
+                        open={modalEditarPerfilAbierto}
+                        onClose={() => setModalEditarPerfilAbierto(false)}
+                        user={user}
+                        setUser={setUser}
+                        onRequiereNuevoLogin={manejarNuevoLoginRequerido}
+                    />
+                </>
+            )}
         </section>
     );
 }

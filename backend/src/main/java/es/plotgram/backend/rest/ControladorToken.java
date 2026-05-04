@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Controlador REST encargado de la gestión de sesión mediante tokens JWT.
- * Permite iniciar sesión, cerrarla, renovar el token y consultar su estado.
+ * Controlador REST para la gestión de sesiones y tokens JWT.
+ * Maneja el inicio de sesión, cierre de sesión y la renovación de tokens.
  */
 @RestController
 @RequestMapping("/api")

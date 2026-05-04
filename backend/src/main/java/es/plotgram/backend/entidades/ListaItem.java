@@ -6,6 +6,10 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 
+/**
+ * Representa un elemento individual dentro de una lista.
+ * Vincula una lista con un contenido específico y mantiene un orden de visualización.
+ */
 @Entity
 @Table(
         uniqueConstraints = {

@@ -13,7 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Controlador REST para el registro y la consulta de usuarios.
+ * Controlador REST para la gestión de usuarios.
+ * Maneja el registro, la recuperación de perfiles y la actualización de información personal.
  */
 @RestController
 @RequestMapping("/api")

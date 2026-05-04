@@ -12,6 +12,10 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.Optional;
 
+/**
+ * Servicio encargado de gestionar los perfiles de usuario y su persistencia.
+ * Proporciona métodos para registrar, buscar, actualizar y verificar usuarios.
+ */
 @Service
 @Validated
 public class ServicioUsuario {
@@ -23,6 +27,12 @@ public class ServicioUsuario {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     * Verifica que el nombre y el email no estén ya registrados.
+     * 
+     * @param usuario Datos del nuevo usuario.
+     */
     public void nuevoUsuario(Usuario usuario) {
         if (usuario.getNombre() != null && repositorioUsuario.buscarPorNombre(usuario.getNombre()).isPresent()) {
             throw new UsuarioYaRegistrado("nombre");
@@ -33,19 +43,43 @@ public class ServicioUsuario {
         repositorioUsuario.guardar(usuario);
     }
 
+    /**
+     * Busca un usuario por su ID interno.
+     * 
+     * @param id ID del usuario.
+     * @return Optional con el usuario si existe.
+     */
     public Optional<Usuario> buscarUsuario(Long id) {
         return repositorioUsuario.buscarPorID(id);
     }
 
+    /**
+     * Busca un usuario por su nombre de usuario.
+     * 
+     * @param nombre Nombre de usuario.
+     * @return Optional con el usuario si existe.
+     */
     public Optional<Usuario> buscarUsuario(String nombre) {
         return repositorioUsuario.buscarPorNombre(nombre);
     }
 
+    /**
+     * Verifica si la contraseña proporcionada coincide con la actual del usuario.
+     * 
+     * @param nombreUsuario Nombre del usuario.
+     * @param contrasenaActual Contraseña a verificar.
+     */
     public void verificarContrasenaActual(String nombreUsuario, String contrasenaActual) {
         Usuario usuario = obtenerUsuarioActivo(nombreUsuario);
         validarContrasenaActual(usuario, contrasenaActual);
     }
 
+    /**
+     * Actualiza la información del perfil de un usuario.
+     * Realiza validaciones de seguridad y unicidad de datos.
+     * 
+     * @return El usuario actualizado.
+     */
     public Usuario actualizarPerfil(String nombreUsuario,
                                     String nuevoNombre,
                                     String nuevoEmail,

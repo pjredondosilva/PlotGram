@@ -9,6 +9,10 @@ import org.springframework.validation.annotation.Validated;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Servicio encargado de gestionar los elementos individuales de las listas.
+ * Controla el orden y la vinculación entre listas y contenidos.
+ */
 @Service
 @Validated
 public class ServicioListaItem {

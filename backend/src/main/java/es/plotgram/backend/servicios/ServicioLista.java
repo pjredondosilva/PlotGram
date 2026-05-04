@@ -14,6 +14,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+/**
+ * Servicio encargado de gestionar las listas de reproducción de los usuarios.
+ * Permite crear, editar, borrar y consultar listas personalizadas y sus contenidos.
+ */
 @Service
 @Validated
 public class ServicioLista {
@@ -33,6 +37,13 @@ public class ServicioLista {
         this.servicioUsuario = servicioUsuario;
     }
 
+    /**
+     * Crea una nueva lista para un usuario.
+     * 
+     * @param nombreUsuario Nombre del propietario.
+     * @param listaNueva Datos de la nueva lista.
+     * @return Detalle de la lista recién creada.
+     */
     @Transactional
     public ListaDetalleServicio crearLista(String nombreUsuario, Lista listaNueva) {
         Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);
@@ -50,18 +61,37 @@ public class ServicioLista {
         return new ListaDetalleServicio(listaGuardada, List.of());
     }
 
+    /**
+     * Obtiene el resumen de todas las listas del usuario autenticado.
+     * 
+     * @param nombreUsuario Nombre del usuario.
+     * @return Lista de resúmenes con conteo de elementos.
+     */
     @Transactional(readOnly = true)
     public List<ListaResumenServicio> obtenerMisListas(String nombreUsuario) {
         Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);
         return construirResumenesDeUsuario(usuario.getId());
     }
 
+    /**
+     * Obtiene el resumen de las listas de cualquier usuario por su ID.
+     * 
+     * @param idUsuario ID del usuario a consultar.
+     * @return Lista de resúmenes de sus listas.
+     */
     @Transactional(readOnly = true)
     public List<ListaResumenServicio> obtenerListasDeUsuario(Long idUsuario) {
         Usuario usuario = obtenerUsuarioPorId(idUsuario);
         return construirResumenesDeUsuario(usuario.getId());
     }
 
+    /**
+     * Obtiene el detalle completo de una lista específica de un usuario.
+     * 
+     * @param idUsuario ID del propietario.
+     * @param idLista ID de la lista.
+     * @return Detalle de la lista con sus elementos.
+     */
     @Transactional(readOnly = true)
     public ListaDetalleServicio obtenerListaDeUsuario(Long idUsuario, Long idLista) {
         Lista lista = obtenerListaPorUsuarioId(idLista, idUsuario);
@@ -69,6 +99,14 @@ public class ServicioLista {
         return new ListaDetalleServicio(lista, elementos);
     }
 
+    /**
+     * Añade un nuevo contenido a una lista.
+     * 
+     * @param idLista ID de la lista.
+     * @param nombreUsuario Nombre del propietario que realiza la acción.
+     * @param contenidoNuevo Detalles del contenido a añadir.
+     * @return Detalle actualizado de la lista.
+     */
     @Transactional
     public ListaDetalleServicio aniadirContenido(Long idLista, String nombreUsuario, Contenido contenidoNuevo) {
         Lista lista = obtenerListaDelUsuarioAutenticado(idLista, nombreUsuario);
@@ -92,6 +130,13 @@ public class ServicioLista {
         return new ListaDetalleServicio(lista, elementos);
     }
 
+    /**
+     * Elimina un elemento específico de una lista.
+     * 
+     * @param idLista ID de la lista.
+     * @param idItem ID del elemento a eliminar.
+     * @param nombreUsuario Nombre del propietario.
+     */
     @Transactional
     public void eliminarElemento(Long idLista, Long idItem, String nombreUsuario) {
         Lista lista = obtenerListaDelUsuarioAutenticado(idLista, nombreUsuario);
@@ -102,6 +147,12 @@ public class ServicioLista {
         servicioListaItem.borrar(listaItem);
     }
 
+    /**
+     * Elimina una lista completa junto con todos sus elementos.
+     * 
+     * @param idLista ID de la lista a borrar.
+     * @param nombreUsuario Nombre del propietario.
+     */
     @Transactional
     public void eliminarLista(Long idLista, String nombreUsuario) {
         Lista lista = obtenerListaDelUsuarioAutenticado(idLista, nombreUsuario);
@@ -114,6 +165,14 @@ public class ServicioLista {
         repositorioLista.borrar(lista);
     }
 
+    /**
+     * Edita los datos básicos de una lista (nombre, descripción, imagen).
+     * 
+     * @param idLista ID de la lista.
+     * @param nombreUsuario Nombre del propietario.
+     * @param datosLista Nuevos datos.
+     * @return Detalle actualizado de la lista.
+     */
     @Transactional
     public ListaDetalleServicio editarLista(Long idLista, String nombreUsuario, Lista datosLista) {
         Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);

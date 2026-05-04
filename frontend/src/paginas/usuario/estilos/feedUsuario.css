@@ -28,7 +28,7 @@
     font-size: 2rem;
     font-weight: 800;
     color: #ffffff;
-    background: linear-gradient(135deg, #ff8a00, #ffb347);
+    background: linear-gradient(135deg, var(--color-accent), #ffb347);
     box-shadow: 0 14px 26px rgba(0, 0, 0, 0.22);
 }
 
@@ -185,9 +185,9 @@
     display: grid;
     overflow: hidden;
     border-radius: 16px;
-    background: rgba(18, 18, 18, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-lg);
 }
 
 .feed-menu-desplegable button {
@@ -204,7 +204,7 @@
 }
 
 .feed-menu-opcion-peligro {
-    color: #ff8d8d !important;
+    color: var(--color-error) !important;
 }
 
 .feed-vacio,
@@ -307,7 +307,7 @@
 }
 
 .feed-formulario-error {
-    color: #ff8d8d;
+    color: var(--color-error);
     font-weight: 600;
 }
 
@@ -331,8 +331,8 @@
 }
 
 .feed-boton-primario {
-    background: #ff8a00;
-    border-color: #ff8a00;
+    background: var(--color-accent);
+    border-color: var(--color-accent);
 }
 
 .feed-boton-primario:hover {
@@ -366,8 +366,9 @@
 }
 
 .feed-boton-peligro {
-    background: rgba(255, 107, 107, 0.14);
-    border-color: rgba(255, 107, 107, 0.34);
+    background: rgba(229, 9, 20, 0.14);
+    border-color: rgba(229, 9, 20, 0.34);
+    color: var(--color-error);
 }
 
 .feed-boton-peligro:hover {
@@ -604,7 +605,7 @@
 .feed-contenido-card:focus-visible {
     transform: translateY(-2px);
     background: rgba(255, 255, 255, 0.075);
-    border-color: rgba(255, 138, 0, 0.55);
+    border-color: var(--color-accent);
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
     outline: none;
 }

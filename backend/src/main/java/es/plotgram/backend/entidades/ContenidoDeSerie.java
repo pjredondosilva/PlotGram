@@ -5,6 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
+/**
+ * Clase abstracta para contenidos que pertenecen a una serie (Temporadas y Episodios).
+ * Mantiene la vinculación con la serie madre mediante su ID de TMDB.
+ */
 @Entity
 public abstract class ContenidoDeSerie extends Contenido {
 
