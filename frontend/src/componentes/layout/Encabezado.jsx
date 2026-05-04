@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BuscadorUsuarios from "./BuscadorUsuarios.jsx";
 import "./estilos/Encabezado.css";
+import iconoNoticias from "../../assets/noticias-icon.png";
+import logoPlotgram from "../../assets/logo.png";
 
 function inicialUsuario(nombre) {
     return (nombre || "?").trim().charAt(0).toUpperCase();
@@ -31,12 +33,24 @@ export default function Encabezado({ user, onLogin, onRegister, onLogout }) {
         <header className="pg-header">
             <div className="pg-header__left">
                 <div className="pg-brand" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-                    Plotgram
+                    <img src={logoPlotgram} alt="Plotgram Logo" className="pg-brand__logo" />
+                    <span>Plotgram</span>
                 </div>
             </div>
 
             <div className="pg-header__right">
-                {user && <BuscadorUsuarios />}
+                {user && (
+                    <>
+                        <button
+                            className="pg-header__news-btn"
+                            onClick={() => navigate("/noticias")}
+                            title="Cine News"
+                        >
+                            <img src={iconoNoticias} alt="Noticias" className="pg-header__news-icon" />
+                        </button>
+                        <BuscadorUsuarios />
+                    </>
+                )}
                 {!user ? (
                     <>
                         <button className="pg-link" onClick={onLogin}>Iniciar sesión</button>

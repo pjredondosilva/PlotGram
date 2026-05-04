@@ -73,6 +73,8 @@ public class ServicioSeguridad {
                         .requestMatchers("/api/ping").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/peliculas/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/series/**").permitAll()
+                        // Noticias (Solo para usuarios registrados)
+                        .requestMatchers("/api/noticias/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .build();

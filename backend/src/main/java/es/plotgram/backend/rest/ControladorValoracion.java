@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * Controlador REST para la gestión de valoraciones y reseñas de películas y series.
- * Sigue una jerarquía de rutas coherente con el tipo de contenido.
+ * Controlador REST encargado de la gestión de valoraciones y reseñas de contenidos (películas y series).
+ * Permite a los usuarios puntuar contenidos, dejar comentarios y consultar las medias de valoración.
  */
 @RestController
 @RequestMapping("/api")
@@ -30,6 +30,13 @@ public class ControladorValoracion {
         this.mapeador = mapeador;
     }
 
+    /**
+     * Registra una nueva valoración o actualiza una existente para un contenido.
+     *
+     * @param authentication Información de sesión del usuario que valora.
+     * @param dto DTO con los datos de la valoración (contenido, puntuación, comentario).
+     * @return DTO con el resumen de la valoración creada o actualizada.
+     */
     @PostMapping("/valoraciones")
     public ResponseEntity<DValoracionResumen> valorar(Authentication authentication,
                                                        @Valid @RequestBody DValoracionNueva dto) {
@@ -42,6 +49,12 @@ public class ControladorValoracion {
         return ResponseEntity.status(HttpStatus.CREATED).body(mapeador.dto(valoracion));
     }
 
+    /**
+     * Recupera todas las valoraciones y reseñas de una película específica.
+     *
+     * @param id ID de la película en el sistema (TMDB ID).
+     * @return Lista de resúmenes de valoraciones.
+     */
     @GetMapping("/peliculas/{id}/valoraciones")
     public List<DValoracionResumen> obtenerValoracionesPelicula(@PathVariable Long id) {
         return servicioValoracion.obtenerValoraciones(id, TipoContenido.PELICULA).stream()
@@ -49,6 +62,12 @@ public class ControladorValoracion {
                 .toList();
     }
 
+    /**
+     * Obtiene la puntuación media y el total de votos para una película.
+     *
+     * @param id ID de la película.
+     * @return DTO con la media y el conteo total.
+     */
     @GetMapping("/peliculas/{id}/valoraciones/media")
     public DMediaValoracion obtenerMediaPelicula(@PathVariable Long id) {
         Double media = servicioValoracion.obtenerMedia(id, TipoContenido.PELICULA);
@@ -56,6 +75,12 @@ public class ControladorValoracion {
         return mapeador.dtoMedia(media, total);
     }
 
+    /**
+     * Recupera todas las valoraciones y reseñas de una serie específica.
+     *
+     * @param id ID de la serie en el sistema.
+     * @return Lista de resúmenes de valoraciones.
+     */
     @GetMapping("/series/{id}/valoraciones")
     public List<DValoracionResumen> obtenerValoracionesSerie(@PathVariable Long id) {
         return servicioValoracion.obtenerValoraciones(id, TipoContenido.SERIE).stream()
@@ -63,6 +88,12 @@ public class ControladorValoracion {
                 .toList();
     }
 
+    /**
+     * Obtiene la puntuación media y el total de votos para una serie.
+     *
+     * @param id ID de la serie.
+     * @return DTO con la media y el conteo total.
+     */
     @GetMapping("/series/{id}/valoraciones/media")
     public DMediaValoracion obtenerMediaSerie(@PathVariable Long id) {
         Double media = servicioValoracion.obtenerMedia(id, TipoContenido.SERIE);

@@ -6,7 +6,7 @@ import { posterUrl } from "../../utils/img.js";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { crearContenidoListaSerie } from "../../utils/contenidoLista.js";
 import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
-import ModalValoraciones from "../../componentes/tmdb/ModalValoraciones.jsx";
+import ModalValoraciones from "../../componentes/Valoraciones/ModalValoraciones.jsx";
 import "./estilos/detalleTmdb.css";
 import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";
 import { obtenerMediaValoraciones } from "../../servicios/ServicioValoraciones.js";
