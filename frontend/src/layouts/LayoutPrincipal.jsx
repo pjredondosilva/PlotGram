@@ -5,6 +5,7 @@ import ModalSistema from "../componentes/Autenticacion/ModalSistema.jsx";
 import FormularioLogin from "../componentes/Autenticacion/FormularioInicioDeSesion.jsx";
 import FormularioRegistro from "../componentes/Autenticacion/FormularioRegistro.jsx";
 import { useAuth } from "../servicios/ContextoDeAutenticacion.jsx";
+import ChatWidget from "../componentes/chat/ChatWidget.jsx";
 
 const LOGIN_FORM_INICIAL = {
     nombre: "",
@@ -75,6 +76,8 @@ export default function LayoutPrincipal() {
             <main>
                 <Outlet />
             </main>
+
+            <ChatWidget />
 
             <ModalSistema open={modal !== null} onClose={handleCloseModal}>
                 {modal === "login" && (

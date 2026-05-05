@@ -20,18 +20,21 @@ tiempoExpiracionTokenJwtMin: 40
 
 tmdb:
   base-url: https://api.themoviedb.org/3
-  token:   eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIyMzUwYmI3MjE4NDYwZGNiNjM0ZmZmYWM1YjdlMDI5YSIsIm5iZiI6MTc1MjA4MTMyNC42MjksInN1YiI6IjY4NmVhM2FjMWI5YThhYjFlOGE5NjYwOSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.K0r9kC62EHEhKtiPgpT32bsah8K_zbeaxiLAhTYSu9s
+  token: ${TMDB_TOKEN}
   lang: es-ES
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  model: gemini-2.5-flash
 plotgram:
   admin:
-    nombre: admin
-    password: admin123
-    email: admin@email.com
+    nombre: ${ADMIN_NAME:admin}
+    password: ${ADMIN_PASSWORD}
+    email: ${ADMIN_EMAIL:admin@email.com}
 
 app:
   auth:
     jwt:
-      secret: rFUIutbOUBLaezB7R9AqTLit9fXttySNjCPInZ5euCA=
+      secret: ${JWT_SECRET}
       clockSkewSeconds: 30
       refrescarventana: 10
       maxhorassesion: 8

@@ -22,14 +22,17 @@ services:
       - "8080:8080"
     depends_on:
       - db
+    env_file:
+      - .env
     environment:
-        SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/plotgram
-        SPRING_DATASOURCE_USERNAME: plotgram
-        SPRING_DATASOURCE_PASSWORD: plotgram
-        SPRING_JPA_HIBERNATE_DDL_AUTO: update
+        SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+        SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+        SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+        SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
         TMDB_TOKEN: ${TMDB_TOKEN}
-        TMDB_BASE_URL: ${TMDB_BASE_URL}
-        TMDB_LANG: ${TMDB_LANG}
+        GEMINI_API_KEY: ${GEMINI_API_KEY}
+        JWT_SECRET: ${JWT_SECRET}
+        ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     networks:
       - tfgnet
 

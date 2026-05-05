@@ -10,6 +10,7 @@ import ModalValoraciones from "../../componentes/Valoraciones/ModalValoraciones.
 import "./estilos/detalleTmdb.css";
 import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";
 import { obtenerMediaValoraciones } from "../../servicios/ServicioValoraciones.js";
+import { useChat } from "../../servicios/ContextoChat.jsx";
 
 function formatearFecha(fecha) {
     if (!fecha) return "Fecha no disponible";
@@ -151,6 +152,22 @@ export default function SerieDetalle() {
             cancelled = true;
         };
     }, [id]);
+
+    const { setUiContext } = useChat();
+
+    useEffect(() => {
+        if (serie) {
+            setUiContext({
+                type: "Serie",
+                title: serie.name,
+                synopsis: serie.overview,
+                creator: serie.creator,
+                cast: serie.cast?.slice(0, 5).map(a => a.name).join(", "),
+                id: id
+            });
+        }
+        return () => setUiContext(null);
+    }, [serie, id, setUiContext]);
 
     async function refrescarMedia() {
         try {

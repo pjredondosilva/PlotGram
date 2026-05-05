@@ -138,7 +138,10 @@ public class ServicioUsuario {
     }
 
     /**
-     * Busca usuarios que coincidan con un término de búsqueda.
+     * Busca usuarios cuyo nombre contenga el término proporcionado.
+     * 
+     * @param query Término de búsqueda.
+     * @return Lista de usuarios que coinciden con la búsqueda.
      */
     public java.util.List<Usuario> buscarUsuarios(String query) {
         if (query == null || query.isBlank()) return java.util.Collections.emptyList();
@@ -146,7 +149,11 @@ public class ServicioUsuario {
     }
 
     /**
-     * Un usuario sigue a otro.
+     * Establece una relación de seguimiento entre el usuario autenticado y otro usuario.
+     * 
+     * @param idSeguido ID del usuario al que se desea seguir.
+     * @param nombreSeguidor Nombre del usuario que realiza la acción.
+     * @throws IllegalArgumentException Si el usuario intenta seguirse a sí mismo.
      */
     @Transactional
     public void seguir(Long idSeguido, String nombreSeguidor) {
@@ -163,7 +170,10 @@ public class ServicioUsuario {
     }
 
     /**
-     * Un usuario deja de seguir a otro.
+     * Elimina una relación de seguimiento existente.
+     * 
+     * @param idSeguido ID del usuario al que se desea dejar de seguir.
+     * @param nombreSeguidor Nombre del usuario que realiza la acción.
      */
     @Transactional
     public void dejarDeSeguir(Long idSeguido, String nombreSeguidor) {
@@ -176,7 +186,11 @@ public class ServicioUsuario {
     }
 
     /**
-     * Comprueba si un usuario sigue a otro.
+     * Comprueba si existe una relación de seguimiento entre dos usuarios.
+     * 
+     * @param nombreSeguidor Nombre del potencial seguidor.
+     * @param idSeguido ID del usuario presuntamente seguido.
+     * @return true si la relación existe, false en caso contrario.
      */
     @Transactional(readOnly = true)
     public boolean esSeguidor(String nombreSeguidor, Long idSeguido) {

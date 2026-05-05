@@ -9,6 +9,7 @@ import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx"
 import ModalValoraciones from "../../componentes/Valoraciones/ModalValoraciones.jsx";
 import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";
 import { obtenerMediaValoraciones } from "../../servicios/ServicioValoraciones.js";
+import { useChat } from "../../servicios/ContextoChat.jsx";
 import "./estilos/detalleTmdb.css";
 
 function formatearFecha(fecha) {
@@ -161,6 +162,23 @@ export default function PeliculaDetalle() {
             cancelled = true;
         };
     }, [id]);
+
+    const { setUiContext } = useChat();
+
+    useEffect(() => {
+        if (pelicula) {
+            setUiContext({
+                type: "Película",
+                title: pelicula.title,
+                year: pelicula.releaseDate ? pelicula.releaseDate.split("-")[0] : "",
+                synopsis: pelicula.overview,
+                director: pelicula.director,
+                cast: pelicula.cast?.slice(0, 5).map(a => a.name).join(", "),
+                id: id
+            });
+        }
+        return () => setUiContext(null);
+    }, [pelicula, id, setUiContext]);
 
     async function refrescarMedia() {
         try {

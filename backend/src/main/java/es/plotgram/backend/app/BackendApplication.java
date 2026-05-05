@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestTemplate;
+
 @EnableScheduling
 @SpringBootApplication(scanBasePackages = "es.plotgram.backend")
 @EntityScan(basePackages="es.plotgram.backend.entidades")
@@ -13,4 +16,8 @@ public class BackendApplication {
 		SpringApplication.run(BackendApplication.class, args);
 	}
 
+	@Bean
+	public RestTemplate restTemplate() {
+		return new RestTemplate();
+	}
 }

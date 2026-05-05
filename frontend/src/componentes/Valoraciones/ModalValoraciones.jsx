@@ -118,10 +118,11 @@ export default function ModalValoraciones({ open, onClose, tmdbId, tipo, conteni
                         
                         {error && <p className="valoracion-error-msg">{error}</p>}
                         
-                        <div style={{ textAlign: "right", marginTop: error ? "0.5rem" : "0" }}>
+                        <div style={{ textAlign: "center", marginTop: error ? "0.5rem" : "0" }}>
                             <button
                                 type="submit"
                                 className="tmdb-boton-primario"
+                                style={{ padding: "0.8rem 2.5rem", fontSize: "1rem" }}
                                 disabled={enviando}
                             >
                                 {enviando ? "Guardando..." : (tieneValoracionPropia ? "Editar mi reseña" : "Publicar reseña")}

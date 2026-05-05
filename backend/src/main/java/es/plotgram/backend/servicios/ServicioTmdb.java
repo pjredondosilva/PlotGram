@@ -87,6 +87,13 @@ public class ServicioTmdb {
         return seriesDelMomento(pagina);
     }
 
+    /**
+     * Busca películas en la API de TMDB mediante una consulta de texto.
+     * 
+     * @param consulta Texto a buscar.
+     * @param pagina Número de página para los resultados.
+     * @return Respuesta paginada con las películas encontradas.
+     */
     public DRespuestaPaginadaTmdb<DPeliculaListado> buscarPeliculas(String consulta, int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/movie")
@@ -101,6 +108,13 @@ public class ServicioTmdb {
         return mapearPeliculas(resp, generosPeliculas());
     }
 
+    /**
+     * Busca series en la API de TMDB mediante una consulta de texto.
+     * 
+     * @param consulta Texto a buscar.
+     * @param pagina Número de página para los resultados.
+     * @return Respuesta paginada con las series encontradas.
+     */
     public DRespuestaPaginadaTmdb<DSerieListado> buscarSeries(String consulta, int pagina) {
         DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/search/tv")
@@ -115,6 +129,12 @@ public class ServicioTmdb {
         return mapearSeries(resp, generosSeries());
     }
 
+    /**
+     * Obtiene las películas que se encuentran actualmente en cartelera.
+     * 
+     * @param pagina Número de página de resultados.
+     * @return Lista paginada de películas en taquilla.
+     */
     public DRespuestaPaginadaTmdb<DPeliculaListado> taquillaPeliculas(int pagina) {
         DRespuestaBusquedaPeliculasTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/movie/now_playing")
@@ -128,6 +148,12 @@ public class ServicioTmdb {
         return mapearPeliculas(resp, generosPeliculas());
     }
 
+    /**
+     * Obtiene las series que son tendencia durante la semana actual.
+     * 
+     * @param pagina Número de página de resultados.
+     * @return Lista paginada de series populares.
+     */
     public DRespuestaPaginadaTmdb<DSerieListado> seriesDelMomento(int pagina) {
         DRespuestaBusquedaSeriesTmdb resp = tmdb.get()
                 .uri(uri -> uri.path("/trending/tv/week")
@@ -141,6 +167,15 @@ public class ServicioTmdb {
         return mapearSeries(resp, generosSeries());
     }
 
+    /**
+     * Descubre películas aplicando filtros avanzados de fecha y género.
+     * 
+     * @param pagina Número de página de resultados.
+     * @param fechaDesde Fecha mínima de lanzamiento.
+     * @param fechaHasta Fecha máxima de lanzamiento.
+     * @param generos Lista de nombres de géneros para filtrar.
+     * @return Lista paginada de películas que cumplen los criterios.
+     */
     public DRespuestaPaginadaTmdb<DPeliculaListado> descubrirPeliculasFiltradas(int pagina,
                                                                                 String fechaDesde,
                                                                                 String fechaHasta,
@@ -180,6 +215,15 @@ public class ServicioTmdb {
         return mapearPeliculas(resp, mapa);
     }
 
+    /**
+     * Descubre series aplicando filtros avanzados de fecha y género.
+     * 
+     * @param pagina Número de página de resultados.
+     * @param fechaDesde Fecha mínima de primera emisión.
+     * @param fechaHasta Fecha máxima de primera emisión.
+     * @param generos Lista de nombres de géneros para filtrar.
+     * @return Lista paginada de series que cumplen los criterios.
+     */
     public DRespuestaPaginadaTmdb<DSerieListado> descubrirSeriesFiltradas(int pagina,
                                                                           String fechaDesde,
                                                                           String fechaHasta,
@@ -219,6 +263,11 @@ public class ServicioTmdb {
         return mapearSeries(resp, mapa);
     }
 
+    /**
+     * Devuelve la lista de nombres de géneros de películas disponibles en la plataforma.
+     * 
+     * @return Lista de strings con los nombres de los géneros.
+     */
     public List<String> nombresGenerosPeliculas() {
         return cacheGenerosPeliculas.values().stream()
                 .filter(Objects::nonNull)
@@ -227,6 +276,11 @@ public class ServicioTmdb {
                 .toList();
     }
 
+    /**
+     * Devuelve la lista de nombres de géneros de series disponibles en la plataforma.
+     * 
+     * @return Lista de strings con los nombres de los géneros.
+     */
     public List<String> nombresGenerosSeries() {
         return cacheGenerosSeries.values().stream()
                 .filter(Objects::nonNull)
@@ -348,11 +402,17 @@ public class ServicioTmdb {
         );
     }
 
+    /**
+     * Tarea inicial que carga los géneros en la caché al arrancar el sistema.
+     */
     @PostConstruct
     public void precargarGeneros() {
         refrescarGeneros();
     }
 
+    /**
+     * Tarea programada que refresca la caché de géneros el día 1 de cada mes.
+     */
     @Scheduled(cron = "0 0 4 1 * *", zone = "Europe/Madrid")
     public void refrescarGeneros() {
         try {
@@ -470,6 +530,13 @@ public class ServicioTmdb {
         return mapeador.DtoSerieDetalle(respuesta);
     }
 
+    /**
+     * Obtiene los detalles de una temporada específica de una serie.
+     * 
+     * @param serieId ID de la serie.
+     * @param numeroTemporada Número de la temporada.
+     * @return Objeto con los datos de la temporada.
+     */
     public DTemporadaDetalle detalleTemporada(Long serieId, int numeroTemporada) {
         var respuesta = tmdb.get()
                 .uri(uriBuilder -> uriBuilder
@@ -487,6 +554,14 @@ public class ServicioTmdb {
         return mapeador.DtoTemporadaDetalle(respuesta);
     }
 
+    /**
+     * Obtiene los detalles de un episodio específico de una serie.
+     * 
+     * @param serieId ID de la serie.
+     * @param numeroTemporada Número de la temporada.
+     * @param numeroEpisodio Número del episodio.
+     * @return Objeto con los datos del episodio.
+     */
     public DEpisodioDetalle detalleEpisodio(Long serieId, int numeroTemporada, int numeroEpisodio) {
         var respuesta = tmdb.get()
                 .uri(uriBuilder -> uriBuilder
