@@ -1,6 +1,6 @@
 package es.plotgram.backend.rest;
 
-import es.plotgram.backend.app.DNoticia;
+import es.plotgram.backend.rest.dto.DNoticia;
 import es.plotgram.backend.servicios.ServicioNoticias;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

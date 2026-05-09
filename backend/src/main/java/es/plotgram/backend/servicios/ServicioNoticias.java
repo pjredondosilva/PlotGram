@@ -4,9 +4,8 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
-import es.plotgram.backend.app.DNoticia;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import es.plotgram.backend.rest.dto.DNoticia;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -26,11 +25,9 @@ import java.util.stream.Collectors;
 @Service
 public class ServicioNoticias {
 
-    private static final Logger logger = LoggerFactory.getLogger(ServicioNoticias.class);
-
     private record FeedConfig(String nombre, String url, String idioma) {}
 
-    private static final List<FeedConfig> FEEDS = List.of(
+    private static final List<FeedConfig> origenes = List.of(
             new FeedConfig("Espinof", "https://www.espinof.com/tag/noticias/rss2.xml", "es"),
             new FeedConfig("Espinof Cine", "https://www.espinof.com/tag/cine/rss2.xml", "es"),
             new FeedConfig("Espinof Series", "https://www.espinof.com/tag/serie/rss2.xml", "es"),
@@ -53,22 +50,17 @@ public class ServicioNoticias {
      */
     @Scheduled(fixedRate = 600000)
     public void actualizarNoticias() {
-        logger.info("Iniciando actualización programada de noticias...");
         List<DNoticia> todas = new ArrayList<>();
 
-        for (FeedConfig config : FEEDS) {
+        for (FeedConfig config : origenes) {
             try {
-                todas.addAll(procesarFeed(config));
+                todas.addAll(procesarOrigen(config));
             } catch (Exception e) {
-                logger.error("Error procesando feed {}: {}", config.nombre(), e.getMessage());
             }
         }
-
-        // Combinar con la caché existente para mantener histórico
         List<DNoticia> combinadas = new ArrayList<>(todas);
         combinadas.addAll(cacheNoticias);
 
-        // Deduplicación por URL única
         Map<String, DNoticia> mapaSinDuplicados = new LinkedHashMap<>();
         for (DNoticia n : combinadas) {
             mapaSinDuplicados.putIfAbsent(n.url(), n);
@@ -77,7 +69,6 @@ public class ServicioNoticias {
         List<DNoticia> listaFinal = new ArrayList<>(mapaSinDuplicados.values());
         listaFinal.sort((a, b) -> b.fechaPublicacion().compareTo(a.fechaPublicacion()));
 
-        // Límite de seguridad para la memoria
         if (listaFinal.size() > 500) {
             listaFinal = listaFinal.subList(0, 500);
         }
@@ -85,7 +76,6 @@ public class ServicioNoticias {
         cacheNoticias.clear();
         cacheNoticias.addAll(listaFinal);
         ultimaActualizacion = Instant.now();
-        logger.info("Actualización completada. Total en caché: {}", cacheNoticias.size());
     }
 
     /**
@@ -107,7 +97,7 @@ public class ServicioNoticias {
      * @param config Configuración del feed (nombre, url e idioma).
      * @return Lista de noticias extraídas y normalizadas del feed.
      */
-    private List<DNoticia> procesarFeed(FeedConfig config) throws Exception {
+    private List<DNoticia> procesarOrigen(FeedConfig config) throws Exception {
         SyndFeedInput input = new SyndFeedInput();
         SyndFeed feed = input.build(new XmlReader(new URL(config.url())));
 

@@ -70,7 +70,8 @@
 }
 
 .pg-header__news-icon {
-    width: 30px; /* Tamaño controlado para que no se vea enorme */
+    width: 30px;
+    /* Tamaño controlado para que no se vea enorme */
     height: 30px;
     object-fit: contain;
 }
@@ -186,9 +187,11 @@
     .pg-header {
         padding: 0 16px;
     }
+
     .pg-user__nombre {
         display: none;
     }
+
     .pg-brand span {
         display: none;
     }

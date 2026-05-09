@@ -178,7 +178,7 @@ export default function ModalValoraciones({ open, onClose, tmdbId, tipo, conteni
                                     <div className="reseña-fecha">
                                         {new Date(v.fecha).toLocaleDateString("es-ES", {
                                             day: "numeric",
-                                            month: "short",
+                                            month: "long",
                                             year: "numeric"
                                         })}
                                     </div>

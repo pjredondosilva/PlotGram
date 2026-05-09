@@ -18,7 +18,7 @@ public class RepositorioValoracion {
     EntityManager em;
 
     @Transactional
-    public Valoracion save(Valoracion valoracion) {
+    public Valoracion guardar(Valoracion valoracion) {
         if (valoracion.getId() == null) {
             em.persist(valoracion);
             return valoracion;
@@ -33,11 +33,11 @@ public class RepositorioValoracion {
                 SELECT v 
                 FROM Valoracion v 
                 WHERE v.contenido.tmdbId = :tmdbId 
-                  AND v.contenido.tipo = :tipo 
+                  AND TYPE(v.contenido) = :clase 
                 ORDER BY v.fecha DESC
                 """, Valoracion.class);
         q.setParameter("tmdbId", tmdbId);
-        q.setParameter("tipo", tipo);
+        q.setParameter("clase", resolverClase(tipo));
         return q.getResultList();
     }
 
@@ -47,10 +47,10 @@ public class RepositorioValoracion {
                 SELECT AVG(CAST(v.puntuacion AS double)) 
                 FROM Valoracion v 
                 WHERE v.contenido.tmdbId = :tmdbId 
-                  AND v.contenido.tipo = :tipo
+                  AND TYPE(v.contenido) = :clase
                 """, Double.class);
         q.setParameter("tmdbId", tmdbId);
-        q.setParameter("tipo", tipo);
+        q.setParameter("clase", resolverClase(tipo));
         return q.getSingleResult();
     }
 
@@ -60,10 +60,10 @@ public class RepositorioValoracion {
                 SELECT COUNT(v) 
                 FROM Valoracion v 
                 WHERE v.contenido.tmdbId = :tmdbId 
-                  AND v.contenido.tipo = :tipo
+                  AND TYPE(v.contenido) = :clase
                 """, Long.class);
         q.setParameter("tmdbId", tmdbId);
-        q.setParameter("tipo", tipo);
+        q.setParameter("clase", resolverClase(tipo));
         return q.getSingleResult();
     }
 
@@ -74,12 +74,22 @@ public class RepositorioValoracion {
                 FROM Valoracion v 
                 WHERE v.usuario.id = :usuarioId 
                   AND v.contenido.tmdbId = :tmdbId 
-                  AND v.contenido.tipo = :tipo
+                  AND TYPE(v.contenido) = :clase
                 """, Valoracion.class);
         q.setParameter("usuarioId", usuarioId);
         q.setParameter("tmdbId", tmdbId);
-        q.setParameter("tipo", tipo);
+        q.setParameter("clase", resolverClase(tipo));
         q.setMaxResults(1);
         return q.getResultList().stream().findFirst();
+    }
+
+    private Class<? extends Contenido> resolverClase(String tipoStr) {
+        es.plotgram.backend.entidades.TipoContenido tipo = es.plotgram.backend.entidades.TipoContenido.valueOf(tipoStr);
+        return switch (tipo) {
+            case PELICULA -> es.plotgram.backend.entidades.Pelicula.class;
+            case SERIE -> es.plotgram.backend.entidades.Serie.class;
+            case TEMPORADA -> es.plotgram.backend.entidades.Temporada.class;
+            case EPISODIO -> es.plotgram.backend.entidades.Episodio.class;
+        };
     }
 }

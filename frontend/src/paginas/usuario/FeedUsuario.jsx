@@ -280,6 +280,7 @@ export default function FeedUsuario() {
                                 lista={lista}
                                 nombreUsuario={perfil.nombre}
                                 idUsuario={perfil.id}
+                                esPropietario={esPropietario}
                                 menuAbierto={menuAbiertoId === lista.id}
                                 onAbrirMenu={esPropietario ? setMenuAbiertoId : () => {}}
                                 onCerrarMenu={() => setMenuAbiertoId(null)}

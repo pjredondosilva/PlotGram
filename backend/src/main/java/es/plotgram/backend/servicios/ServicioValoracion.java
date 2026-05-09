@@ -62,7 +62,7 @@ public class ServicioValoracion {
         valoracion.setComentario(comentario);
         valoracion.setFecha(LocalDateTime.now());
 
-        return repositorioValoracion.save(valoracion);
+        return repositorioValoracion.guardar(valoracion);
     }
 
     /**

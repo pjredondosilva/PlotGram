@@ -7,6 +7,7 @@ export default function TarjetaLista({
                                          lista,
                                          nombreUsuario,
                                          idUsuario,
+                                         esPropietario,
                                          menuAbierto,
                                          onAbrirMenu,
                                          onCerrarMenu,
@@ -40,31 +41,33 @@ export default function TarjetaLista({
 
     return (
         <article className="feed-lista-card tmdb-panel">
-            <div className="feed-lista-card-menu" ref={menuRef}>
-                <button
-                    type="button"
-                    className="feed-menu-boton"
-                    onClick={() => (menuAbierto ? onCerrarMenu() : onAbrirMenu(lista.id))}
-                    aria-label={`Abrir opciones de la lista ${lista.nombre}`}
-                >
-                    ⋯
-                </button>
+            {esPropietario && (
+                <div className="feed-lista-card-menu" ref={menuRef}>
+                    <button
+                        type="button"
+                        className="feed-menu-boton"
+                        onClick={() => (menuAbierto ? onCerrarMenu() : onAbrirMenu(lista.id))}
+                        aria-label={`Abrir opciones de la lista ${lista.nombre}`}
+                    >
+                        ⋯
+                    </button>
 
-                {menuAbierto && (
-                    <div className="feed-menu-desplegable">
-                        <button type="button" onClick={() => onEditar(lista)}>
-                            Editar
-                        </button>
-                        <button
-                            type="button"
-                            className="feed-menu-opcion-peligro"
-                            onClick={() => onBorrar(lista)}
-                        >
-                            Borrar
-                        </button>
-                    </div>
-                )}
-            </div>
+                    {menuAbierto && (
+                        <div className="feed-menu-desplegable">
+                            <button type="button" onClick={() => onEditar(lista)}>
+                                Editar
+                            </button>
+                            <button
+                                type="button"
+                                className="feed-menu-opcion-peligro"
+                                onClick={() => onBorrar(lista)}
+                            >
+                                Borrar
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
 
             <button
                 type="button"

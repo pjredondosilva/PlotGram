@@ -81,6 +81,7 @@ public class ServicioUsuario {
      * 
      * @return El usuario actualizado.
      */
+    @Transactional
     public Usuario actualizarPerfil(String nombreUsuario,
                                     String nuevoNombre,
                                     String nuevoEmail,
@@ -103,7 +104,12 @@ public class ServicioUsuario {
             usuario.setContrasena(passwordEncoder.encode(contrasenaNormalizada));
         }
 
-        return repositorioUsuario.actualizar(usuario);
+        Usuario actualizado = repositorioUsuario.actualizar(usuario);
+        // Forzamos la carga de colecciones antes de cerrar la transacción
+        actualizado.getSeguidores().size();
+        actualizado.getSeguidos().size();
+        
+        return actualizado;
     }
 
     private Usuario obtenerUsuarioActivo(String nombreUsuario) {

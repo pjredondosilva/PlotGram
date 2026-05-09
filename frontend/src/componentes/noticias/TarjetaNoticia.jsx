@@ -6,8 +6,8 @@ const TarjetaNoticia = ({ noticia }) => {
     const formatearFecha = (fechaStr) => {
         const fecha = new Date(fechaStr);
         return fecha.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: 'short',
+            day: 'numeric',
+            month: 'long',
             year: 'numeric'
         });
     };

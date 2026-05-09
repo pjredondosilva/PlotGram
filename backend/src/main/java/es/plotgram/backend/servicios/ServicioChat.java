@@ -21,11 +21,11 @@ public class ServicioChat {
     private String apiKey;
 
     @Value("${gemini.model}")
-    private String model;
+    private String modelo;
 
     private final RestTemplate restTemplate;
 
-    private static final String SYSTEM_PROMPT = """
+    private static final String promptsistema = """
         Eres un asistente experto en películas, series y entretenimiento dentro de la red social PlotGram.
         Responde solo sobre sinopsis, reparto, directores, estrenos, plataformas y curiosidades.
         Sé breve, en español y utiliza un formato ESTRUCTURADO y VISUAL:
@@ -58,13 +58,13 @@ public class ServicioChat {
         }
 
         // URL limpia sin la API Key expuesta
-        String finalUrl = String.format("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent", model);
+        String finalUrl = String.format("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent", modelo);
         
         // Construir el cuerpo para Gemini
         List<Map<String, Object>> contents = new ArrayList<>();
         
         // 1. Añadir Prompt de Sistema + Contexto
-        String systemText = SYSTEM_PROMPT;
+        String systemText = promptsistema;
         if (request.uiContext() != null && !request.uiContext().isEmpty()) {
             systemText += "\n\nContexto UI actual: " + request.uiContext();
         }
