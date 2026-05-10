@@ -9,18 +9,18 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 
 /**
- * Entidad base para cualquier tipo de contenido (Película, Serie, Temporada, Episodio).
- * Utiliza una estrategia de tabla única (SINGLE_TABLE) para la herencia y expone el
- * discriminador como un campo de solo lectura para facilitar las consultas.
+ * Entidad base para cualquier tipo de contenido (Película, Serie, Temporada,
+ * Episodio).
+ * Utiliza una estrategia de tabla única (SINGLE_TABLE) para la herencia y
+ * expone el
+ * tipo de contenido mediante un método abstracto.
  */
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "tipo", discriminatorType = DiscriminatorType.STRING, length = 20)
-@Table(
-        uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"tmdbId", "tipo"})
-        }
-)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "tmdbId", "tipo" })
+})
 public abstract class Contenido {
 
     @Id
@@ -51,9 +51,6 @@ public abstract class Contenido {
     @Size(max = 255)
     @Column(nullable = false, length = 255)
     private String enlace;
-
-    @Column(name = "tipo", insertable = false, updatable = false)
-    private String tipo;
 
     public Contenido() {
     }
