@@ -48,11 +48,11 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("listarPeliculas OK: si hay consulta, usa búsqueda de películas")
+    @DisplayName("listarPeliculas OK: si hay consulta, usa busqueda de Peliculas")
     void testListarPeliculasConConsulta() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[{"id":28,"name":"Acción"},{"id":878,"name":"Ciencia ficción"}]}
+                    {"genres":[{"id":28,"name":"Accion"},{"id":878,"name":"Ciencia ficcion"}]}
                     """,
                 "/genre/tv/list", """
                     {"genres":[]}
@@ -78,7 +78,7 @@ class ServicioTmdbTest {
         assertThat(resultado.totalPages()).isEqualTo(5);
         assertThat(resultado.totalResults()).isEqualTo(40);
         assertThat(resultado.results()).containsExactly(
-                new DPeliculaListado(1L, "Alien", "1979-05-25", "/alien.jpg", List.of(28, 878), List.of("Acción", "Ciencia ficción"))
+                new DPeliculaListado(1L, "Alien", "1979-05-25", "/alien.jpg", List.of(28, 878), List.of("Accion", "Ciencia ficcion"))
         );
         ClientRequest request = buscarPeticionPorRuta("/search/movie");
         assertThat(request.url().getQuery())
@@ -88,7 +88,7 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("listarPeliculas OK: sin consulta ni filtros usa películas en taquilla")
+    @DisplayName("listarPeliculas OK: sin consulta ni filtros usa peliculas en taquilla")
     void testListarPeliculasSinConsultaNiFiltros() {
         mockRutas(Map.of(
                 "/movie/now_playing", """
@@ -118,11 +118,11 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("listarPeliculas OK: si hay filtros usa discover/movie con fechas y géneros")
+    @DisplayName("listarPeliculas OK: si hay filtros usa discover/movie con fechas y generos")
     void testListarPeliculasConFiltros() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[{"id":28,"name":"Acción"},{"id":18,"name":"Drama"}]}
+                    {"genres":[{"id":28,"name":"Accion"},{"id":18,"name":"Drama"}]}
                     """,
                 "/genre/tv/list", """
                     {"genres":[]}
@@ -142,11 +142,11 @@ class ServicioTmdbTest {
                 .thenReturn(new DPeliculaListado(3L, "Mad Max", "2015-05-15", "/madmax.jpg", List.of(28), List.of()));
 
         servicio.refrescarGeneros();
-        var resultado = servicio.listarPeliculas(" ", 3, "2015-01-01", "2015-12-31", List.of(" acción "));
+        var resultado = servicio.listarPeliculas(" ", 3, "2015-01-01", "2015-12-31", List.of(" Accion "));
 
         assertThat(resultado.page()).isEqualTo(3);
         assertThat(resultado.results()).containsExactly(
-                new DPeliculaListado(3L, "Mad Max", "2015-05-15", "/madmax.jpg", List.of(28), List.of("Acción"))
+                new DPeliculaListado(3L, "Mad Max", "2015-05-15", "/madmax.jpg", List.of(28), List.of("Accion"))
         );
         ClientRequest request = buscarPeticionPorRuta("/discover/movie");
         assertThat(request.url().getQuery())
@@ -157,11 +157,11 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("listarPeliculas KO: si se filtra por un género inexistente, devuelve respuesta vacía sin llamar a discover")
+    @DisplayName("listarPeliculas KO: si se filtra por un genero inexistente, devuelve respuesta vacia sin llamar a discover")
     void testListarPeliculasGeneroInexistente() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[{"id":28,"name":"Acción"}]}
+                    {"genres":[{"id":28,"name":"Accion"}]}
                     """,
                 "/genre/tv/list", """
                     {"genres":[]}
@@ -180,7 +180,7 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("listarSeries OK: si hay consulta, usa búsqueda de series")
+    @DisplayName("listarSeries OK: si hay consulta, usa busqueda de series")
     void testListarSeriesConConsulta() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
@@ -215,7 +215,7 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("listarSeries OK: si hay filtros usa discover/tv con fechas y géneros")
+    @DisplayName("listarSeries OK: si hay filtros usa discover/tv con fechas y generos")
     void testListarSeriesConFiltros() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
@@ -258,7 +258,7 @@ class ServicioTmdbTest {
     void testNombresGenerosOrdenados() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[{"id":28,"name":"Acción"},{"id":18,"name":"Drama"},{"id":12,"name":"Acción"}]}
+                    {"genres":[{"id":28,"name":"Accion"},{"id":18,"name":"Drama"},{"id":12,"name":"Accion"}]}
                     """,
                 "/genre/tv/list", """
                     {"genres":[{"id":35,"name":"Comedia"},{"id":9648,"name":"Misterio"}]}
@@ -267,7 +267,7 @@ class ServicioTmdbTest {
 
         servicio.refrescarGeneros();
 
-        assertThat(servicio.nombresGenerosPeliculas()).containsExactly("Acción", "Drama");
+        assertThat(servicio.nombresGenerosPeliculas()).containsExactly("Accion", "Drama");
         assertThat(servicio.nombresGenerosSeries()).containsExactly("Comedia", "Misterio");
     }
 
@@ -344,7 +344,7 @@ class ServicioTmdbTest {
     }
 
     @Test
-    @DisplayName("refrescarGeneros KO: si una llamada falla, no lanza excepción")
+    @DisplayName("refrescarGeneros KO: si una llamada falla, no lanza excepcion")
     void testRefrescarGenerosNoRompeSiTmdbFalla() {
         when(exchangeFunction.exchange(any())).thenAnswer(invocation -> {
             ClientRequest request = invocation.getArgument(0);

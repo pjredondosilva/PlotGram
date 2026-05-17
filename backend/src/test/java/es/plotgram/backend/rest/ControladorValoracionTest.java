@@ -51,44 +51,34 @@ class ControladorValoracionTest {
     private ServicioUsuario servicioUsuario;
 
     @Test
-    @DisplayName("POST /api/valoraciones OK: crea una valoración correctamente")
+    @DisplayName("POST /api/valoraciones OK: crea una valoracion correctamente")
     void testValorarPelicula() {
-        // GIVEN
         crearUsuario("AnaValoradora", "ana@test.com");
         Authentication auth = new UsernamePasswordAuthenticationToken("AnaValoradora", null);
         
         DContenidoListaNuevo contenido = new DContenidoListaNuevo(1001L, TipoContenido.PELICULA, "Dune", "/img.jpg", LocalDate.now(), "Sinopsis", "url", null, null, null);
-        DValoracionNueva dto = new DValoracionNueva(contenido, 5, "Excelente película");
-        
-        // WHEN
+        DValoracionNueva dto = new DValoracionNueva(contenido, 5, "Excelente pelicula");
         var respuesta = controlador.valorar(auth, dto);
-        
-        // THEN
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody()).isNotNull();
         assertThat(respuesta.getBody().puntuacion()).isEqualTo(5);
-        assertThat(respuesta.getBody().comentario()).isEqualTo("Excelente película");
+        assertThat(respuesta.getBody().comentario()).isEqualTo("Excelente pelicula");
     }
 
     @Test
     @DisplayName("GET /api/peliculas/{id}/valoraciones/media OK: obtiene la media correcta")
     void testObtenerMedia() {
-        // GIVEN
         crearUsuario("PedroMedia", "pedro@test.com");
         crearUsuario("LuciaMedia", "lucia@test.com");
         
         Pelicula p = new Pelicula();
         p.setTmdbId(2002L);
         p.setTitulo("Pelicula Media");
-        p.setEnlace("http://test.com/2002"); // OBLIGATORIO
+        p.setEnlace("http://test.com/2002");
         
         servicioValoracion.valorar("PedroMedia", p, 4, "Buena");
         servicioValoracion.valorar("LuciaMedia", p, 2, "Regular");
-        
-        // WHEN
         var respuesta = controlador.obtenerMediaPelicula(2002L);
-        
-        // THEN
         assertThat(respuesta.media()).isEqualTo(3.0);
         assertThat(respuesta.total()).isEqualTo(2);
     }
@@ -96,18 +86,13 @@ class ControladorValoracionTest {
     @Test
     @DisplayName("GET /api/series/{id}/valoraciones OK: lista las valoraciones de una serie")
     void testListarValoracionesSerie() {
-        // GIVEN
         crearUsuario("CarlosSerie", "carlos@test.com");
         Serie s = new Serie();
         s.setTmdbId(3003L);
         s.setTitulo("Serie Carlos");
-        s.setEnlace("http://test.com/3003"); // OBLIGATORIO
+        s.setEnlace("http://test.com/3003");
         servicioValoracion.valorar("CarlosSerie", s, 5, "Obra maestra");
-        
-        // WHEN
         var lista = controlador.obtenerValoracionesSerie(3003L);
-        
-        // THEN
         assertThat(lista).isNotEmpty();
         assertThat(lista.get(0).usuarioNombre()).isEqualTo("CarlosSerie");
     }

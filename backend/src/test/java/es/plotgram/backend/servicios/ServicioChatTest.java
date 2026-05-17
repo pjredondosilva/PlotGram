@@ -35,13 +35,12 @@ class ServicioChatTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(servicioChat, "apiKey", "clave-secreta-chat");
-        ReflectionTestUtils.setField(servicioChat, "model", "modelo-ia-test");
+        ReflectionTestUtils.setField(servicioChat, "modelo", "modelo-ia-test");
     }
 
     @Test
     @DisplayName("procesarChat OK: el servicio formatea correctamente la respuesta de Gemini")
     void testProcesarChatExito() throws Exception {
-        // GIVEN
         DPeticionChat request = new DPeticionChat(
                 List.of(new DMensajeChat("user", "Hola PlotBot")),
                 "Contexto Unico de Prueba"
@@ -57,23 +56,16 @@ class ServicioChatTest {
 
         when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(Map.class)))
                 .thenReturn(new ResponseEntity<>(responseBody, HttpStatus.OK));
-
-        // WHEN
         String respuesta = servicioChat.procesarChat(request);
-
-        // THEN
         assertThat(respuesta).isEqualTo("Respuesta de IA Unica");
     }
 
     @Test
     @DisplayName("procesarChat KO: lanza excepcion si la API de Gemini falla")
     void testProcesarChatError() {
-        // GIVEN
         DPeticionChat request = new DPeticionChat(List.of(), null);
         when(restTemplate.postForEntity(anyString(), any(HttpEntity.class), eq(Map.class)))
                 .thenReturn(new ResponseEntity<>(HttpStatus.BAD_GATEWAY));
-
-        // WHEN & THEN
         assertThrows(RuntimeException.class, () -> servicioChat.procesarChat(request));
     }
 }

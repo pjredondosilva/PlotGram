@@ -23,7 +23,8 @@ import static org.assertj.core.api.Assertions.*;
                 "tmdb.token=test-token",
                 "plotgram.admin.nombre=admin-test",
                 "plotgram.admin.password=Admin123!",
-                "plotgram.admin.email=admin-test@plotgram.test"
+                "plotgram.admin.email=admin-test@plotgram.test",
+                "gemini.api-key=test-key"
         }
 )
 @ActiveProfiles("test")
@@ -37,10 +38,10 @@ class ServicioListaTest {
     private ServicioUsuario servicioUsuario;
 
     @Test
-    @DisplayName("crearLista OK: crea una lista vacía para el usuario")
+    @DisplayName("crearLista OK: crea una lista vacia para el usuario")
     void testCrearListaValida() {
         crearUsuario("AnaListaCrear", "ana.lista.crear@gmail.com");
-        Lista listaNueva = lista("Favoritas Ana", "Películas favoritas", "/ana.jpg");
+        Lista listaNueva = lista("Favoritas Ana", "Peliculas favoritas", "/ana.jpg");
 
         var resultado = servicioLista.crearLista("AnaListaCrear", listaNueva);
 
@@ -72,7 +73,7 @@ class ServicioListaTest {
     }
 
     @Test
-    @DisplayName("obtenerMisListas OK: devuelve los resúmenes con el número de elementos")
+    @DisplayName("obtenerMisListas OK: devuelve los resumenes con el numero de elementos")
     void testObtenerMisListas() {
         crearUsuario("DarioMisListas", "dario.mis.listas@gmail.com");
         var lista1 = servicioLista.crearLista("DarioMisListas", lista("Vistas Dario", null, null)).lista();
@@ -154,7 +155,7 @@ class ServicioListaTest {
     }
 
     @Test
-    @DisplayName("editarLista OK: actualiza nombre, descripción e imagen sin eliminar elementos")
+    @DisplayName("editarLista OK: actualiza nombre, descripcion e imagen sin eliminar elementos")
     void testEditarListaValida() {
         crearUsuario("JorgeListaEditar", "jorge.lista.editar@gmail.com");
         var lista = servicioLista.crearLista("JorgeListaEditar", lista("Original Jorge", "Original", "/original.jpg")).lista();
@@ -194,7 +195,7 @@ class ServicioListaTest {
     }
 
     @Test
-    @DisplayName("eliminarElemento KO: lanza excepción si el elemento no pertenece a la lista")
+    @DisplayName("eliminarElemento KO: lanza excepcion si el elemento no pertenece a la lista")
     void testEliminarElementoNoEncontrado() {
         crearUsuario("MartaListaElementoNoExiste", "marta.lista.elemento.noexiste@gmail.com");
         var lista = servicioLista.crearLista("MartaListaElementoNoExiste", lista("Lista Marta", null, null)).lista();
@@ -217,7 +218,7 @@ class ServicioListaTest {
     }
 
     @Test
-    @DisplayName("obtenerMisListas KO: lanza excepción si el usuario no existe")
+    @DisplayName("obtenerMisListas KO: lanza excepcion si el usuario no existe")
     void testObtenerMisListasUsuarioNoExiste() {
         assertThatThrownBy(() -> servicioLista.obtenerMisListas("UsuarioListaInexistente"))
                 .isInstanceOf(UsuarioNoEncontrado.class);

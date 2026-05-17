@@ -28,7 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "tmdb.token=test-token",
                 "plotgram.admin.nombre=admin-test",
                 "plotgram.admin.password=Admin123!",
-                "plotgram.admin.email=admin-test@plotgram.test"
+                "plotgram.admin.email=admin-test@plotgram.test",
+                "gemini.api-key=test-key"
         }
 )
 @ActiveProfiles("test")
@@ -109,7 +110,7 @@ class ControladorUsuarioTest {
     }
 
     @Test
-    @DisplayName("POST /api/usuarios/me/verificacioncontrasena OK: devuelve 204 si la contraseña es correcta")
+    @DisplayName("POST /api/usuarios/me/verificacioncontrasena OK: devuelve 204 si la contraseÃ±a es correcta")
     void testVerificarContrasenaCorrecta() {
         servicioUsuario.nuevoUsuario(usuario("RaquelPassword", passwordEncoder.encode("ClaveRaquel1!"), "raquel.password@gmail.com"));
         Authentication auth = new UsernamePasswordAuthenticationToken("RaquelPassword", null);
@@ -129,7 +130,7 @@ class ControladorUsuarioTest {
                 " SergioNuevo ",
                 " sergio.nuevo@gmail.com ",
                 " https://imagenes.test/sergio.jpg ",
-                " Nueva descripción ",
+                " Nueva descripciÃ³n ",
                 "ClaveSergio1!",
                 "NuevaSergio1!"
         );
@@ -141,7 +142,7 @@ class ControladorUsuarioTest {
         assertThat(respuesta.getBody().nombre()).isEqualTo("SergioNuevo");
         assertThat(respuesta.getBody().email()).isEqualTo("sergio.nuevo@gmail.com");
         assertThat(respuesta.getBody().fotoPerfil()).isEqualTo("https://imagenes.test/sergio.jpg");
-        assertThat(respuesta.getBody().descripcion()).isEqualTo("Nueva descripción");
+        assertThat(respuesta.getBody().descripcion()).isEqualTo("Nueva descripciÃ³n");
         assertThat(respuesta.getBody().contrasenia()).isNull();
     }
 

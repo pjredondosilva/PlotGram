@@ -22,7 +22,8 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "tmdb.token=test-token",
                 "plotgram.admin.nombre=admin-test",
                 "plotgram.admin.password=Admin123!",
-                "plotgram.admin.email=admin-test@plotgram.test"
+                "plotgram.admin.email=admin-test@plotgram.test",
+                "gemini.api-key=test-key"
         }
 )
 @ActiveProfiles("test")
@@ -36,19 +37,14 @@ class ServicioValoracionTest {
     private ServicioUsuario servicioUsuario;
 
     @Test
-    @DisplayName("valorar OK: guarda una nueva valoración y permite recuperarla")
+    @DisplayName("valorar OK: guarda una nueva valoracion y permite recuperarla")
     void testValorarExito() {
-        // GIVEN
         crearUsuario("JuanValorar", "juan@test.com");
         Pelicula p = new Pelicula();
         p.setTmdbId(5005L);
         p.setTitulo("Pelicula Juan");
         p.setEnlace("http://test.com/5005");
-
-        // WHEN
-        Valoracion v = servicioValoracion.valorar("JuanValorar", p, 4, "Me gustó");
-
-        // THEN
+        Valoracion v = servicioValoracion.valorar("JuanValorar", p, 4, "Me gustÃ³");
         assertThat(v.getId()).isNotNull();
         assertThat(v.getPuntuacion()).isEqualTo(4);
         assertThat(v.getUsuario().getNombre()).isEqualTo("JuanValorar");
@@ -57,7 +53,6 @@ class ServicioValoracionTest {
     @Test
     @DisplayName("obtenerMedia OK: calcula la media de varias valoraciones")
     void testCalcularMedia() {
-        // GIVEN
         crearUsuario("User1Media", "u1@test.com");
         crearUsuario("User2Media", "u2@test.com");
         
@@ -68,12 +63,8 @@ class ServicioValoracionTest {
         
         servicioValoracion.valorar("User1Media", p, 5, "Genial");
         servicioValoracion.valorar("User2Media", p, 3, "Meh");
-
-        // WHEN
         Double media = servicioValoracion.obtenerMedia(6006L, TipoContenido.PELICULA);
         Long total = servicioValoracion.obtenerTotal(6006L, TipoContenido.PELICULA);
-
-        // THEN
         assertThat(media).isEqualTo(4.0);
         assertThat(total).isEqualTo(2L);
     }

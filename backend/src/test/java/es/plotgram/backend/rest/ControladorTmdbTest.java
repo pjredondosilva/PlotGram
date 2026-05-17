@@ -29,25 +29,25 @@ class ControladorTmdbTest {
     }
 
     @Test
-    @DisplayName("GET /api/peliculas delega en listarPeliculas con consulta, fechas, página y géneros")
+    @DisplayName("GET /api/peliculas delega en listarPeliculas con consulta, fechas, pagina y generos")
     void testDarPeliculas() {
         var respuestaEsperada = new DRespuestaPaginadaTmdb<>(
                 2,
                 5,
                 40,
-                List.of(new DPeliculaListado(10L, "Alien", "1979-05-25", "/alien.jpg", List.of(28, 878), List.of("Acción", "Ciencia ficción")))
+                List.of(new DPeliculaListado(10L, "Alien", "1979-05-25", "/alien.jpg", List.of(28, 878), List.of("AcciÃ³n", "Ciencia ficciÃ³n")))
         );
-        when(servicioTmdb.listarPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("Acción")))
+        when(servicioTmdb.listarPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("AcciÃ³n")))
                 .thenReturn(respuestaEsperada);
 
-        var resultado = controlador.darPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("Acción"));
+        var resultado = controlador.darPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("AcciÃ³n"));
 
         assertThat(resultado).isSameAs(respuestaEsperada);
-        verify(servicioTmdb).listarPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("Acción"));
+        verify(servicioTmdb).listarPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("AcciÃ³n"));
     }
 
     @Test
-    @DisplayName("GET /api/series delega en listarSeries con consulta, fechas, página y géneros")
+    @DisplayName("GET /api/series delega en listarSeries con consulta, fechas, pagina y generos")
     void testDarSeries() {
         var respuestaEsperada = new DRespuestaPaginadaTmdb<>(
                 3,
@@ -67,11 +67,11 @@ class ControladorTmdbTest {
     @Test
     @DisplayName("GET /api/peliculas/generos delega en nombresGenerosPeliculas")
     void testDarGenerosPeliculas() {
-        when(servicioTmdb.nombresGenerosPeliculas()).thenReturn(List.of("Acción", "Drama"));
+        when(servicioTmdb.nombresGenerosPeliculas()).thenReturn(List.of("Accion", "Drama"));
 
         var resultado = controlador.darGenerosPeliculas();
 
-        assertThat(resultado).containsExactly("Acción", "Drama");
+        assertThat(resultado).containsExactly("Accion", "Drama");
         verify(servicioTmdb).nombresGenerosPeliculas();
     }
 
@@ -98,7 +98,7 @@ class ControladorTmdbTest {
                 "/backdrop.jpg",
                 169,
                 8.7,
-                List.of("Ciencia ficción"),
+                List.of("Ciencia ficcion"),
                 List.of(),
                 new DTrailer("Trailer", "abc123", "YouTube"),
                 new DProveedoresPelicula(List.of(), List.of(), List.of()),

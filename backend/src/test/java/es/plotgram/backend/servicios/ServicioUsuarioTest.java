@@ -24,7 +24,8 @@ import static org.assertj.core.api.Assertions.*;
                 "tmdb.token=test-token",
                 "plotgram.admin.nombre=admin-test",
                 "plotgram.admin.password=Admin123!",
-                "plotgram.admin.email=admin-test@plotgram.test"
+                "plotgram.admin.email=admin-test@plotgram.test",
+                "gemini.api-key=test-key"
         }
 )
 @ActiveProfiles("test")
@@ -99,7 +100,7 @@ class ServicioUsuarioTest {
     }
 
     @Test
-    @DisplayName("verificarContrasenaActual OK: no lanza excepción si la contraseña coincide")
+    @DisplayName("verificarContrasenaActual OK: no lanza excepcion si la contraseña coincide")
     void testVerificarContrasenaActualValida() {
         servicio.nuevoUsuario(usuario("FabioPassword", passwordEncoder.encode("ClaveFabio1!"), "fabio.password@gmail.com"));
 
@@ -108,14 +109,14 @@ class ServicioUsuarioTest {
     }
 
     @Test
-    @DisplayName("verificarContrasenaActual KO: lanza excepción si el usuario no existe")
+    @DisplayName("verificarContrasenaActual KO: lanza excepcion si el usuario no existe")
     void testVerificarContrasenaActualUsuarioNoExiste() {
         assertThatThrownBy(() -> servicio.verificarContrasenaActual("GemaPassword", "ClaveGema1!"))
                 .isInstanceOf(UsuarioNoEncontrado.class);
     }
 
     @Test
-    @DisplayName("verificarContrasenaActual KO: lanza excepción si la contraseña no coincide")
+    @DisplayName("verificarContrasenaActual KO: lanza excepcion si la contraseña no coincide")
     void testVerificarContrasenaActualIncorrecta() {
         servicio.nuevoUsuario(usuario("HugoPassword", passwordEncoder.encode("ClaveHugo1!"), "hugo.password@gmail.com"));
 
@@ -134,7 +135,7 @@ class ServicioUsuarioTest {
                 "  IreneNueva  ",
                 "  irene.nueva@gmail.com  ",
                 "   ",
-                "  Nueva descripción de Irene  ",
+                "  Nueva descripciÃ³n de Irene  ",
                 "ClaveIrene1!",
                 "   "
         );
@@ -142,7 +143,7 @@ class ServicioUsuarioTest {
         assertThat(resultado.getNombre()).isEqualTo("IreneNueva");
         assertThat(resultado.getEmail()).isEqualTo("irene.nueva@gmail.com");
         assertThat(resultado.getFotoPerfil()).isNull();
-        assertThat(resultado.getDescripcion()).isEqualTo("Nueva descripción de Irene");
+        assertThat(resultado.getDescripcion()).isEqualTo("Nueva descripciÃ³n de Irene");
         assertThat(resultado.getContrasena()).isEqualTo(hashOriginal);
     }
 
@@ -218,14 +219,14 @@ class ServicioUsuarioTest {
                 "MarcosActual",
                 "marcos.actual@gmail.com",
                 null,
-                "Descripción Marcos",
+                "DescripciÃ³n Marcos",
                 "ClaveMarcos1!",
                 null
         );
 
         assertThat(resultado.getNombre()).isEqualTo("MarcosActual");
         assertThat(resultado.getEmail()).isEqualTo("marcos.actual@gmail.com");
-        assertThat(resultado.getDescripcion()).isEqualTo("Descripción Marcos");
+        assertThat(resultado.getDescripcion()).isEqualTo("DescripciÃ³n Marcos");
     }
 
     private Usuario usuario(String nombre, String contrasena, String email) {

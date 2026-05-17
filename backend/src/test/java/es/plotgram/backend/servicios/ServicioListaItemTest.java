@@ -25,7 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "tmdb.token=test-token",
                 "plotgram.admin.nombre=admin-test",
                 "plotgram.admin.password=Admin123!",
-                "plotgram.admin.email=admin-test@plotgram.test"
+                "plotgram.admin.email=admin-test@plotgram.test",
+                "gemini.api-key=test-key"
         }
 )
 @ActiveProfiles("test")
@@ -76,7 +77,7 @@ class ServicioListaItemTest {
     }
 
     @Test
-    @DisplayName("contarPorListaId OK: devuelve el número de elementos de una lista")
+    @DisplayName("contarPorListaId OK: devuelve el numero de elementos de una lista")
     void testContarPorListaId() {
         DatosBase datos = datosBase("VeraItemContar", "Lista contar", 204L);
         Contenido contenido2 = repositorioContenido.guardar(pelicula(205L));
@@ -90,7 +91,7 @@ class ServicioListaItemTest {
     }
 
     @Test
-    @DisplayName("existePorListaIdYContenidoId OK: indica si el contenido ya está en la lista")
+    @DisplayName("existePorListaIdYContenidoId OK: indica si el contenido ya esta en la lista")
     void testExistePorListaIdYContenidoId() {
         DatosBase datos = datosBase("WandaItemExiste", "Lista existe", 206L);
         servicioListaItem.guardar(new ListaItem(null, datos.lista(), datos.contenido(), 0));
@@ -112,7 +113,7 @@ class ServicioListaItemTest {
     @Test
     @DisplayName("buscarUltimoOrdenDeLista OK: devuelve el mayor orden de la lista")
     void testBuscarUltimoOrdenDeLista() {
-        DatosBase datos = datosBase("XaviItemUltimo", "Lista último", 207L);
+        DatosBase datos = datosBase("XaviItemUltimo", "Lista Ãºltimo", 207L);
         Contenido contenido2 = repositorioContenido.guardar(pelicula(208L));
 
         servicioListaItem.guardar(new ListaItem(null, datos.lista(), datos.contenido(), 0));
@@ -173,7 +174,7 @@ class ServicioListaItemTest {
         Lista lista = repositorioLista.guardar(new Lista(
                 null,
                 nombreLista,
-                "Descripción",
+                "DescripciÃ³n",
                 "/portada.jpg",
                 usuario
         ));

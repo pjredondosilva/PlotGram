@@ -31,17 +31,12 @@ class ControladorChatTest {
     @Test
     @DisplayName("POST /api/chat OK: el controlador delega correctamente en el servicio")
     void testChatExito() throws Exception {
-        // GIVEN
         DPeticionChat request = new DPeticionChat(
                 List.of(new DMensajeChat("user", "Pregunta de prueba")),
                 "Contexto de pelicula"
         );
         when(servicioChat.procesarChat(any(DPeticionChat.class))).thenReturn("Respuesta Simulada");
-
-        // WHEN
         var respuesta = controladorChat.chat(request);
-
-        // THEN
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody().get("content")).isEqualTo("Respuesta Simulada");
     }
@@ -49,14 +44,9 @@ class ControladorChatTest {
     @Test
     @DisplayName("POST /api/chat KO: el controlador maneja excepciones del servicio")
     void testChatError() throws Exception {
-        // GIVEN
         DPeticionChat request = new DPeticionChat(List.of(), null);
         when(servicioChat.procesarChat(any(DPeticionChat.class))).thenThrow(new RuntimeException("Fallo en la IA"));
-
-        // WHEN
         var respuesta = controladorChat.chat(request);
-
-        // THEN
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -31,7 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "tmdb.token=test-token",
                 "plotgram.admin.nombre=admin-test",
                 "plotgram.admin.password=Admin123!",
-                "plotgram.admin.email=admin-test@plotgram.test"
+                "plotgram.admin.email=admin-test@plotgram.test",
+                "gemini.api-key=test-key"
         }
 )
 @ActiveProfiles("test")
@@ -52,14 +53,14 @@ class ControladorListaTest {
     void testCrearLista() {
         crearUsuario("AliciaControladorLista", "alicia.controlador.lista@gmail.com");
         Authentication auth = auth("AliciaControladorLista");
-        var dto = new DListaNueva("Favoritas Alicia", "Descripción Alicia", "/alicia.jpg");
+        var dto = new DListaNueva("Favoritas Alicia", "DescripciÃ³n Alicia", "/alicia.jpg");
 
         var respuesta = controlador.crearLista(auth, dto);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody()).isNotNull();
         assertThat(respuesta.getBody().nombre()).isEqualTo("Favoritas Alicia");
-        assertThat(respuesta.getBody().descripcion()).isEqualTo("Descripción Alicia");
+        assertThat(respuesta.getBody().descripcion()).isEqualTo("DescripciÃ³n Alicia");
         assertThat(respuesta.getBody().elementos()).isEmpty();
     }
 
@@ -109,7 +110,7 @@ class ControladorListaTest {
     }
 
     @Test
-    @DisplayName("POST /api/usuarios/me/listas/{idLista}/elementos OK: añade contenido a una lista")
+    @DisplayName("POST /api/usuarios/me/listas/{idLista}/elementos OK: aÃ±ade contenido a una lista")
     void testAniadirElemento() {
         crearUsuario("EvaControladorElemento", "eva.controlador.elemento@gmail.com");
         Authentication auth = auth("EvaControladorElemento");
@@ -143,13 +144,13 @@ class ControladorListaTest {
     @DisplayName("GET /api/usuarios/{idUsuario}/listas OK: devuelve las listas de un usuario")
     void testObtenerListasDeUsuario() {
         Usuario usuario = crearUsuario("GonzaloControladorPublicas", "gonzalo.controlador.publicas@gmail.com");
-        controlador.crearLista(auth("GonzaloControladorPublicas"), new DListaNueva("Lista Pública Gonzalo", null, null));
+        controlador.crearLista(auth("GonzaloControladorPublicas"), new DListaNueva("Lista PÃºblica Gonzalo", null, null));
 
         var respuesta = controlador.obtenerListasDeUsuario(usuario.getId());
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).hasSize(1);
-        assertThat(respuesta.getBody().get(0).nombre()).isEqualTo("Lista Pública Gonzalo");
+        assertThat(respuesta.getBody().get(0).nombre()).isEqualTo("Lista PÃºblica Gonzalo");
     }
 
     @Test

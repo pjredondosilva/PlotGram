@@ -23,7 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "tmdb.token=test-token",
                 "plotgram.admin.nombre=admin-test",
                 "plotgram.admin.password=Admin123!",
-                "plotgram.admin.email=admin-test@plotgram.test"
+                "plotgram.admin.email=admin-test@plotgram.test",
+                "gemini.api-key=test-key"
         }
 )
 @ActiveProfiles("test")
@@ -62,7 +63,7 @@ class ServicioContenidoTest {
     @Test
     @DisplayName("buscarOGuardar OK: permite mismo tmdbId si el tipo de contenido es distinto")
     void testBuscarOGuardarMismoTmdbIdDistintoTipo() {
-        Pelicula pelicula = pelicula(103L, "Fargo Película");
+        Pelicula pelicula = pelicula(103L, "Fargo Pelicula");
         Serie serie = serie(103L, "Fargo Serie");
 
         var peliculaGuardada = servicioContenido.buscarOGuardar(pelicula);

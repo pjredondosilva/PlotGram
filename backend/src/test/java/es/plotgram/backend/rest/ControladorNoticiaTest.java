@@ -25,19 +25,14 @@ class ControladorNoticiaTest {
     private ControladorNoticia controladorNoticia;
 
     @Test
-    @DisplayName("GET /api/noticias OK: filtra noticias por idioma y paginación")
+    @DisplayName("GET /api/noticias OK: filtra noticias por idioma y paginacion")
     void testObtenerNoticias() {
-        // GIVEN
         DNoticia n1 = new DNoticia("id-n1", "Noticia ES", "Desc", "url", "img", "Fuente", "es", Instant.now());
         DNoticia n2 = new DNoticia("id-n2", "Noticia US", "Desc", "url", "img", "Fuente", "us", Instant.now());
         
         when(servicioNoticias.getNoticias()).thenReturn(List.of(n1, n2));
-
-        // WHEN
         var resultadoES = controladorNoticia.obtenerNoticias("es", 1, 10);
         var resultadoUS = controladorNoticia.obtenerNoticias("us", 1, 10);
-
-        // THEN
         assertThat(resultadoES).hasSize(1);
         assertThat(resultadoES.get(0).titulo()).isEqualTo("Noticia ES");
         
@@ -46,15 +41,10 @@ class ControladorNoticiaTest {
     }
 
     @Test
-    @DisplayName("GET /api/noticias OK: maneja paginación vacía")
+    @DisplayName("GET /api/noticias OK: maneja paginacion vacia")
     void testObtenerNoticiasVacias() {
-        // GIVEN
         when(servicioNoticias.getNoticias()).thenReturn(List.of());
-
-        // WHEN
         var resultado = controladorNoticia.obtenerNoticias("es", 1, 10);
-
-        // THEN
         assertThat(resultado).isEmpty();
     }
 }
