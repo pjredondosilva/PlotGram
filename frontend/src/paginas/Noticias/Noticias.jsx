@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import TarjetaNoticia from '../../componentes/noticias/TarjetaNoticia';
-import BotonNoticiasIdioma from '../../componentes/noticias/BotonNoticiasIdioma';
-import { obtenerNoticias } from '../../servicios/ServicioNoticias';
+import TarjetaNoticia from '../../componentes/noticias/TarjetaNoticia.jsx';
+import BotonNoticiasIdioma from '../../componentes/noticias/BotonNoticiasIdioma.jsx';
+import { obtenerNoticias } from '../../servicios/ServicioNoticias.js';
 import './estilos/noticias.css';
 
 const Noticias = () => {

@@ -1,4 +1,4 @@
-package es.plotgram.backend.rest.dto.valoraciones;
+package es.plotgram.backend.rest.dto;
 
 import java.time.LocalDateTime;
 

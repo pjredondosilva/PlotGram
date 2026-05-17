@@ -1,6 +1,6 @@
 package es.plotgram.backend.rest;
 
-import es.plotgram.backend.rest.dto.ChatRequest;
+import es.plotgram.backend.rest.dto.DPeticionChat;
 import es.plotgram.backend.servicios.ServicioChat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +35,7 @@ public class ControladorChat {
      * @return Respuesta con el contenido generado por la IA o mensaje de error.
      */
     @PostMapping
-    public ResponseEntity<Map<String, String>> chat(@RequestBody ChatRequest request) {
+    public ResponseEntity<Map<String, String>> chat(@RequestBody DPeticionChat request) {
         try {
             String respuesta = servicioChat.procesarChat(request);
             return ResponseEntity.ok(Map.of("content", respuesta.trim()));

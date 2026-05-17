@@ -2,9 +2,9 @@ package es.plotgram.backend.rest;
 
 import es.plotgram.backend.entidades.TipoContenido;
 import es.plotgram.backend.rest.dto.Mapeador;
-import es.plotgram.backend.rest.dto.valoraciones.DMediaValoracion;
-import es.plotgram.backend.rest.dto.valoraciones.DValoracionNueva;
-import es.plotgram.backend.rest.dto.valoraciones.DValoracionResumen;
+import es.plotgram.backend.rest.dto.DMediaValoracion;
+import es.plotgram.backend.rest.dto.DValoracionNueva;
+import es.plotgram.backend.rest.dto.DValoracionResumen;
 import es.plotgram.backend.servicios.ServicioValoracion;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

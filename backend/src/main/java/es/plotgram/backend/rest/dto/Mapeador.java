@@ -23,12 +23,12 @@ public class Mapeador {
         this.codificadorClaves = codificadorClaves;
     }
 
-    public Dusuario dto(Usuario usuario) {
+    public DUsuario dto(Usuario usuario) {
         return dto(usuario, null);
     }
 
-    public Dusuario dto(Usuario usuario, Boolean loSigo) {
-        return new Dusuario(
+    public DUsuario dto(Usuario usuario, Boolean loSigo) {
+        return new DUsuario(
                 usuario.getId(),
                 usuario.getNombre(),
                 null,
@@ -43,7 +43,7 @@ public class Mapeador {
         );
     }
 
-    public Usuario entidad(Dusuario dUsuario) {
+    public Usuario entidad(DUsuario dUsuario) {
         return new Usuario(
                 dUsuario.id(),
                 dUsuario.nombre(),
@@ -145,9 +145,9 @@ public class Mapeador {
         );
     }
 
-    public es.plotgram.backend.rest.dto.valoraciones.DValoracionResumen dto(es.plotgram.backend.entidades.Valoracion valoracion) {
+    public DValoracionResumen dto(es.plotgram.backend.entidades.Valoracion valoracion) {
         Usuario u = valoracion.getUsuario();
-        return new es.plotgram.backend.rest.dto.valoraciones.DValoracionResumen(
+        return new DValoracionResumen(
                 valoracion.getId(),
                 u.getId(),
                 u.getNombre(),
@@ -158,8 +158,8 @@ public class Mapeador {
         );
     }
 
-    public es.plotgram.backend.rest.dto.valoraciones.DMediaValoracion dtoMedia(Double media, long total) {
-        return new es.plotgram.backend.rest.dto.valoraciones.DMediaValoracion(media, total);
+    public DMediaValoracion dtoMedia(Double media, long total) {
+        return new DMediaValoracion(media, total);
     }
 
     public String contrasenaActual(DVerificacionContrasena dto) {

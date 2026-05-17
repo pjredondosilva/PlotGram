@@ -1,7 +1,7 @@
 package es.plotgram.backend.servicios;
 
-import es.plotgram.backend.rest.dto.ChatMessage;
-import es.plotgram.backend.rest.dto.ChatRequest;
+import es.plotgram.backend.rest.dto.DMensajeChat;
+import es.plotgram.backend.rest.dto.DPeticionChat;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -10,9 +10,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 /**
- * Servicio encargado de la comunicación con la API de Inteligencia Artificial Google Gemini.
- * Centraliza la lógica de construcción de prompts, gestión de contexto y llamadas externas
- * para el chatbot de la plataforma.
+ * Servicio encargado de la comunicación con la API de Google Gemini.
+ * Gestiona el envío de mensajes, el contexto de la interfaz y la búsqueda web.
  */
 @Service
 public class ServicioChat {
@@ -33,76 +32,72 @@ public class ServicioChat {
         - Usa listas con guiones para los detalles.
         - Deja líneas en blanco entre secciones para mayor claridad.
         
-        IMPORTANTE: Si se proporciona un 'Contexto UI', úsalo como tu fuente principal de verdad. 
-        No menciones fechas de corte de conocimiento; si tienes la información en el contexto, úsala con seguridad.
+        IMPORTANTE: Si se proporciona un 'Contexto UI', úsalo como tu fuente principal de verdad.
+        Si tienes la información en el contexto, úsala con seguridad.
         """;
 
-    /**
-     * Constructor del servicio.
-     * @param restTemplate Cliente para realizar peticiones HTTP.
-     */
     public ServicioChat(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     /**
-     * Procesa una solicitud de chat enviándola a la API de Gemini y devolviendo la respuesta generada.
-     * 
-     * @param request Objeto que contiene los mensajes previos y el contexto opcional de la interfaz.
-     * @return El contenido textual de la respuesta de la IA.
-     * @throws Exception Si ocurre un error en la comunicación o la API devuelve un error de cuota/modelo.
+     * Procesa una solicitud de chat enviándola a la API de Gemini.
      */
-    public String procesarChat(ChatRequest request) throws Exception {
-        if (apiKey == null || apiKey.equals("TU_CLAVE_AQUI") || apiKey.isEmpty()) {
-            throw new IllegalStateException("La API Key de Gemini no está configurada en el servidor.");
+    public String procesarChat(DPeticionChat request) throws Exception {
+        if (apiKey == null || apiKey.isEmpty() || apiKey.startsWith("${")) {
+            throw new IllegalStateException("La API Key de Gemini no está configurada correctamente.");
         }
 
-        // URL limpia sin la API Key expuesta
         String finalUrl = String.format("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent", modelo);
-        
-        // Construir el cuerpo para Gemini
+
         List<Map<String, Object>> contents = new ArrayList<>();
-        
-        // 1. Añadir Prompt de Sistema + Contexto
-        String systemText = promptsistema;
-        if (request.uiContext() != null && !request.uiContext().isEmpty()) {
-            systemText += "\n\nContexto UI actual: " + request.uiContext();
+
+        // 1. Añadimos el prompt de sistema y el contexto como un mensaje de 'user' al principio
+        // (Gemini v1beta a veces prefiere el sistema en el historial si no se usa el campo 'system_instruction')
+        String textoInicial = promptsistema;
+        if (request.contextoUI() != null && !request.contextoUI().isEmpty()) {
+            textoInicial += "\n\nContexto UI actual: " + request.contextoUI();
         }
-        
+
         contents.add(Map.of(
             "role", "user",
-            "parts", List.of(Map.of("text", systemText))
+            "parts", List.of(Map.of("text", textoInicial))
         ));
-        
-        // 2. Añadir historial de mensajes
-        for (ChatMessage msg : request.messages()) {
-            String geminiRole = msg.role().equals("assistant") ? "model" : "user";
+
+        // 2. Añadimos el historial
+        for (DMensajeChat msg : request.mensajes()) {
             contents.add(Map.of(
-                "role", geminiRole,
-                "parts", List.of(Map.of("text", msg.content()))
+                "role", msg.rol(),
+                "parts", List.of(Map.of("text", msg.contenido()))
             ));
         }
 
-        Map<String, Object> body = Map.of("contents", contents);
+        Map<String, Object> body = Map.of(
+            "contents", contents,
+            "tools", List.of(Map.of("google_search", Map.of()))
+        );
 
-        // CABECERAS: Autenticación robusta mediante cabecera
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("x-goog-api-key", apiKey);
-        
+
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(finalUrl, entity, Map.class);
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(finalUrl, entity, Map.class);
 
-        if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
-            List candidates = (List) response.getBody().get("candidates");
-            Map firstCandidate = (Map) candidates.get(0);
-            Map content = (Map) firstCandidate.get("content");
-            List parts = (List) content.get("parts");
-            Map firstPart = (Map) parts.get(0);
-            return (String) firstPart.get("text");
-        } else {
-            throw new RuntimeException("Error en la respuesta de la API de Gemini: " + response.getStatusCode());
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                List candidates = (List) response.getBody().get("candidates");
+                Map firstCandidate = (Map) candidates.get(0);
+                Map content = (Map) firstCandidate.get("content");
+                List parts = (List) content.get("parts");
+                Map firstPart = (Map) parts.get(0);
+                return (String) firstPart.get("text");
+            } else {
+                throw new RuntimeException("Error en la respuesta de Gemini: " + response.getStatusCode());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Fallo al conectar con el asistente: " + e.getMessage());
         }
     }
 }

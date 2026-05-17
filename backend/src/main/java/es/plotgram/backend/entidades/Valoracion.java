@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(
-        name = "valoraciones",
+        name = "valoracion",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"usuario_id", "contenido_id"})
         }

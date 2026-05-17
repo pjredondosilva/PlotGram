@@ -1,6 +1,5 @@
-package es.plotgram.backend.rest.dto.valoraciones;
+package es.plotgram.backend.rest.dto;
 
-import es.plotgram.backend.rest.dto.DContenidoListaNuevo;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

@@ -7,7 +7,7 @@ import TemporadaDetalle from "../paginas/tmdb/TemporadaDetalle.jsx";
 import FeedUsuario from "../paginas/usuario/FeedUsuario.jsx";
 import EpisodioDetalle from "../paginas/tmdb/EpisodioDetalle.jsx";
 import DetalleLista from "../paginas/Listas/DetalleLista.jsx";
-import Noticias from "../paginas/home/Noticias.jsx";
+import Noticias from "../paginas/Noticias/Noticias.jsx";
 
 export const router = createBrowserRouter([
     {

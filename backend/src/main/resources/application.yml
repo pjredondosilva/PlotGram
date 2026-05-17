@@ -19,9 +19,9 @@ spring:
 tiempoExpiracionTokenJwtMin: 40
 
 tmdb:
-  base-url: https://api.themoviedb.org/3
+  base-url: ${TMDB_BASE_URL:https://api.themoviedb.org/3}
   token: ${TMDB_TOKEN}
-  lang: es-ES
+  lang: ${TMDB_LANG:es-ES}
 gemini:
   api-key: ${GEMINI_API_KEY}
   model: gemini-2.5-flash

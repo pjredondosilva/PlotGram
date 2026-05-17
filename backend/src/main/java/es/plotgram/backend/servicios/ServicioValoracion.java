@@ -55,6 +55,7 @@ public class ServicioValoracion {
                 contenido.getTipo().name()
         );
 
+        boolean esNueva = existente.isEmpty();
         Valoracion valoracion = existente.orElseGet(Valoracion::new);
         valoracion.setUsuario(usuario);
         valoracion.setContenido(contenido);
@@ -62,7 +63,11 @@ public class ServicioValoracion {
         valoracion.setComentario(comentario);
         valoracion.setFecha(LocalDateTime.now());
 
-        return repositorioValoracion.guardar(valoracion);
+        if (esNueva) {
+            return repositorioValoracion.guardar(valoracion);
+        } else {
+            return repositorioValoracion.actualizar(valoracion);
+        }
     }
 
     /**

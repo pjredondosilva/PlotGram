@@ -19,12 +19,13 @@ public class RepositorioValoracion {
 
     @Transactional
     public Valoracion guardar(Valoracion valoracion) {
-        if (valoracion.getId() == null) {
-            em.persist(valoracion);
-            return valoracion;
-        } else {
-            return em.merge(valoracion);
-        }
+        em.persist(valoracion);
+        return valoracion;
+    }
+
+    @Transactional
+    public Valoracion actualizar(Valoracion valoracion) {
+        return em.merge(valoracion);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)

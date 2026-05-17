@@ -6,7 +6,7 @@ import java.util.List;
  * Representa una solicitud de chat enviada desde el frontend.
  * Contiene el historial de mensajes y el contexto opcional de la interfaz.
  */
-public record ChatRequest(
-    List<ChatMessage> messages,
-    String uiContext
+public record DPeticionChat(
+    List<DMensajeChat> mensajes,
+    String contextoUI
 ) {}

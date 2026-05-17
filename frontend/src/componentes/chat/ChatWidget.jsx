@@ -15,7 +15,7 @@ export default function ChatWidget() {
     
     const [open, setOpen] = useState(false);
     const [msgs, setMsgs] = useState([
-        { role: 'assistant', content: '¡Hola! Soy PlotBot, tu asistente de PlotGram. ¿En qué película o serie estás pensando hoy?' }
+        { rol: 'model', contenido: '¡Hola! Soy PlotBot, tu asistente de PlotGram. ¿En qué película o serie estás pensando hoy?' }
     ]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -38,7 +38,7 @@ export default function ChatWidget() {
         const text = input.trim();
         if (!text || loading) return;
 
-        const newMsgs = [...msgs, { role: 'user', content: text }];
+        const newMsgs = [...msgs, { rol: 'user', contenido: text }];
         setMsgs(newMsgs);
         setInput('');
         setLoading(true);
@@ -49,8 +49,8 @@ export default function ChatWidget() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    messages: newMsgs,
-                    uiContext: uiContext ? JSON.stringify(uiContext) : ''
+                    mensajes: newMsgs,
+                    contextoUI: uiContext ? JSON.stringify(uiContext) : ''
                 })
             });
 
@@ -60,17 +60,17 @@ export default function ChatWidget() {
             }
 
             const data = await response.json();
-            setMsgs(prev => [...prev, { role: 'assistant', content: data.content }]);
+            setMsgs(prev => [...prev, { rol: 'model', contenido: data.content }]);
         } catch (e) {
             setErr(e.message);
-            setMsgs(prev => [...prev, { role: 'assistant', content: 'Lo siento, he tenido un problema al procesar tu pregunta.' }]);
+            setMsgs(prev => [...prev, { rol: 'model', contenido: 'Lo siento, he tenido un problema al procesar tu pregunta.' }]);
         } finally {
             setLoading(false);
         }
     };
 
     const clearHistory = () => {
-        setMsgs([{ role: 'assistant', content: 'Historial reiniciado. ¿En qué más puedo ayudarte?' }]);
+        setMsgs([{ rol: 'model', contenido: 'Historial reiniciado. ¿En qué más puedo ayudarte?' }]);
         setErr(null);
     };
 
@@ -99,18 +99,18 @@ export default function ChatWidget() {
 
                     <div className="pg-chat-body" ref={scrollRef}>
                         {msgs.map((m, i) => (
-                            <div key={i} className={`pg-chat-msg ${m.role}`}>
+                            <div key={i} className={`pg-chat-msg ${m.rol}`}>
                                 <div className="pg-chat-bubble">
-                                    {m.role === 'assistant' ? (
-                                        <ReactMarkdown>{m.content}</ReactMarkdown>
+                                    {m.rol === 'model' ? (
+                                        <ReactMarkdown>{m.contenido}</ReactMarkdown>
                                     ) : (
-                                        m.content
+                                        m.contenido
                                     )}
                                 </div>
                             </div>
                         ))}
                         {loading && (
-                            <div className="pg-chat-msg assistant">
+                            <div className="pg-chat-msg model">
                                 <div className="pg-chat-bubble loading">
                                     <span>.</span><span>.</span><span>.</span>
                                 </div>

@@ -3,7 +3,7 @@ package es.plotgram.backend.rest;
 import es.plotgram.backend.rest.dto.DActualizacionPerfil;
 import es.plotgram.backend.rest.dto.DUsuarioRegistro;
 import es.plotgram.backend.rest.dto.DVerificacionContrasena;
-import es.plotgram.backend.rest.dto.Dusuario;
+import es.plotgram.backend.rest.dto.DUsuario;
 import es.plotgram.backend.rest.dto.Mapeador;
 import es.plotgram.backend.servicios.ServicioUsuario;
 import jakarta.validation.Valid;
@@ -51,7 +51,7 @@ public class ControladorUsuario {
      * @return El DTO del usuario solicitado o 404 si no existe.
      */
     @GetMapping("/usuarios/{id}")
-    public ResponseEntity<Dusuario> obtenerUsuario(@PathVariable long id, Authentication authentication) {
+    public ResponseEntity<DUsuario> obtenerUsuario(@PathVariable long id, Authentication authentication) {
         return servicioUsuario.buscarUsuario(id)
                 .map(usuario -> {
                     Boolean loSigo = null;
@@ -70,7 +70,7 @@ public class ControladorUsuario {
      * @return El DTO con los datos del usuario actual.
      */
     @GetMapping("/usuarios/me")
-    public ResponseEntity<Dusuario> me(Authentication authentication) {
+    public ResponseEntity<DUsuario> me(Authentication authentication) {
         String nombre = authentication.getName();
         return servicioUsuario.buscarUsuario(nombre)
                 .map(usuario -> ResponseEntity.ok(mapeador.dto(usuario)))
@@ -100,7 +100,7 @@ public class ControladorUsuario {
      * @return El usuario actualizado.
      */
     @PutMapping("/usuarios/me/actualizacionperfil")
-    public ResponseEntity<Dusuario> actualizarPerfil(Authentication authentication,
+    public ResponseEntity<DUsuario> actualizarPerfil(Authentication authentication,
                                                      @Valid @RequestBody DActualizacionPerfil dto) {
         Mapeador.DatosActualizacionPerfil datos = mapeador.datosActualizacionPerfil(dto);
 
@@ -124,7 +124,7 @@ public class ControladorUsuario {
      * @return Lista de usuarios que coinciden con el criterio.
      */
     @GetMapping("/usuarios/busqueda")
-    public List<Dusuario> buscarUsuarios(@RequestParam String q) {
+    public List<DUsuario> buscarUsuarios(@RequestParam String q) {
         return servicioUsuario.buscarUsuarios(q).stream()
                 .map(mapeador::dto)
                 .toList();

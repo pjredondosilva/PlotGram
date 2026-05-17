@@ -6,7 +6,7 @@ import es.plotgram.backend.entidades.Tipousuario;
  * DTO para la representación de un usuario.
  * Incluye contadores de seguidores y seguidos para la integración social.
  */
-public record Dusuario(
+public record DUsuario(
         Long id,
         String nombre,
         String contrasenia, // Normalmente nulo en respuestas
