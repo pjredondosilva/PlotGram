@@ -110,7 +110,7 @@ class ControladorUsuarioTest {
     }
 
     @Test
-    @DisplayName("POST /api/usuarios/me/verificacioncontrasena OK: devuelve 204 si la contraseÃ±a es correcta")
+    @DisplayName("POST /api/usuarios/me/verificacioncontrasena OK: devuelve 204 si la contraseña es correcta")
     void testVerificarContrasenaCorrecta() {
         servicioUsuario.nuevoUsuario(usuario("RaquelPassword", passwordEncoder.encode("ClaveRaquel1!"), "raquel.password@gmail.com"));
         Authentication auth = new UsernamePasswordAuthenticationToken("RaquelPassword", null);
@@ -130,7 +130,7 @@ class ControladorUsuarioTest {
                 " SergioNuevo ",
                 " sergio.nuevo@gmail.com ",
                 " https://imagenes.test/sergio.jpg ",
-                " Nueva descripciÃ³n ",
+                " Nueva descripcion ",
                 "ClaveSergio1!",
                 "NuevaSergio1!"
         );
@@ -142,8 +142,106 @@ class ControladorUsuarioTest {
         assertThat(respuesta.getBody().nombre()).isEqualTo("SergioNuevo");
         assertThat(respuesta.getBody().email()).isEqualTo("sergio.nuevo@gmail.com");
         assertThat(respuesta.getBody().fotoPerfil()).isEqualTo("https://imagenes.test/sergio.jpg");
-        assertThat(respuesta.getBody().descripcion()).isEqualTo("Nueva descripciÃ³n");
+        assertThat(respuesta.getBody().descripcion()).isEqualTo("Nueva descripcion");
         assertThat(respuesta.getBody().contrasenia()).isNull();
+    }
+
+    @Test
+    @DisplayName("GET /api/usuarios/busqueda OK: devuelve la lista de usuarios que coinciden")
+    void testBuscarUsuarios() {
+        servicioUsuario.nuevoUsuario(usuario("ZeldaBusqueda1", "hash", "zelda1@gmail.com"));
+        servicioUsuario.nuevoUsuario(usuario("ZeldaBusqueda2", "hash", "zelda2@gmail.com"));
+
+        var respuesta = controlador.buscarUsuarios("ZeldaBusq");
+
+        assertThat(respuesta).hasSize(2);
+        assertThat(respuesta).extracting(es.plotgram.backend.rest.dto.DUsuario::nombre)
+                .containsExactlyInAnyOrder("ZeldaBusqueda1", "ZeldaBusqueda2");
+    }
+
+    @Test
+    @DisplayName("POST /api/usuarios/{id}/seguidores OK: sigue a un usuario y devuelve 204")
+    void testSeguirUsuario() {
+        servicioUsuario.nuevoUsuario(usuario("PacoSeguidor", "hash", "paco.seguidor@gmail.com"));
+        servicioUsuario.nuevoUsuario(usuario("MariaSeguida", "hash", "maria.seguida@gmail.com"));
+        Authentication auth = new UsernamePasswordAuthenticationToken("PacoSeguidor", null);
+        Long idSeguido = servicioUsuario.buscarUsuario("MariaSeguida").orElseThrow().getId();
+
+        var respuesta = controlador.seguir(idSeguido, auth);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(servicioUsuario.esSeguidor("PacoSeguidor", idSeguido)).isTrue();
+    }
+
+    @Test
+    @DisplayName("DELETE /api/usuarios/{id}/seguidores OK: deja de seguir a un usuario y devuelve 204")
+    void testDejarDeSeguirUsuario() {
+        servicioUsuario.nuevoUsuario(usuario("AnaSeguidora", "hash", "ana.seguidora@gmail.com"));
+        servicioUsuario.nuevoUsuario(usuario("LuisSeguido", "hash", "luis.seguido@gmail.com"));
+        Authentication auth = new UsernamePasswordAuthenticationToken("AnaSeguidora", null);
+        Long idSeguido = servicioUsuario.buscarUsuario("LuisSeguido").orElseThrow().getId();
+        servicioUsuario.seguir(idSeguido, "AnaSeguidora");
+
+        var respuesta = controlador.dejarDeSeguir(idSeguido, auth);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(servicioUsuario.esSeguidor("AnaSeguidora", idSeguido)).isFalse();
+    }
+
+    @Test
+    @DisplayName("GET /api/usuarios/{id} OK: devuelve loSigo=true si el usuario autenticado lo sigue")
+    void testObtenerUsuarioExistenteConAutenticacionYSeguimiento() {
+        servicioUsuario.nuevoUsuario(usuario("OscarAutenticado", "hash", "oscar.auth@gmail.com"));
+        servicioUsuario.nuevoUsuario(usuario("PedroConsultado", "hash", "pedro.cons@gmail.com"));
+        Long idConsultado = servicioUsuario.buscarUsuario("PedroConsultado").orElseThrow().getId();
+
+        servicioUsuario.seguir(idConsultado, "OscarAutenticado");
+        Authentication auth = new UsernamePasswordAuthenticationToken("OscarAutenticado", null, java.util.Collections.emptyList());
+
+        var respuesta = controlador.obtenerUsuario(idConsultado, auth);
+
+        assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(respuesta.getBody()).isNotNull();
+        assertThat(respuesta.getBody().nombre()).isEqualTo("PedroConsultado");
+        assertThat(respuesta.getBody().loSigo()).isTrue();
+    }
+
+    @Test
+    @DisplayName("POST /api/usuarios KO: lanza UsuarioYaRegistrado si el email o nombre ya existe")
+    void testNuevoUsuarioDuplicado() {
+        servicioUsuario.nuevoUsuario(usuario("Duplicado", "hash", "duplicado@gmail.com"));
+        DUsuarioRegistro dto = new DUsuarioRegistro("Duplicado", "duplicado2@gmail.com", "Password123!");
+        
+        org.junit.jupiter.api.Assertions.assertThrows(
+                es.plotgram.backend.excepciones.UsuarioYaRegistrado.class,
+                () -> controlador.nuevoUsuario(dto)
+        );
+    }
+
+    @Test
+    @DisplayName("POST /api/usuarios/me/verificacioncontrasena KO: lanza ContrasenaActualIncorrecta si no coincide")
+    void testVerificarContrasenaIncorrecta() {
+        servicioUsuario.nuevoUsuario(usuario("UsuarioPassword", passwordEncoder.encode("Secreta123!"), "pwd@gmail.com"));
+        Authentication auth = new UsernamePasswordAuthenticationToken("UsuarioPassword", null);
+        DVerificacionContrasena dto = new DVerificacionContrasena("MalaContraseña!");
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                es.plotgram.backend.excepciones.ContrasenaActualIncorrecta.class,
+                () -> controlador.verificarContrasena(auth, dto)
+        );
+    }
+
+    @Test
+    @DisplayName("POST /api/usuarios/{id}/seguidores KO: lanza IllegalArgumentException si intenta seguirse a si mismo")
+    void testSeguirAMiMismo() {
+        servicioUsuario.nuevoUsuario(usuario("Narcisista", "hash", "narciso@gmail.com"));
+        Long id = servicioUsuario.buscarUsuario("Narcisista").orElseThrow().getId();
+        Authentication auth = new UsernamePasswordAuthenticationToken("Narcisista", null);
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalArgumentException.class,
+                () -> controlador.seguir(id, auth)
+        );
     }
 
     private Usuario usuario(String nombre, String contrasena, String email) {

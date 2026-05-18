@@ -135,7 +135,7 @@ class ServicioUsuarioTest {
                 "  IreneNueva  ",
                 "  irene.nueva@gmail.com  ",
                 "   ",
-                "  Nueva descripciÃ³n de Irene  ",
+                "  Nueva descripcion de Irene  ",
                 "ClaveIrene1!",
                 "   "
         );
@@ -143,7 +143,7 @@ class ServicioUsuarioTest {
         assertThat(resultado.getNombre()).isEqualTo("IreneNueva");
         assertThat(resultado.getEmail()).isEqualTo("irene.nueva@gmail.com");
         assertThat(resultado.getFotoPerfil()).isNull();
-        assertThat(resultado.getDescripcion()).isEqualTo("Nueva descripciÃ³n de Irene");
+        assertThat(resultado.getDescripcion()).isEqualTo("Nueva descripcion de Irene");
         assertThat(resultado.getContrasena()).isEqualTo(hashOriginal);
     }
 
@@ -219,14 +219,75 @@ class ServicioUsuarioTest {
                 "MarcosActual",
                 "marcos.actual@gmail.com",
                 null,
-                "DescripciÃ³n Marcos",
+                "descripcion Marcos",
                 "ClaveMarcos1!",
                 null
         );
 
         assertThat(resultado.getNombre()).isEqualTo("MarcosActual");
         assertThat(resultado.getEmail()).isEqualTo("marcos.actual@gmail.com");
-        assertThat(resultado.getDescripcion()).isEqualTo("DescripciÃ³n Marcos");
+        assertThat(resultado.getDescripcion()).isEqualTo("descripcion Marcos");
+    }
+
+    @Test
+    @DisplayName("seguir OK: permite seguir a otro usuario y comprobar esSeguidor")
+    void testSeguirYEsSeguidor() {
+        Usuario u1 = usuario("PacoSeguidor", "hash", "paco@gmail.com");
+        Usuario u2 = usuario("MariaSeguida", "hash", "maria@gmail.com");
+        servicio.nuevoUsuario(u1);
+        servicio.nuevoUsuario(u2);
+
+        Long idSeguido = servicio.buscarUsuario("MariaSeguida").orElseThrow().getId();
+
+        servicio.seguir(idSeguido, "PacoSeguidor");
+
+        assertThat(servicio.esSeguidor("PacoSeguidor", idSeguido)).isTrue();
+        assertThat(servicio.esSeguidor("MariaSeguida", servicio.buscarUsuario("PacoSeguidor").orElseThrow().getId())).isFalse();
+    }
+
+    @Test
+    @DisplayName("dejarDeSeguir OK: elimina relacion de seguimiento y esSeguidor pasa a false")
+    void testDejarDeSeguir() {
+        Usuario u1 = usuario("AnaSeguidora", "hash", "ana@gmail.com");
+        Usuario u2 = usuario("LuisSeguido", "hash", "luis@gmail.com");
+        servicio.nuevoUsuario(u1);
+        servicio.nuevoUsuario(u2);
+
+        Long idSeguido = servicio.buscarUsuario("LuisSeguido").orElseThrow().getId();
+        servicio.seguir(idSeguido, "AnaSeguidora");
+        assertThat(servicio.esSeguidor("AnaSeguidora", idSeguido)).isTrue();
+
+        servicio.dejarDeSeguir(idSeguido, "AnaSeguidora");
+
+        assertThat(servicio.esSeguidor("AnaSeguidora", idSeguido)).isFalse();
+    }
+
+    @Test
+    @DisplayName("seguir KO: lanza excepcion si el usuario intenta seguirse a si mismo")
+    void testNoPermitirSeguirseASiMismo() {
+        Usuario u1 = usuario("PedroSolo", "hash", "pedro@gmail.com");
+        servicio.nuevoUsuario(u1);
+
+        Long miId = servicio.buscarUsuario("PedroSolo").orElseThrow().getId();
+
+        assertThatThrownBy(() -> servicio.seguir(miId, "PedroSolo"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("No puedes seguirte a ti mismo");
+    }
+
+    @Test
+    @DisplayName("buscarUsuarios OK: devuelve lista limitando por coincidencia de nombre")
+    void testBuscarUsuarios() {
+        servicio.nuevoUsuario(usuario("ZacariasBusqueda1", "hash", "zaca1@gmail.com"));
+        servicio.nuevoUsuario(usuario("ZacariasBusqueda2", "hash", "zaca2@gmail.com"));
+        servicio.nuevoUsuario(usuario("ZacariasBusqueda3", "hash", "zaca3@gmail.com"));
+        servicio.nuevoUsuario(usuario("IgnorarEste", "hash", "ignorar@gmail.com"));
+
+        var resultados = servicio.buscarUsuarios("ZacariasBusq");
+
+        assertThat(resultados).hasSize(3);
+        assertThat(resultados).extracting(Usuario::getNombre)
+                .containsExactlyInAnyOrder("ZacariasBusqueda1", "ZacariasBusqueda2", "ZacariasBusqueda3");
     }
 
     private Usuario usuario(String nombre, String contrasena, String email) {

@@ -36,4 +36,51 @@ class ServicioNoticiasTest {
         String resultado = (String) ReflectionTestUtils.invokeMethod(servicio, "limpiarHtml", htmlIn);
         assertThat(resultado).isEqualTo("Texto con etiquetas");
     }
+
+    @Test
+    @DisplayName("extraerImagen OK: obtiene la URL desde el enclosure si existe")
+    void testExtraerImagenConEnclosure() {
+        ServicioNoticias servicio = new ServicioNoticias();
+
+        com.rometools.rome.feed.synd.SyndEntry entry = org.mockito.Mockito.mock(com.rometools.rome.feed.synd.SyndEntry.class);
+        com.rometools.rome.feed.synd.SyndEnclosure enclosure = org.mockito.Mockito.mock(com.rometools.rome.feed.synd.SyndEnclosure.class);
+
+        org.mockito.Mockito.when(enclosure.getUrl()).thenReturn("https://test.com/imagen.jpg");
+        org.mockito.Mockito.when(entry.getEnclosures()).thenReturn(List.of(enclosure));
+
+        String resultado = (String) ReflectionTestUtils.invokeMethod(servicio, "extraerImagen", entry);
+        assertThat(resultado).isEqualTo("https://test.com/imagen.jpg");
+    }
+
+    @Test
+    @DisplayName("extraerImagen OK: obtiene la URL mediante Regex en la descripcion si no hay enclosure")
+    void testExtraerImagenConRegex() {
+        ServicioNoticias servicio = new ServicioNoticias();
+
+        com.rometools.rome.feed.synd.SyndEntry entry = org.mockito.Mockito.mock(com.rometools.rome.feed.synd.SyndEntry.class);
+        com.rometools.rome.feed.synd.SyndContent desc = org.mockito.Mockito.mock(com.rometools.rome.feed.synd.SyndContent.class);
+
+        org.mockito.Mockito.when(entry.getEnclosures()).thenReturn(List.of());
+        org.mockito.Mockito.when(desc.getValue()).thenReturn("<p>Un texto <img src=\"https://test.com/regex.jpg\" alt=\"x\"/></p>");
+        org.mockito.Mockito.when(entry.getDescription()).thenReturn(desc);
+
+        String resultado = (String) ReflectionTestUtils.invokeMethod(servicio, "extraerImagen", entry);
+        assertThat(resultado).isEqualTo("https://test.com/regex.jpg");
+    }
+
+    @Test
+    @DisplayName("extraerImagen OK: devuelve null si no encuentra ninguna imagen")
+    void testExtraerImagenSinImagen() {
+        ServicioNoticias servicio = new ServicioNoticias();
+
+        com.rometools.rome.feed.synd.SyndEntry entry = org.mockito.Mockito.mock(com.rometools.rome.feed.synd.SyndEntry.class);
+        com.rometools.rome.feed.synd.SyndContent desc = org.mockito.Mockito.mock(com.rometools.rome.feed.synd.SyndContent.class);
+
+        org.mockito.Mockito.when(entry.getEnclosures()).thenReturn(List.of());
+        org.mockito.Mockito.when(desc.getValue()).thenReturn("<p>Un texto sin imagen</p>");
+        org.mockito.Mockito.when(entry.getDescription()).thenReturn(desc);
+
+        String resultado = (String) ReflectionTestUtils.invokeMethod(servicio, "extraerImagen", entry);
+        assertThat(resultado).isNull();
+    }
 }

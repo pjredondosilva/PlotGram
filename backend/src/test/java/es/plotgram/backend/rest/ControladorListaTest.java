@@ -53,14 +53,14 @@ class ControladorListaTest {
     void testCrearLista() {
         crearUsuario("AliciaControladorLista", "alicia.controlador.lista@gmail.com");
         Authentication auth = auth("AliciaControladorLista");
-        var dto = new DListaNueva("Favoritas Alicia", "DescripciÃ³n Alicia", "/alicia.jpg");
+        var dto = new DListaNueva("Favoritas Alicia", "Descripción Alicia", "/alicia.jpg");
 
         var respuesta = controlador.crearLista(auth, dto);
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(respuesta.getBody()).isNotNull();
         assertThat(respuesta.getBody().nombre()).isEqualTo("Favoritas Alicia");
-        assertThat(respuesta.getBody().descripcion()).isEqualTo("DescripciÃ³n Alicia");
+        assertThat(respuesta.getBody().descripcion()).isEqualTo("Descripción Alicia");
         assertThat(respuesta.getBody().elementos()).isEmpty();
     }
 
@@ -110,7 +110,7 @@ class ControladorListaTest {
     }
 
     @Test
-    @DisplayName("POST /api/usuarios/me/listas/{idLista}/elementos OK: aÃ±ade contenido a una lista")
+    @DisplayName("POST /api/usuarios/me/listas/{idLista}/elementos OK: añade contenido a una lista")
     void testAniadirElemento() {
         crearUsuario("EvaControladorElemento", "eva.controlador.elemento@gmail.com");
         Authentication auth = auth("EvaControladorElemento");
@@ -144,13 +144,13 @@ class ControladorListaTest {
     @DisplayName("GET /api/usuarios/{idUsuario}/listas OK: devuelve las listas de un usuario")
     void testObtenerListasDeUsuario() {
         Usuario usuario = crearUsuario("GonzaloControladorPublicas", "gonzalo.controlador.publicas@gmail.com");
-        controlador.crearLista(auth("GonzaloControladorPublicas"), new DListaNueva("Lista PÃºblica Gonzalo", null, null));
+        controlador.crearLista(auth("GonzaloControladorPublicas"), new DListaNueva("Lista Pública Gonzalo", null, null));
 
         var respuesta = controlador.obtenerListasDeUsuario(usuario.getId());
 
         assertThat(respuesta.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(respuesta.getBody()).hasSize(1);
-        assertThat(respuesta.getBody().get(0).nombre()).isEqualTo("Lista PÃºblica Gonzalo");
+        assertThat(respuesta.getBody().get(0).nombre()).isEqualTo("Lista Pública Gonzalo");
     }
 
     @Test
@@ -167,6 +167,46 @@ class ControladorListaTest {
         assertThat(respuesta.getBody().nombre()).isEqualTo("Detalle Helena");
         assertThat(respuesta.getBody().elementos()).hasSize(1);
         assertThat(respuesta.getBody().elementos().get(0).titulo()).isEqualTo("Contenido Helena");
+    }
+
+    @Test
+    @DisplayName("POST /api/usuarios/me/listas KO: lanza ListaYaRegistrada si ya existe una lista con ese nombre")
+    void testNuevaListaDuplicada() {
+        crearUsuario("IvanLista", "ivan.lista@gmail.com");
+        controlador.crearLista(auth("IvanLista"), new DListaNueva("Mis Favoritos", null, null));
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                es.plotgram.backend.excepciones.ListaYaRegistrada.class,
+                () -> controlador.crearLista(auth("IvanLista"), new DListaNueva("Mis Favoritos", null, null))
+        );
+    }
+
+    @Test
+    @DisplayName("POST /api/usuarios/me/listas/{idLista}/elementos KO: lanza ContenidoYaEnLista si se repite contenido")
+    void testAnadirElementoDuplicado() {
+        crearUsuario("SaraLista", "sara.lista@gmail.com");
+        Long idLista = controlador.crearLista(auth("SaraLista"), new DListaNueva("Pelis", null, null)).getBody().id();
+        
+        controlador.aniadirElemento(idLista, auth("SaraLista"), contenido(999L, "Inception"));
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                es.plotgram.backend.excepciones.ContenidoYaEnLista.class,
+                () -> controlador.aniadirElemento(idLista, auth("SaraLista"), contenido(999L, "Inception"))
+        );
+    }
+
+    @Test
+    @DisplayName("PUT /api/usuarios/me/listas/{idLista} KO: lanza ListaNoEncontrada si se edita lista ajena")
+    void testEditarListaSinPermisos() {
+        crearUsuario("Propietario", "propietario@gmail.com");
+        crearUsuario("Intruso", "intruso@gmail.com");
+
+        Long idLista = controlador.crearLista(auth("Propietario"), new DListaNueva("Lista Privada", null, null)).getBody().id();
+
+        org.junit.jupiter.api.Assertions.assertThrows(
+                es.plotgram.backend.excepciones.ListaNoEncontrada.class,
+                () -> controlador.editarMiLista(idLista, auth("Intruso"), new DListaNueva("Hackeada", null, null))
+        );
     }
 
     private Usuario crearUsuario(String nombre, String email) {

@@ -35,15 +35,15 @@ class ControladorTmdbTest {
                 2,
                 5,
                 40,
-                List.of(new DPeliculaListado(10L, "Alien", "1979-05-25", "/alien.jpg", List.of(28, 878), List.of("AcciÃ³n", "Ciencia ficciÃ³n")))
+                List.of(new DPeliculaListado(10L, "Alien", "1979-05-25", "/alien.jpg", List.of(28, 878), List.of("Acción", "Ciencia ficción")))
         );
-        when(servicioTmdb.listarPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("AcciÃ³n")))
+        when(servicioTmdb.listarPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("Acción")))
                 .thenReturn(respuestaEsperada);
 
-        var resultado = controlador.darPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("AcciÃ³n"));
+        var resultado = controlador.darPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("Acción"));
 
         assertThat(resultado).isSameAs(respuestaEsperada);
-        verify(servicioTmdb).listarPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("AcciÃ³n"));
+        verify(servicioTmdb).listarPeliculas("alien", 2, "1979-01-01", "1980-01-01", List.of("Acción"));
     }
 
     @Test

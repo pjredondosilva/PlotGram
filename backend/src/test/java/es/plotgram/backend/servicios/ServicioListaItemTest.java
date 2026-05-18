@@ -113,7 +113,7 @@ class ServicioListaItemTest {
     @Test
     @DisplayName("buscarUltimoOrdenDeLista OK: devuelve el mayor orden de la lista")
     void testBuscarUltimoOrdenDeLista() {
-        DatosBase datos = datosBase("XaviItemUltimo", "Lista Ãºltimo", 207L);
+        DatosBase datos = datosBase("XaviItemUltimo", "Lista último", 207L);
         Contenido contenido2 = repositorioContenido.guardar(pelicula(208L));
 
         servicioListaItem.guardar(new ListaItem(null, datos.lista(), datos.contenido(), 0));
@@ -174,7 +174,7 @@ class ServicioListaItemTest {
         Lista lista = repositorioLista.guardar(new Lista(
                 null,
                 nombreLista,
-                "DescripciÃ³n",
+                "Descripción",
                 "/portada.jpg",
                 usuario
         ));

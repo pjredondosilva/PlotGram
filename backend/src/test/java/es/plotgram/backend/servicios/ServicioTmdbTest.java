@@ -52,22 +52,22 @@ class ServicioTmdbTest {
     void testListarPeliculasConConsulta() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[{"id":28,"name":"Accion"},{"id":878,"name":"Ciencia ficcion"}]}
-                    """,
+                        {"genres":[{"id":28,"name":"Accion"},{"id":878,"name":"Ciencia ficcion"}]}
+                        """,
                 "/genre/tv/list", """
-                    {"genres":[]}
-                    """,
-                "/search/movie", """
-                    {
-                      "page": 2,
-                      "total_pages": 5,
-                      "total_results": 40,
-                      "results": [
-                        {"id": 1, "title": "Alien", "release_date": "1979-05-25", "poster_path": "/alien.jpg", "genre_ids": [28, 878]}
-                      ]
-                    }
-                    """
-        ));
+                        {"genres":[]}
+                        """,
+                "/search/movie",
+                """
+                        {
+                          "page": 2,
+                          "total_pages": 5,
+                          "total_results": 40,
+                          "results": [
+                            {"id": 1, "title": "Alien", "release_date": "1979-05-25", "poster_path": "/alien.jpg", "genre_ids": [28, 878]}
+                          ]
+                        }
+                        """));
         when(mapeador.DtoPelicula(any(DPeliculaListadoRespuesta.class)))
                 .thenReturn(new DPeliculaListado(1L, "Alien", "1979-05-25", "/alien.jpg", List.of(28, 878), List.of()));
 
@@ -78,8 +78,8 @@ class ServicioTmdbTest {
         assertThat(resultado.totalPages()).isEqualTo(5);
         assertThat(resultado.totalResults()).isEqualTo(40);
         assertThat(resultado.results()).containsExactly(
-                new DPeliculaListado(1L, "Alien", "1979-05-25", "/alien.jpg", List.of(28, 878), List.of("Accion", "Ciencia ficcion"))
-        );
+                new DPeliculaListado(1L, "Alien", "1979-05-25", "/alien.jpg", List.of(28, 878),
+                        List.of("Accion", "Ciencia ficcion")));
         ClientRequest request = buscarPeticionPorRuta("/search/movie");
         assertThat(request.url().getQuery())
                 .contains("query=alien")
@@ -91,17 +91,17 @@ class ServicioTmdbTest {
     @DisplayName("listarPeliculas OK: sin consulta ni filtros usa peliculas en taquilla")
     void testListarPeliculasSinConsultaNiFiltros() {
         mockRutas(Map.of(
-                "/movie/now_playing", """
-                    {
-                      "page": 1,
-                      "total_pages": 8,
-                      "total_results": 100,
-                      "results": [
-                        {"id": 2, "title": "Dune", "release_date": "2024-03-01", "poster_path": "/dune.jpg", "genre_ids": [878]}
-                      ]
-                    }
-                    """
-        ));
+                "/movie/now_playing",
+                """
+                        {
+                          "page": 1,
+                          "total_pages": 8,
+                          "total_results": 100,
+                          "results": [
+                            {"id": 2, "title": "Dune", "release_date": "2024-03-01", "poster_path": "/dune.jpg", "genre_ids": [878]}
+                          ]
+                        }
+                        """));
         when(mapeador.DtoPelicula(any(DPeliculaListadoRespuesta.class)))
                 .thenReturn(new DPeliculaListado(2L, "Dune", "2024-03-01", "/dune.jpg", List.of(878), List.of()));
 
@@ -109,8 +109,7 @@ class ServicioTmdbTest {
 
         assertThat(resultado.page()).isEqualTo(1);
         assertThat(resultado.results()).containsExactly(
-                new DPeliculaListado(2L, "Dune", "2024-03-01", "/dune.jpg", List.of(878), List.of())
-        );
+                new DPeliculaListado(2L, "Dune", "2024-03-01", "/dune.jpg", List.of(878), List.of()));
         ClientRequest request = buscarPeticionPorRuta("/movie/now_playing");
         assertThat(request.url().getQuery())
                 .contains("language=es-ES")
@@ -122,22 +121,22 @@ class ServicioTmdbTest {
     void testListarPeliculasConFiltros() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[{"id":28,"name":"Accion"},{"id":18,"name":"Drama"}]}
-                    """,
+                        {"genres":[{"id":28,"name":"Accion"},{"id":18,"name":"Drama"}]}
+                        """,
                 "/genre/tv/list", """
-                    {"genres":[]}
-                    """,
-                "/discover/movie", """
-                    {
-                      "page": 3,
-                      "total_pages": 4,
-                      "total_results": 20,
-                      "results": [
-                        {"id": 3, "title": "Mad Max", "release_date": "2015-05-15", "poster_path": "/madmax.jpg", "genre_ids": [28]}
-                      ]
-                    }
-                    """
-        ));
+                        {"genres":[]}
+                        """,
+                "/discover/movie",
+                """
+                        {
+                          "page": 3,
+                          "total_pages": 4,
+                          "total_results": 20,
+                          "results": [
+                            {"id": 3, "title": "Mad Max", "release_date": "2015-05-15", "poster_path": "/madmax.jpg", "genre_ids": [28]}
+                          ]
+                        }
+                        """));
         when(mapeador.DtoPelicula(any(DPeliculaListadoRespuesta.class)))
                 .thenReturn(new DPeliculaListado(3L, "Mad Max", "2015-05-15", "/madmax.jpg", List.of(28), List.of()));
 
@@ -146,8 +145,7 @@ class ServicioTmdbTest {
 
         assertThat(resultado.page()).isEqualTo(3);
         assertThat(resultado.results()).containsExactly(
-                new DPeliculaListado(3L, "Mad Max", "2015-05-15", "/madmax.jpg", List.of(28), List.of("Accion"))
-        );
+                new DPeliculaListado(3L, "Mad Max", "2015-05-15", "/madmax.jpg", List.of(28), List.of("Accion")));
         ClientRequest request = buscarPeticionPorRuta("/discover/movie");
         assertThat(request.url().getQuery())
                 .contains("primary_release_date.gte=2015-01-01")
@@ -161,12 +159,11 @@ class ServicioTmdbTest {
     void testListarPeliculasGeneroInexistente() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[{"id":28,"name":"Accion"}]}
-                    """,
+                        {"genres":[{"id":28,"name":"Accion"}]}
+                        """,
                 "/genre/tv/list", """
-                    {"genres":[]}
-                    """
-        ));
+                        {"genres":[]}
+                        """));
 
         servicio.refrescarGeneros();
         var resultado = servicio.listarPeliculas(null, 1, null, null, List.of("Musical inventado"));
@@ -184,22 +181,22 @@ class ServicioTmdbTest {
     void testListarSeriesConConsulta() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[]}
-                    """,
+                        {"genres":[]}
+                        """,
                 "/genre/tv/list", """
-                    {"genres":[{"id":18,"name":"Drama"},{"id":9648,"name":"Misterio"}]}
-                    """,
-                "/search/tv", """
-                    {
-                      "page": 2,
-                      "total_pages": 4,
-                      "total_results": 60,
-                      "results": [
-                        {"id": 4, "name": "Dark", "first_air_date": "2017-12-01", "poster_path": "/dark.jpg", "genre_ids": [18, 9648]}
-                      ]
-                    }
-                    """
-        ));
+                        {"genres":[{"id":18,"name":"Drama"},{"id":9648,"name":"Misterio"}]}
+                        """,
+                "/search/tv",
+                """
+                        {
+                          "page": 2,
+                          "total_pages": 4,
+                          "total_results": 60,
+                          "results": [
+                            {"id": 4, "name": "Dark", "first_air_date": "2017-12-01", "poster_path": "/dark.jpg", "genre_ids": [18, 9648]}
+                          ]
+                        }
+                        """));
         when(mapeador.DtoSerie(any(DSerieListadoRespuesta.class)))
                 .thenReturn(new DSerieListado(4L, "Dark", "2017-12-01", "/dark.jpg", List.of(18, 9648), List.of()));
 
@@ -208,8 +205,8 @@ class ServicioTmdbTest {
 
         assertThat(resultado.page()).isEqualTo(2);
         assertThat(resultado.results()).containsExactly(
-                new DSerieListado(4L, "Dark", "2017-12-01", "/dark.jpg", List.of(18, 9648), List.of("Drama", "Misterio"))
-        );
+                new DSerieListado(4L, "Dark", "2017-12-01", "/dark.jpg", List.of(18, 9648),
+                        List.of("Drama", "Misterio")));
         ClientRequest request = buscarPeticionPorRuta("/search/tv");
         assertThat(request.url().getQuery()).contains("query=dark").contains("page=2");
     }
@@ -219,32 +216,33 @@ class ServicioTmdbTest {
     void testListarSeriesConFiltros() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[]}
-                    """,
+                        {"genres":[]}
+                        """,
                 "/genre/tv/list", """
-                    {"genres":[{"id":10765,"name":"Sci-Fi & Fantasy"}]}
-                    """,
-                "/discover/tv", """
-                    {
-                      "page": 4,
-                      "total_pages": 5,
-                      "total_results": 50,
-                      "results": [
-                        {"id": 5, "name": "The Last of Us", "first_air_date": "2023-01-15", "poster_path": "/tlou.jpg", "genre_ids": [10765]}
-                      ]
-                    }
-                    """
-        ));
+                        {"genres":[{"id":10765,"name":"Sci-Fi & Fantasy"}]}
+                        """,
+                "/discover/tv",
+                """
+                        {
+                          "page": 4,
+                          "total_pages": 5,
+                          "total_results": 50,
+                          "results": [
+                            {"id": 5, "name": "The Last of Us", "first_air_date": "2023-01-15", "poster_path": "/tlou.jpg", "genre_ids": [10765]}
+                          ]
+                        }
+                        """));
         when(mapeador.DtoSerie(any(DSerieListadoRespuesta.class)))
-                .thenReturn(new DSerieListado(5L, "The Last of Us", "2023-01-15", "/tlou.jpg", List.of(10765), List.of()));
+                .thenReturn(
+                        new DSerieListado(5L, "The Last of Us", "2023-01-15", "/tlou.jpg", List.of(10765), List.of()));
 
         servicio.refrescarGeneros();
         var resultado = servicio.listarSeries(null, 4, "2023-01-01", "2023-12-31", List.of("sci-fi & fantasy"));
 
         assertThat(resultado.page()).isEqualTo(4);
         assertThat(resultado.results()).containsExactly(
-                new DSerieListado(5L, "The Last of Us", "2023-01-15", "/tlou.jpg", List.of(10765), List.of("Sci-Fi & Fantasy"))
-        );
+                new DSerieListado(5L, "The Last of Us", "2023-01-15", "/tlou.jpg", List.of(10765),
+                        List.of("Sci-Fi & Fantasy")));
         ClientRequest request = buscarPeticionPorRuta("/discover/tv");
         assertThat(request.url().getQuery())
                 .contains("first_air_date.gte=2023-01-01")
@@ -258,12 +256,11 @@ class ServicioTmdbTest {
     void testNombresGenerosOrdenados() {
         mockRutas(Map.of(
                 "/genre/movie/list", """
-                    {"genres":[{"id":28,"name":"Accion"},{"id":18,"name":"Drama"},{"id":12,"name":"Accion"}]}
-                    """,
+                        {"genres":[{"id":28,"name":"Accion"},{"id":18,"name":"Drama"},{"id":12,"name":"Accion"}]}
+                        """,
                 "/genre/tv/list", """
-                    {"genres":[{"id":35,"name":"Comedia"},{"id":9648,"name":"Misterio"}]}
-                    """
-        ));
+                        {"genres":[{"id":35,"name":"Comedia"},{"id":9648,"name":"Misterio"}]}
+                        """));
 
         servicio.refrescarGeneros();
 
@@ -276,17 +273,19 @@ class ServicioTmdbTest {
     void testDetallePelicula() {
         mockRutas(Map.of(
                 "/movie/10", """
-                    {"id":10,"title":"Interstellar","overview":"Overview"}
-                    """
-        ));
-        var detalle = new DPeliculaDetalle(10L, "Interstellar", "Overview", null, null, null, null, null, List.of(), List.of(), null, new DProveedoresPelicula(List.of(), List.of(), List.of()), List.of(), null, null, null, null, "No disponible", false);
+                        {"id":10,"title":"Interstellar","overview":"Overview"}
+                        """));
+        var detalle = new DPeliculaDetalle(10L, "Interstellar", "Overview", null, null, null, null, null, List.of(),
+                List.of(), null, new DProveedoresPelicula(List.of(), List.of(), List.of()), List.of(), null, null, null,
+                null, "No disponible", false);
         when(mapeador.DtoPeliculaDetalle(any(DPeliculaDetalleRespuesta.class))).thenReturn(detalle);
 
         var resultado = servicio.detallePelicula(10L);
 
         assertThat(resultado).isSameAs(detalle);
         ClientRequest request = buscarPeticionPorRuta("/movie/10");
-        assertThat(request.url().getQuery()).contains("append_to_response=").contains("credits").contains("release_dates");
+        assertThat(request.url().getQuery()).contains("append_to_response=").contains("credits")
+                .contains("release_dates");
     }
 
     @Test
@@ -294,17 +293,19 @@ class ServicioTmdbTest {
     void testDetalleSerie() {
         mockRutas(Map.of(
                 "/tv/20", """
-                    {"id":20,"name":"Dark","overview":"Overview"}
-                    """
-        ));
-        var detalle = new DSerieDetalle(20L, "Dark", "Overview", null, null, null, null, null, null, List.of(), List.of(), List.of(), "No disponible", "No disponible", "No disponible", new DProveedoresPelicula(List.of(), List.of(), List.of()), List.of());
+                        {"id":20,"name":"Dark","overview":"Overview"}
+                        """));
+        var detalle = new DSerieDetalle(20L, "Dark", "Overview", null, null, null, null, null, null, List.of(),
+                List.of(), List.of(), "No disponible", "No disponible", "No disponible",
+                new DProveedoresPelicula(List.of(), List.of(), List.of()), List.of());
         when(mapeador.DtoSerieDetalle(any(DSerieDetalleRespuesta.class))).thenReturn(detalle);
 
         var resultado = servicio.detalleSerie(20L);
 
         assertThat(resultado).isSameAs(detalle);
         ClientRequest request = buscarPeticionPorRuta("/tv/20");
-        assertThat(request.url().getQuery()).contains("append_to_response=").contains("credits").contains("recommendations");
+        assertThat(request.url().getQuery()).contains("append_to_response=").contains("credits")
+                .contains("recommendations");
     }
 
     @Test
@@ -312,9 +313,8 @@ class ServicioTmdbTest {
     void testDetalleTemporada() {
         mockRutas(Map.of(
                 "/tv/30/season/2", """
-                    {"id":300,"name":"Temporada 2","season_number":2,"episodes":[]}
-                    """
-        ));
+                        {"id":300,"name":"Temporada 2","season_number":2,"episodes":[]}
+                        """));
         var detalle = new DTemporadaDetalle(300L, "Temporada 2", null, 2, 0, null, null, List.of());
         when(mapeador.DtoTemporadaDetalle(any(DTemporadaDetalleRespuesta.class))).thenReturn(detalle);
 
@@ -330,9 +330,8 @@ class ServicioTmdbTest {
     void testDetalleEpisodio() {
         mockRutas(Map.of(
                 "/tv/40/season/3/episode/4", """
-                    {"id":400,"name":"Episodio 4","episode_number":4,"season_number":3}
-                    """
-        ));
+                        {"id":400,"name":"Episodio 4","episode_number":4,"season_number":3}
+                        """));
         var detalle = new DEpisodioDetalle(400L, "Episodio 4", null, 4, 3, null, null, null, null, List.of());
         when(mapeador.DtoEpisodioDetalle(any(DEpisodioDetalleRespuesta.class))).thenReturn(detalle);
 
@@ -356,8 +355,8 @@ class ServicioTmdbTest {
 
             if (path.equals("/genre/tv/list")) {
                 return respuestaJson("""
-                    {"genres":[{"id":18,"name":"Drama"}]}
-                    """);
+                        {"genres":[{"id":18,"name":"Drama"}]}
+                        """);
             }
 
             return Mono.error(new IllegalStateException("Ruta no mockeada: " + path));
@@ -387,8 +386,7 @@ class ServicioTmdbTest {
                 ClientResponse.create(HttpStatus.OK)
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .body(body)
-                        .build()
-        );
+                        .build());
     }
 
     private ClientRequest buscarPeticionPorRuta(String ruta) {
