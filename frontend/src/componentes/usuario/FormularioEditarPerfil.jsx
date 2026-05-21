@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ModalSistema from "../Autenticacion/ModalSistema.jsx";
+import ModalSistema from "../autenticacion/ModalSistema.jsx";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { actualizarMiPerfil, verificarContrasenaActual } from "../../servicios/ServicioAutenticacion.js";
-import "../../paginas/usuario/estilos/feedUsuario.css";
+import "../../paginas/usuario/estilos/FeedUsuario.css";
 
 const FORMULARIO_VACIO = {
     nombre: "",

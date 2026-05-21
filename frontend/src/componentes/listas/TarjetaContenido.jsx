@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import "../../paginas/usuario/estilos/feedUsuario.css";
-import "../../paginas/tmdb/estilos/detalleTmdb.css";
+import "../../paginas/usuario/estilos/FeedUsuario.css";
+import "../../paginas/tmdb/estilos/DetalleTmdb.css";
 
 function formatearFecha(fecha) {
     if (!fecha) return "Fecha no disponible";

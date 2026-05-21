@@ -191,6 +191,14 @@ public class ServicioLista {
         return new ListaDetalleServicio(listaActualizada, elementos);
     }
 
+    /**
+     * Valida si un nombre de lista está disponible para un usuario.
+     *
+     * @param usuarioId ID del usuario propietario.
+     * @param nombre Nombre de la lista a validar.
+     * @param idListaActual ID de la lista actual (para exclusión en ediciones), o null en creaciones.
+     * @throws ListaYaRegistrada Si el nombre ya está en uso por otra lista del usuario.
+     */
     private void validarNombreDisponible(Long usuarioId, String nombre, Long idListaActual) {
         boolean nombreEnUso = idListaActual == null
                 ? repositorioLista.existePorUsuarioIdYNombre(usuarioId, nombre)
@@ -201,6 +209,13 @@ public class ServicioLista {
         }
     }
 
+    /**
+     * Limpia y normaliza el nombre de la lista, validando que no esté en blanco.
+     *
+     * @param nombre Nombre original de la lista.
+     * @return Nombre normalizado.
+     * @throws ResponseStatusException Si el nombre está vacío o en blanco (400 Bad Request).
+     */
     private String normalizarNombreLista(String nombre) {
         String nombreNormalizado = nombre == null ? "" : nombre.trim();
 
@@ -214,6 +229,12 @@ public class ServicioLista {
         return nombreNormalizado;
     }
 
+    /**
+     * Construye los resúmenes de las listas de un usuario, incluyendo el conteo de elementos.
+     *
+     * @param usuarioId ID del usuario.
+     * @return Lista de objetos de resumen.
+     */
     private List<ListaResumenServicio> construirResumenesDeUsuario(Long usuarioId) {
         return repositorioLista.buscarPorUsuarioId(usuarioId).stream()
                 .map(lista -> new ListaResumenServicio(
@@ -223,21 +244,50 @@ public class ServicioLista {
                 .toList();
     }
 
+    /**
+     * Obtiene una entidad Usuario por su nombre de usuario.
+     *
+     * @param nombreUsuario Nombre del usuario.
+     * @return Entidad Usuario encontrada.
+     * @throws UsuarioNoEncontrado Si el usuario no existe.
+     */
     private Usuario obtenerUsuarioPorNombre(String nombreUsuario) {
         return servicioUsuario.buscarUsuario(nombreUsuario)
                 .orElseThrow(UsuarioNoEncontrado::new);
     }
 
+    /**
+     * Obtiene una entidad Usuario por su ID.
+     *
+     * @param idUsuario ID del usuario.
+     * @return Entidad Usuario encontrada.
+     * @throws UsuarioNoEncontrado Si el usuario no existe.
+     */
     private Usuario obtenerUsuarioPorId(Long idUsuario) {
         return servicioUsuario.buscarUsuario(idUsuario)
                 .orElseThrow(UsuarioNoEncontrado::new);
     }
 
+    /**
+     * Obtiene una lista asegurando que pertenezca al usuario autenticado.
+     *
+     * @param idLista ID de la lista.
+     * @param nombreUsuario Nombre del usuario autenticado.
+     * @return Entidad Lista correspondiente.
+     */
     private Lista obtenerListaDelUsuarioAutenticado(Long idLista, String nombreUsuario) {
         Usuario usuario = obtenerUsuarioPorNombre(nombreUsuario);
         return obtenerListaPorUsuarioId(idLista, usuario.getId());
     }
 
+    /**
+     * Obtiene una lista por su ID y el ID de su usuario propietario.
+     *
+     * @param idLista ID de la lista.
+     * @param idUsuario ID del usuario propietario.
+     * @return Entidad Lista correspondiente.
+     * @throws ListaNoEncontrada Si la lista no existe para ese usuario.
+     */
     private Lista obtenerListaPorUsuarioId(Long idLista, Long idUsuario) {
         return repositorioLista.buscarPorIdYUsuarioId(idLista, idUsuario)
                 .orElseThrow(ListaNoEncontrada::new);

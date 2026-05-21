@@ -1,6 +1,6 @@
 import "./estilos/CardProyecto.css";
 import { Link } from "react-router-dom";
-import { posterUrl } from "../../utils/img";
+import { posterUrl } from "../../utils/Img";
 
 function formatearFecha(fecha) {
     if (!fecha) return "-";

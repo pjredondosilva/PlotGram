@@ -112,17 +112,39 @@ public class ServicioUsuario {
         return actualizado;
     }
 
+    /**
+     * Obtiene una entidad Usuario por su nombre de usuario.
+     *
+     * @param nombreUsuario Nombre del usuario a buscar.
+     * @return Entidad Usuario correspondiente.
+     * @throws UsuarioNoEncontrado Si el usuario no existe.
+     */
     private Usuario obtenerUsuarioActivo(String nombreUsuario) {
         return repositorioUsuario.buscarPorNombre(nombreUsuario)
                 .orElseThrow(UsuarioNoEncontrado::new);
     }
 
+    /**
+     * Valida si la contraseña actual proporcionada coincide con la contraseña codificada del usuario.
+     *
+     * @param usuario Entidad Usuario.
+     * @param contrasenaActual Contraseña en texto plano a verificar.
+     * @throws ContrasenaActualIncorrecta Si la contraseña no coincide.
+     */
     private void validarContrasenaActual(Usuario usuario, String contrasenaActual) {
         if (!passwordEncoder.matches(contrasenaActual, usuario.getContrasena())) {
             throw new ContrasenaActualIncorrecta();
         }
     }
 
+    /**
+     * Valida que el nombre y correo no estén ya en uso por otros usuarios distintos.
+     *
+     * @param nombre Nombre a verificar.
+     * @param email Correo electrónico a verificar.
+     * @param idUsuarioActual ID del usuario que está actualizando para permitir sus propios datos actuales.
+     * @throws UsuarioYaRegistrado Si el nombre o el correo ya están en uso.
+     */
     private void validarUnicidad(String nombre, String email, Long idUsuarioActual) {
         repositorioUsuario.buscarPorNombre(nombre.trim())
                 .filter(otro -> !otro.getId().equals(idUsuarioActual))
@@ -137,6 +159,12 @@ public class ServicioUsuario {
                 });
     }
 
+    /**
+     * Normaliza un valor de texto opcional, convirtiendo cadenas vacías o con espacios en null.
+     *
+     * @param valor Criterio a normalizar.
+     * @return El valor recortado, o null si está en blanco o es nulo.
+     */
     private String normalizarOpcional(String valor) {
         if (valor == null) return null;
         String limpio = valor.trim();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import ModalSistema from "../Autenticacion/ModalSistema.jsx";
+import ModalSistema from "../autenticacion/ModalSistema.jsx";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { listarValoraciones, valorarContenido } from "../../servicios/ServicioValoraciones.js";
 import "./estilos/ModalValoraciones.css";

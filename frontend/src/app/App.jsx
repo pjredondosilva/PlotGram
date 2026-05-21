@@ -1,5 +1,5 @@
 import { RouterProvider } from "react-router-dom";
-import { router } from "./router";
+import { router } from "./Router";
 import { AuthProvider } from "../servicios/ContextoDeAutenticacion.jsx";
 import { ChatProvider } from "../servicios/ContextoChat.jsx";
 

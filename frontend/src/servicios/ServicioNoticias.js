@@ -1,4 +1,4 @@
-import { apiGet } from "./api.js";
+import { apiGet } from "./Api.js";
 
 export async function obtenerNoticias(idioma = "", pagina = 1, tamano = 20) {
     let path = "/api/noticias";

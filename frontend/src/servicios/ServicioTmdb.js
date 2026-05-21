@@ -1,4 +1,4 @@
-import { apiGet } from "./api.js";
+import { apiGet } from "./Api.js";
 
 function construirQueryString(query, page = 1, filtros = {}) {
     const params = new URLSearchParams();

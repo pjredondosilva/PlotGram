@@ -19,24 +19,53 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+/**
+ * Configuración principal de seguridad web de la aplicación.
+ * Define la cadena de filtros de seguridad, políticas de sesión, CORS y beans
+ * necesarios para la autenticación y encriptación de contraseñas.
+ */
 @Configuration
 @EnableMethodSecurity
 public class ServicioSeguridad {
+    
+    /**
+     * Define el bean del codificador de contraseñas utilizando el algoritmo BCrypt.
+     *
+     * @return El codificador de contraseñas.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Expone el AuthenticationManager configurado de Spring Security.
+     *
+     * @param configuration Configuración de autenticación.
+     * @return El AuthenticationManager de Spring Security.
+     * @throws Exception Si ocurre algún error al obtener el manejador.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
+    /**
+     * Define el bean para el filtro personalizado de autenticación JWT.
+     *
+     * @return Instancia de FiltroAutenticacionJwt.
+     */
     @Bean
     public FiltroAutenticacionJwt filtroAutenticacionJwt() {
         return new FiltroAutenticacionJwt();
     }
 
+    /**
+     * Configura los parámetros CORS permitiendo peticiones desde orígenes locales
+     * y túneles de desarrollo tipo ngrok.
+     *
+     * @return CorsConfigurationSource configurado.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -45,7 +74,7 @@ public class ServicioSeguridad {
                 "http://127.0.0.1:*",
                 "https://*.ngrok.app",
                 "https://*.ngrok-free.dev"
-        ));
+                ));
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization","Content-Type"));
         config.setAllowCredentials(true);
@@ -55,6 +84,14 @@ public class ServicioSeguridad {
         return source;
     }
 
+    /**
+     * Define la cadena de filtros de seguridad y las reglas de autorización para
+     * los diferentes endpoints de la API REST.
+     *
+     * @param http Configuración de seguridad HTTP.
+     * @return La cadena de filtros de seguridad (SecurityFilterChain) construida.
+     * @throws Exception Si ocurre un error durante la configuración de seguridad.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http

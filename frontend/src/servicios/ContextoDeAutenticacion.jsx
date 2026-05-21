@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getMe, logout as apiLogout } from "./ServicioAutenticacion.js";
-import { useRenovacionJwt } from "./useRenovacionJwt.js";
+import { useRenovacionJwt } from "./UseRenovacionJwt.js";
 
 const ContextoDeAutenticacion = createContext(null);
 

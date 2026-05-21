@@ -17,6 +17,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Filtro de seguridad JWT que intercepta todas las peticiones HTTP entrantes.
+ * Extrae el token de autenticación (de cabeceras o cookies), lo valida,
+ * y establece el contexto de seguridad de Spring Security si el token es correcto.
+ */
 public class FiltroAutenticacionJwt extends OncePerRequestFilter {
 
     @Autowired
@@ -25,6 +30,15 @@ public class FiltroAutenticacionJwt extends OncePerRequestFilter {
     @Autowired
     UtilJwt utilJwt;
 
+    /**
+     * Intercepta y procesa la petición para autenticar al usuario mediante JWT.
+     *
+     * @param request Petición HTTP recibida.
+     * @param response Respuesta HTTP a enviar.
+     * @param filterChain Cadena de filtros de seguridad.
+     * @throws ServletException Si ocurre un error en el contenedor de servlets.
+     * @throws IOException Si ocurre un error de Entrada/Salida.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -77,6 +91,13 @@ public class FiltroAutenticacionJwt extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Extrae el token JWT desde la cabecera 'Authorization' (Bearer) o
+     * de la cookie de sesión llamada 'pg_token'.
+     *
+     * @param request Petición HTTP recibida.
+     * @return El token en formato String, o null si no se encuentra.
+     */
     private String extraerToken(HttpServletRequest request) {
         String auth = request.getHeader("Authorization");
         if (auth != null && auth.startsWith("Bearer ")) {
@@ -92,6 +113,12 @@ public class FiltroAutenticacionJwt extends OncePerRequestFilter {
         return null;
     }
 
+    /**
+     * Limpia la información de autenticación del contexto de seguridad y borra
+     * la cookie de sesión inválida en la respuesta.
+     *
+     * @param response Respuesta HTTP para enviar la cookie de expiración.
+     */
     private void limpiarAutenticacionInvalida(HttpServletResponse response) {
         SecurityContextHolder.clearContext();
 

@@ -1,5 +1,5 @@
 // ServicioListas.js
-import { apiDelete, apiGet, apiPost, apiPut } from "./api.js";
+import { apiDelete, apiGet, apiPost, apiPut } from "./Api.js";
 
 export function obtenerMisListas() {
     return apiGet("/api/usuarios/me/listas");

@@ -1,9 +1,9 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Encabezado from "../componentes/layout/Encabezado.jsx";
-import ModalSistema from "../componentes/Autenticacion/ModalSistema.jsx";
-import FormularioLogin from "../componentes/Autenticacion/FormularioInicioDeSesion.jsx";
-import FormularioRegistro from "../componentes/Autenticacion/FormularioRegistro.jsx";
+import ModalSistema from "../componentes/autenticacion/ModalSistema.jsx";
+import FormularioLogin from "../componentes/autenticacion/FormularioInicioDeSesion.jsx";
+import FormularioRegistro from "../componentes/autenticacion/FormularioRegistro.jsx";
 import { useAuth } from "../servicios/ContextoDeAutenticacion.jsx";
 import ChatWidget from "../componentes/chat/ChatWidget.jsx";
 

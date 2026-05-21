@@ -2,44 +2,47 @@ services:
   db:
     image: mariadb:11
     container_name: plotgram-db
+    restart: unless-stopped
     environment:
       MARIADB_DATABASE: plotgram
       MARIADB_USER: plotgram
       MARIADB_PASSWORD: plotgram
       MARIADB_ROOT_PASSWORD: root
-    ports:
-      - "3307:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
     networks:
       - tfgnet
 
   backend:
-    build:
-      context: ./backend
-    container_name: tfg-backend
-    ports:
-      - "8080:8080"
+    image: ghcr.io/pjredondosilva/plotgram-backend:1.0.0
+    container_name: plotgram-backend
+    restart: unless-stopped
     depends_on:
       - db
     env_file:
       - .env
     environment:
-        SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
-        SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
-        SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
-        SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
-        TMDB_TOKEN: ${TMDB_TOKEN}
-        GEMINI_API_KEY: ${GEMINI_API_KEY}
-        JWT_SECRET: ${JWT_SECRET}
-        ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      SPRING_DATASOURCE_URL: jdbc:mariadb://db:3306/plotgram
+      SPRING_DATASOURCE_USERNAME: plotgram
+      SPRING_DATASOURCE_PASSWORD: plotgram
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+
+      TMDB_TOKEN: ${TMDB_TOKEN}
+      TMDB_BASE_URL: https://api.themoviedb.org/3
+      TMDB_LANG: es-ES
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+
+      JWT_SECRET: rFUIutbOUBLaezB7R9AqTLit9fXttySNjCPInZ5euCA=
+      ADMIN_NAME: admin
+      ADMIN_PASSWORD: admin123
+      ADMIN_EMAIL: admin@email.com
     networks:
       - tfgnet
 
   frontend:
-    build:
-      context: ./frontend
-    container_name: tfg-frontend
+    image: ghcr.io/pjredondosilva/plotgram-frontend:1.0.0
+    container_name: plotgram-frontend
+    restart: unless-stopped
     ports:
       - "3000:80"
     depends_on:

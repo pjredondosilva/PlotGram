@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { DarDetallesPeliculas } from "../../servicios/ServicioTmdb.js";
-import { logoUrl, profileUrl } from "../../utils/tmdbImagenes.js";
-import { posterUrl } from "../../utils/img.js";
+import { logoUrl, profileUrl } from "../../utils/TmdbImagenes.js";
+import { posterUrl } from "../../utils/Img.js";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
-import { crearContenidoListaPelicula } from "../../utils/contenidoLista.js";
+import { crearContenidoListaPelicula } from "../../utils/ContenidoLista.js";
 import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
-import ModalValoraciones from "../../componentes/Valoraciones/ModalValoraciones.jsx";
+import ModalValoraciones from "../../componentes/valoraciones/ModalValoraciones.jsx";
 import MediaGrid from "../../componentes/tmdb/ListaProyecto.jsx";
 import { obtenerMediaValoraciones } from "../../servicios/ServicioValoraciones.js";
 import { useChat } from "../../servicios/ContextoChat.jsx";
-import "./estilos/detalleTmdb.css";
+import "./estilos/DetalleTmdb.css";
 
 function formatearFecha(fecha) {
     if (!fecha) return "Fecha no disponible";
@@ -40,7 +40,7 @@ const URLS_PROVEEDORES = {
     3: "https://play.google.com/store/movies",
     8: "https://www.netflix.com/es",
     9: "https://www.primevideo.com",
-    10: "https://www.amazon.es/gp/video/storefront",
+    10: "https://www.primevideo.com",
     11: "https://mubi.com/es",
     35: "https://rakuten.tv/es",
     63: "https://www.filmin.es",
@@ -59,6 +59,9 @@ const URLS_PROVEEDORES = {
     netflix: "https://www.netflix.com/es",
     "amazon prime video": "https://www.primevideo.com",
     "prime video": "https://www.primevideo.com",
+    "amazon with ads": "https://www.primevideo.com",
+    "amazon video with ads": "https://www.primevideo.com",
+    "amazon prime video with ads": "https://www.primevideo.com",
     "disney plus": "https://www.disneyplus.com/es-es",
     "disney+": "https://www.disneyplus.com/es-es",
     max: "https://www.max.com/es/es",
@@ -101,6 +104,7 @@ function obtenerUrlProveedor(proveedor) {
 
 function ProviderItem({ provider }) {
     const url = obtenerUrlProveedor(provider);
+    const nombreMostrado = (provider.name || "").toLowerCase().includes("amazon") ? "Prime Video" : provider.name;
 
     return (
         <a
@@ -108,15 +112,15 @@ function ProviderItem({ provider }) {
             href={url}
             target="_blank"
             rel="noreferrer"
-            title={`Abrir ${provider.name}`}
-            aria-label={`Abrir ${provider.name}`}
+            title={`Abrir ${nombreMostrado}`}
+            aria-label={`Abrir ${nombreMostrado}`}
         >
             {provider.logoPath ? (
-                <img src={logoUrl(provider.logoPath)} alt={provider.name} />
+                <img src={logoUrl(provider.logoPath)} alt={nombreMostrado} />
             ) : (
                 <div className="tmdb-provider-logo-placeholder" />
             )}
-            <span>{provider.name}</span>
+            <span>{nombreMostrado}</span>
         </a>
     );
 }

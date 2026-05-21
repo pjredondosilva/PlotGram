@@ -11,10 +11,10 @@ import { obtenerUsuario } from "../../servicios/ServicioAutenticacion.js";
 import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
 import TarjetaLista from "../../componentes/listas/TarjetaLista.jsx";
 import FormularioEditarPerfil from "../../componentes/usuario/FormularioEditarPerfil.jsx";
-import ModalSistema from "../../componentes/Autenticacion/ModalSistema.jsx";
+import ModalSistema from "../../componentes/autenticacion/ModalSistema.jsx";
 import { seguirUsuario, dejarDeSeguirUsuario } from "../../servicios/ServicioAutenticacion.js";
-import "../tmdb/estilos/detalleTmdb.css";
-import "./estilos/feedUsuario.css";
+import "../tmdb/estilos/DetalleTmdb.css";
+import "./estilos/FeedUsuario.css";
 
 function descripcionUsuarioPorDefecto(nombre) {
     if (!nombre) return "Todavía no has añadido una descripción.";

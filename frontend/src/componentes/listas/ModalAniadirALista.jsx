@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import ModalSistema from "../Autenticacion/ModalSistema.jsx";
+import ModalSistema from "../autenticacion/ModalSistema.jsx";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
 import { aniadirContenidoALista, obtenerMisListas } from "../../servicios/ServicioListas.js";
-import "../../paginas/tmdb/estilos/detalleTmdb.css";
+import "../../paginas/tmdb/estilos/DetalleTmdb.css";
 
 export default function ModalAniadirALista({ open, onClose, contenido, onAnadido }) {
     const { user } = useAuth();

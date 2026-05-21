@@ -1,4 +1,4 @@
-import "./estilos/home.css";
+import "./estilos/Home.css";
 import BotonPeliculaSerie from "../../componentes/tmdb/BotonPeliculaSerie.jsx";
 import BarraDeBusqueda from "../../componentes/tmdb/BarraDeBusqueda";
 import ListaProyecto from "../../componentes/tmdb/ListaProyecto.jsx";

@@ -1,4 +1,4 @@
-import {apiDelete, apiGet, apiPost, apiPut} from "./api.js";
+import {apiDelete, apiGet, apiPost, apiPut} from "./Api.js";
 
 export function registrarUsuario({ nombre, email, contrasenia }) {
     return apiPost("/api/usuarios", { nombre, email, contrasenia });

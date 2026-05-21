@@ -9,9 +9,9 @@ import {
 } from "../../servicios/ServicioListas.js";
 import FormularioLista from "../../componentes/listas/FormularioListas.jsx";
 import TarjetaContenido from "../../componentes/listas/TarjetaContenido.jsx";
-import ModalSistema from "../../componentes/Autenticacion/ModalSistema.jsx";
-import "../Tmdb/estilos/detalleTmdb.css";
-import "../usuario/estilos/feedUsuario.css";
+import ModalSistema from "../../componentes/autenticacion/ModalSistema.jsx";
+import "../tmdb/estilos/DetalleTmdb.css";
+import "../usuario/estilos/FeedUsuario.css";
 
 export default function DetalleLista() {
     const { idUsuario, idLista } = useParams();

@@ -6,8 +6,8 @@ import SerieDetalle from "../paginas/tmdb/SerieDetalle.jsx";
 import TemporadaDetalle from "../paginas/tmdb/TemporadaDetalle.jsx";
 import FeedUsuario from "../paginas/usuario/FeedUsuario.jsx";
 import EpisodioDetalle from "../paginas/tmdb/EpisodioDetalle.jsx";
-import DetalleLista from "../paginas/Listas/DetalleLista.jsx";
-import Noticias from "../paginas/Noticias/Noticias.jsx";
+import DetalleLista from "../paginas/listas/DetalleLista.jsx";
+import Noticias from "../paginas/noticias/Noticias.jsx";
 
 export const router = createBrowserRouter([
     {

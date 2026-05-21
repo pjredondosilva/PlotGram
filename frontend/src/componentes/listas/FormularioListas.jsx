@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import "../../paginas/usuario/estilos/feedUsuario.css";
+import "../../paginas/usuario/estilos/FeedUsuario.css";
 
 const VACIO = {
     nombre: "",

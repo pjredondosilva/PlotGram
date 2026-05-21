@@ -149,6 +149,12 @@ public class Usuario {
         return seguidos;
     }
 
+    /**
+     * Establece una relación de seguimiento, añadiendo al usuario indicado a la
+     * lista de seguidos y registrándose a sí mismo en la lista de seguidores del otro.
+     *
+     * @param usuario Usuario al que se desea seguir.
+     */
     public void seguir(Usuario usuario) {
         if (!this.seguidos.contains(usuario)) {
             this.seguidos.add(usuario);
@@ -156,6 +162,12 @@ public class Usuario {
         }
     }
 
+    /**
+     * Elimina una relación de seguimiento, quitando al usuario indicado de la
+     * lista de seguidos y dándose de baja de la lista de seguidores del otro.
+     *
+     * @param usuario Usuario al que se desea dejar de seguir.
+     */
     public void dejarDeSeguir(Usuario usuario) {
         this.seguidos.remove(usuario);
         usuario.getSeguidores().remove(this);

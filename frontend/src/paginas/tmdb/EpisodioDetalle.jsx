@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import { DarDetallesEpisodio } from "../../servicios/ServicioTmdb.js";
-import { profileUrl, stillUrl } from "../../utils/tmdbImagenes.js";
+import { profileUrl, stillUrl } from "../../utils/TmdbImagenes.js";
 import { useAuth } from "../../servicios/ContextoDeAutenticacion.jsx";
-import { crearContenidoListaEpisodio } from "../../utils/contenidoLista.js";
+import { crearContenidoListaEpisodio } from "../../utils/ContenidoLista.js";
 import ModalAniadirALista from "../../componentes/listas/ModalAniadirALista.jsx";
-import "./estilos/detalleTmdb.css";
+import "./estilos/DetalleTmdb.css";
 
 function formatearFecha(fecha) {
     if (!fecha) return "Fecha no disponible";
